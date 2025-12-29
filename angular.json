@@ -24,6 +24,11 @@
                 "input": "src/assets",
                 "output": "/assets"
               },
+              {
+                "glob": "web.config",
+                "input": ".",
+                "output": "/"
+              }
             ],
             "styles": [
               "src/styles.css"
