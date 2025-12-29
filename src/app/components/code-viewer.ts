@@ -61,7 +61,7 @@ import { SyntaxHighlighterService } from '../services/syntax-highlighter.service
       width: 3rem;
       text-align: right;
       padding-right: 1rem;
-      color: var(--color-vscode-text-muted, #858585);
+      color: #858585;
       user-select: none;
       border-right: 1px solid #3e3e42;
       margin-right: 1rem;

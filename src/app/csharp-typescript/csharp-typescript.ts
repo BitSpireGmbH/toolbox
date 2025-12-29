@@ -263,7 +263,9 @@ export class CsharpTypescriptComponent {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'An error occurred during conversion';
       this.errorMessage.set(errorMsg);
-      this.displayCode.set(`// Error: ${errorMsg}`);
+      // Use appropriate comment syntax based on output language
+      const commentPrefix = this.direction() === 'csharp-to-typescript' ? '//' : '//';
+      this.displayCode.set(`${commentPrefix} Error: ${errorMsg}`);
     }
   }
 }
