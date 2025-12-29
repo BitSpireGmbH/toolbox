@@ -14,8 +14,8 @@
 
     <!-- Navigation Menu -->
     <nav class="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
-      <a 
-        routerLink="/home" 
+      <a
+        routerLink="/home"
         routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
         [routerLinkActiveOptions]="{exact: false}"
         class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
@@ -29,8 +29,8 @@
         </svg>
       </a>
 
-      <a 
-        routerLink="/csharp-json" 
+      <a
+        routerLink="/csharp-json"
         routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
         class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -43,8 +43,8 @@
         </svg>
       </a>
 
-      <a 
-        routerLink="/csharp-typescript" 
+      <a
+        routerLink="/csharp-typescript"
         routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
         class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -57,8 +57,8 @@
         </svg>
       </a>
 
-      <a 
-        routerLink="/middleware-designer" 
+      <a
+        routerLink="/middleware-designer"
         routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
         class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -77,7 +77,7 @@
     <!-- Footer Section -->
     <div class="p-4 border-t border-white/10">
       <div class="text-center text-white/50 text-xs space-y-1">
-        <p>v1.0.0 • Angular 21</p>
+        <p>{{ version() }}</p>
         <p class="text-white/30">© 2025 Bitspire</p>
       </div>
     </div>

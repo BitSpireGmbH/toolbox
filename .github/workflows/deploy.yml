@@ -1,0 +1,48 @@
+name: Deploy to Azure
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Inject Version
+        run: |
+          TAG_NAME=${{ github.ref_name }}
+          sed -i "s/#{RELEASE_VERSION}/$TAG_NAME/g" src/environments/environment.ts
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C4BCCD6F32884502A82C471396DD32FB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B7A7AC6E73134FAC8A99674E317A2EC9 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DCC79192346349369199FC0B8E04D96B }}
+
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
+        with:
+          app-name: 'bitspire-toolkit'
+          slot-name: 'Production'
+          package: .
