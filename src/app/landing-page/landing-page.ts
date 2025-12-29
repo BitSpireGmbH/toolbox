@@ -24,7 +24,7 @@ import { RouterLink } from '@angular/router';
         <!-- Tool Cards -->
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- JSON -> C# Card -->
-          <a routerLink="/csharp-json" 
+          <a routerLink="/csharp-json"
              class="group relative block bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-500 p-8 border border-gray-200 hover:border-brand-primary/50 hover:-translate-y-1 overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div class="relative">
@@ -51,7 +51,7 @@ import { RouterLink } from '@angular/router';
           </a>
 
           <!-- C# <-> TypeScript Card -->
-          <a routerLink="/csharp-typescript" 
+          <a routerLink="/csharp-typescript"
              class="group relative block bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-500 p-8 border border-gray-200 hover:border-brand-secondary/50 hover:-translate-y-1 overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-brand-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div class="relative">
@@ -78,7 +78,7 @@ import { RouterLink } from '@angular/router';
           </a>
 
           <!-- Middleware Designer Card -->
-          <a routerLink="/middleware-designer" 
+          <a routerLink="/middleware-designer"
              class="group relative block bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-500 p-8 border border-gray-200 hover:border-brand-primary/50 hover:-translate-y-1 overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div class="relative">
