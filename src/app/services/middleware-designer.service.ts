@@ -26,7 +26,8 @@ export type MiddlewareType =
   | 'Compression'
   | 'RateLimiting'
   | 'Custom'
-  | 'MinimalAPIEndpoint';
+  | 'MinimalAPIEndpoint'
+  | 'HTTPS';
 
 export interface BranchConfig {
   condition: BranchCondition;
@@ -108,6 +109,9 @@ export interface MiddlewareConfig {
   httpMethod?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path?: string;
   handlerCode?: string;
+
+  // Response Compression
+  enableForHttps?: boolean; // Warning: Enabling compression for HTTPS has security risks (CRIME and BREACH attacks)
 
   // Index signature for compatibility
   [key: string]: unknown;
@@ -349,6 +353,25 @@ export class MiddlewareDesignerService {
       code += `});\n\n`;
     }
 
+    // Response Compression services (for Compression middleware)
+    const needsCompression = pipeline.middlewares.some((m) => m.type === 'Compression');
+    if (needsCompression) {
+      code += `// Add response compression services\n`;
+      const compressionMiddlewares = pipeline.middlewares.filter((m) => m.type === 'Compression');
+      const hasEnableForHttps = compressionMiddlewares.some((m) => (m.config as MiddlewareConfig).enableForHttps);
+
+      if (hasEnableForHttps) {
+        code += `// WARNING: Enabling compression for HTTPS has security implications (CRIME and BREACH attacks)\n`;
+        code += `// Only enable this if you understand the risks and have mitigations in place\n`;
+        code += `builder.Services.AddResponseCompression(options =>\n`;
+        code += `{\n`;
+        code += `    options.EnableForHttps = true;\n`;
+        code += `});\n\n`;
+      } else {
+        code += `builder.Services.AddResponseCompression();\n\n`;
+      }
+    }
+
     if (needsExceptionHandler) {
       code += `// Add exception handler services\n`;
       const exHandlers = pipeline.middlewares.filter((m) =>
@@ -478,6 +501,10 @@ export class MiddlewareDesignerService {
             code += `${indent}app.Map${config.httpMethod}("${config.path}", ${config.handlerCode});\n`;
           }
         }
+        break;
+
+      case 'HTTPS':
+        code += `${indent}app.UseHttpsRedirection();\n`;
         break;
     }
 

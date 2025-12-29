@@ -402,30 +402,48 @@ import { EditConfig } from '../middleware-config.utils';
                   </div>
                 }
                 @case ('Compression') {
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Algorithms</label>
-                    <div class="space-y-2">
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Algorithms</label>
+                      <div class="space-y-2">
+                        <label class="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            [(ngModel)]="config().gzip"
+                            class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                          <span class="text-sm text-gray-700">gzip</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            [(ngModel)]="config().brotli"
+                            class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                          <span class="text-sm text-gray-700">brotli</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            [(ngModel)]="config().deflate"
+                            class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                          <span class="text-sm text-gray-700">deflate</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
                       <label class="flex items-center gap-2">
                         <input
                           type="checkbox"
-                          [(ngModel)]="config().gzip"
+                          [(ngModel)]="config().enableForHttps"
                           class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
-                        <span class="text-sm text-gray-700">gzip</span>
+                        <span class="text-sm text-gray-700">Enable for HTTPS</span>
                       </label>
-                      <label class="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          [(ngModel)]="config().brotli"
-                          class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
-                        <span class="text-sm text-gray-700">brotli</span>
-                      </label>
-                      <label class="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          [(ngModel)]="config().deflate"
-                          class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
-                        <span class="text-sm text-gray-700">deflate</span>
-                      </label>
+                      @if (config().enableForHttps) {
+                        <div class="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                          <p class="font-semibold mb-1">⚠️ Security Warning</p>
+                          <p>Enabling compression for HTTPS has security implications. It can make your application vulnerable to CRIME and BREACH attacks. Only enable this if you understand the risks and have appropriate mitigations in place.</p>
+                        </div>
+                      }
                     </div>
                   </div>
                 }
@@ -676,7 +694,7 @@ import { EditConfig } from '../middleware-config.utils';
 export class MiddlewareEditModalComponent {
   readonly middleware = input<MiddlewareNode | null>(null);
   readonly config = model.required<EditConfig>();
-  
+
   readonly save = output<void>();
   readonly cancel = output<void>();
 }

@@ -40,8 +40,8 @@ export const MIDDLEWARE_LIBRARY: MiddlewareLibraryItemData[] = [
     type: 'Compression',
     name: 'Compression',
     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">  <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" /></svg>\n',
-    description: 'Compress responses',
-    defaultConfig: { algorithms: ['gzip', 'brotli'] },
+    description: 'Compress HTTP responses using gzip, brotli, or deflate',
+    defaultConfig: { algorithms: ['gzip', 'brotli'], enableForHttps: false },
   },
   {
     type: 'RateLimiting',
@@ -56,6 +56,13 @@ export const MIDDLEWARE_LIBRARY: MiddlewareLibraryItemData[] = [
     icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>',
     description: 'Define a minimal API endpoint',
     defaultConfig: { httpMethod: 'GET', path: '/api/hello', handlerCode: '() => "Hello World"' },
+  },
+  {
+    type: 'HTTPS',
+    name: 'HTTPS Redirection',
+    icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg>',
+    description: 'Redirect HTTP requests to HTTPS',
+    defaultConfig: {},
   },
   {
     type: 'Custom',

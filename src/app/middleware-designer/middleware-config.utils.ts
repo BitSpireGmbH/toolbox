@@ -44,6 +44,7 @@ export interface EditConfig {
   gzip?: boolean;
   brotli?: boolean;
   deflate?: boolean;
+  enableForHttps?: boolean;
   // Rate Limiting
   policyName?: string;
   limiterType?: 'FixedWindow' | 'SlidingWindow' | 'TokenBucket' | 'Concurrency';
@@ -72,7 +73,7 @@ export interface EditConfig {
  */
 export function initializeEditConfig(middleware: MiddlewareNode): EditConfig {
   const config = middleware.config as MiddlewareConfig;
-  
+
   return {
     // Routing
     routesText: config.routes?.join('\n') || '',
@@ -117,6 +118,7 @@ export function initializeEditConfig(middleware: MiddlewareNode): EditConfig {
     gzip: config.algorithms?.includes('gzip') || false,
     brotli: config.algorithms?.includes('brotli') || false,
     deflate: config.algorithms?.includes('deflate') || false,
+    enableForHttps: config.enableForHttps || false,
     // Rate Limiting
     policyName: config.policyName || 'fixed',
     limiterType: config.limiterType || 'FixedWindow',
@@ -213,6 +215,7 @@ export function buildMiddlewareConfig(type: string, editConfig: EditConfig): Mid
       if (editConfig.gzip) newConfig.algorithms.push('gzip');
       if (editConfig.brotli) newConfig.algorithms.push('brotli');
       if (editConfig.deflate) newConfig.algorithms.push('deflate');
+      newConfig.enableForHttps = editConfig.enableForHttps;
       break;
     case 'RateLimiting':
       newConfig.policyName = editConfig.policyName;

@@ -20,6 +20,6 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('p')?.textContent).toContain('Tool Box');
+    expect(compiled.querySelector('.font-semibold')?.textContent).toContain('.NET Toolbox');
   });
 });
