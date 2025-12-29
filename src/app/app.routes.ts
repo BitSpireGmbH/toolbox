@@ -17,5 +17,9 @@ export const routes: Routes = [
   {
     path: 'csharp-typescript',
     loadComponent: () => import('./csharp-typescript/csharp-typescript').then(m => m.CsharpTypescriptComponent)
+  },
+  {
+    path: 'middleware-designer',
+    loadComponent: () => import('./middleware-designer/middleware-designer').then(m => m.MiddlewareDesignerComponent)
   }
 ];

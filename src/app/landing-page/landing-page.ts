@@ -20,7 +20,7 @@ import { RouterLink } from '@angular/router';
         </div>
 
         <!-- Tool Cards -->
-        <div class="grid md:grid-cols-2 gap-8">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- JSON -> C# Card -->
           <a routerLink="/csharp-json" 
              class="group relative block bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-200/50 hover:border-[#1976D2]/50 hover:-translate-y-1 overflow-hidden">
@@ -68,6 +68,36 @@ import { RouterLink } from '@angular/router';
               <p class="text-gray-600 leading-relaxed">Convert between C# classes and TypeScript interfaces/types. Perfect for full-stack development with Angular, React, or Vue.</p>
               <div class="mt-6 flex items-center gap-2 text-[#9C27B0] font-semibold text-sm group-hover:gap-3 transition-all">
                 <span>Start Converting</span>
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
+            </div>
+          </a>
+
+          <!-- Middleware Designer Card -->
+          <a routerLink="/middleware-designer" 
+             class="group relative block bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-200/50 hover:border-orange-500/50 hover:-translate-y-1 overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="relative">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 bg-gradient-to-br from-orange-600 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="18" cy="18" r="3"></circle>
+                    <circle cx="6" cy="6" r="3"></circle>
+                    <path d="M6 9v6"></path>
+                    <path d="M9 6h6"></path>
+                    <path d="M9 18h6"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">Middleware</h2>
+                  <span class="text-sm text-gray-500 font-medium">Visual Designer</span>
+                </div>
+              </div>
+              <p class="text-gray-600 leading-relaxed">Build ASP.NET Core middleware pipelines visually. Simulate requests, test flows, and export ready-to-use C# code.</p>
+              <div class="mt-6 flex items-center gap-2 text-orange-600 font-semibold text-sm group-hover:gap-3 transition-all">
+                <span>Start Designing</span>
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
