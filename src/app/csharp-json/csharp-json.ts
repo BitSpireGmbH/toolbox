@@ -16,7 +16,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
         
         <button
           (click)="showOptions.set(!showOptions())"
-          [class]="showOptions() ? 'bg-[#1976D2] text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+          [class]="showOptions() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
           class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
@@ -35,7 +35,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
               <select 
                 [value]="classType()"
                 (change)="classType.set($any($event.target).value)"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1976D2] bg-white shadow-sm">
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
                 <option value="class">Class</option>
                 <option value="record">Record</option>
                 <option value="struct">Struct</option>
@@ -49,7 +49,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
               <select 
                 [value]="enumerationType()"
                 (change)="enumerationType.set($any($event.target).value)"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1976D2] bg-white shadow-sm">
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
                 <option value="List<T>">List&lt;T&gt;</option>
                 <option value="IReadOnlyCollection<T>">IReadOnlyCollection&lt;T&gt;</option>
                 <option value="T[]">T[]</option>
@@ -61,7 +61,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
               <select 
                 [value]="serializer()"
                 (change)="serializer.set($any($event.target).value)"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1976D2] bg-white shadow-sm">
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
                 <option value="System.Text.Json">System.Text.Json</option>
                 <option value="Newtonsoft.Json">Newtonsoft.Json</option>
               </select>
@@ -73,7 +73,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
                   type="checkbox"
                   [checked]="convertSnakeCase()"
                   (change)="convertSnakeCase.set($any($event.target).checked)"
-                  class="w-4 h-4 text-[#1976D2] border-gray-300 rounded focus:ring-2 focus:ring-[#1976D2]">
+                  class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
                 <span class="text-xs font-medium text-gray-700">snake_case → PascalCase</span>
               </label>
             </div>
@@ -85,7 +85,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
                     type="checkbox"
                     [checked]="generateSerializerContext()"
                     (change)="generateSerializerContext.set($any($event.target).checked)"
-                    class="w-4 h-4 text-[#1976D2] border-gray-300 rounded focus:ring-2 focus:ring-[#1976D2]">
+                    class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
                   <span class="text-xs font-medium text-gray-700">Generate Context</span>
                 </label>
               </div>
@@ -119,17 +119,17 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
         </div>
 
         <!-- Output Panel -->
-        <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-          <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex justify-between items-center">
+        <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow">
+          <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center">
             <div class="flex items-center gap-2">
-              <div class="w-1.5 h-1.5 rounded-full" [class]="outputCode() ? 'bg-blue-500' : 'bg-gray-300'"></div>
-              <h3 class="font-semibold text-sm text-gray-700">C# Output</h3>
+              <div class="w-1.5 h-1.5 rounded-full" [class]="outputCode() ? 'bg-green-500' : 'bg-gray-500'"></div>
+              <h3 class="font-semibold text-sm text-gray-200">C# Output</h3>
             </div>
             <button 
               (click)="copyToClipboard()"
               [disabled]="!outputCode()"
               class="px-3 py-1 rounded-md text-xs font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-              [class]="outputCode() ? 'text-[#1976D2] hover:bg-[#1976D2]/10' : 'text-gray-400'">
+              [class]="outputCode() ? 'text-green-400 hover:bg-green-400/10' : 'text-gray-500'">
               <span class="flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -141,8 +141,8 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
           </div>
           <textarea
             [value]="outputCode()"
-            class="w-full h-[600px] p-4 font-mono text-sm focus:outline-none resize-none"
-            [class]="errorMessage() ? 'bg-red-50/50 text-red-600' : 'bg-gray-50/50 text-gray-900'"
+            class="w-full h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-900"
+            [class]="errorMessage() ? 'text-red-400' : 'text-green-400'"
             [placeholder]="errorMessage() || 'C# class will appear here automatically...'"
             readonly
           ></textarea>

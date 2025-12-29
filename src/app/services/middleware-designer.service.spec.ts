@@ -15,13 +15,13 @@ describe('MiddlewareDesignerService', () => {
   });
 
   describe('Validation', () => {
-    it('should reject empty pipeline', () => {
+    it('should accept empty pipeline at startup', () => {
       const pipeline: Pipeline = { id: '1', name: 'Test', middlewares: [] };
       const result = service.validatePipeline(pipeline);
 
-      expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].message).toContain('empty');
+      // Empty pipeline is acceptable at startup
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
 
     it('should detect circular branches', () => {
@@ -114,7 +114,7 @@ describe('MiddlewareDesignerService', () => {
         name: 'Test Pipeline',
         middlewares: [
           { id: '1', type: 'Routing', order: 0, config: {} },
-          { id: '2', type: 'Authentication', order: 1, config: { authProvider: 'Bearer' } },
+          { id: '2', type: 'Authentication', order: 1, config: { authScheme: 'JwtBearer' } },
         ],
       };
 
@@ -299,7 +299,7 @@ describe('MiddlewareDesignerService', () => {
         name: 'Test',
         middlewares: [
           { id: 'm1', type: 'Routing', order: 0, config: { routes: ['/api/*'] } },
-          { id: 'm2', type: 'Authentication', order: 1, config: { authProvider: 'Bearer' } },
+          { id: 'm2', type: 'Authentication', order: 1, config: { authScheme: 'JwtBearer' } },
         ],
       };
 
@@ -317,7 +317,7 @@ describe('MiddlewareDesignerService', () => {
           id: '1',
           name: 'Test',
           middlewares: [
-            { id: '1', type: 'Authentication', order: 0, config: { authProvider: 'Bearer' } },
+            { id: '1', type: 'Authentication', order: 0, config: { authScheme: 'JwtBearer' } },
           ],
         };
 
@@ -343,7 +343,7 @@ describe('MiddlewareDesignerService', () => {
           id: '1',
           name: 'Test',
           middlewares: [
-            { id: '1', type: 'Authentication', order: 0, config: { authProvider: 'Bearer' } },
+            { id: '1', type: 'Authentication', order: 0, config: { authScheme: 'JwtBearer' } },
             { id: '2', type: 'Routing', order: 1, config: {} },
           ],
         };
@@ -351,7 +351,7 @@ describe('MiddlewareDesignerService', () => {
         const request: SimulationRequest = {
           method: 'GET',
           path: '/api/users',
-          headers: { Authorization: 'Bearer token123' },
+          headers: { Authorization: 'Bearer header.payload.signature' },
           query: {},
           isAuthenticated: true,
           claims: {},
@@ -982,7 +982,7 @@ describe('MiddlewareDesignerService', () => {
               id: '1',
               type: 'Authentication',
               order: 0,
-              config: { authProvider: 'Bearer' },
+              config: { authScheme: 'JwtBearer' },
             },
           ],
         };
@@ -990,7 +990,7 @@ describe('MiddlewareDesignerService', () => {
         const request: SimulationRequest = {
           method: 'GET',
           path: '/api/users',
-          headers: { authorization: 'Bearer token' },
+          headers: { authorization: 'Bearer header.payload.signature' },
           query: {},
           isAuthenticated: true,
           claims: {},

@@ -46,7 +46,29 @@ export interface MiddlewareConfig {
   routes?: string[];
   
   // Authentication
-  authProvider?: 'Bearer' | 'Cookie' | 'Basic';
+  authScheme?: 'JwtBearer' | 'OpenIdConnect' | 'Cookie';
+  // JWT Bearer settings (for API authentication)
+  jwtAuthority?: string;
+  jwtAudience?: string;
+  jwtValidateIssuer?: boolean;
+  jwtValidateAudience?: boolean;
+  jwtValidateLifetime?: boolean;
+  jwtRequireHttpsMetadata?: boolean;
+  // OpenID Connect settings (for web application authentication with user interaction)
+  oidcAuthority?: string;
+  oidcClientId?: string;
+  oidcClientSecret?: string;
+  oidcResponseType?: string;
+  oidcScopes?: string[];
+  oidcSaveTokens?: boolean;
+  oidcGetClaimsFromUserInfoEndpoint?: boolean;
+  // Cookie settings
+  cookieName?: string;
+  cookieLoginPath?: string;
+  cookieLogoutPath?: string;
+  cookieAccessDeniedPath?: string;
+  cookieExpireMinutes?: number;
+  cookieSlidingExpiration?: boolean;
   
   // Authorization
   policies?: string[];
@@ -165,11 +187,8 @@ export class MiddlewareDesignerService {
 
     // Empty pipeline check
     if (pipeline.middlewares.length === 0) {
-      errors.push({
-        middlewareId: 'pipeline',
-        message: 'Pipeline cannot be empty',
-      });
-      return { valid: false, errors, warnings };
+      // Empty pipeline is acceptable at startup — show no validation messages
+      return { valid: true, errors, warnings };
     }
 
     // Check for circular branches
@@ -262,9 +281,14 @@ export class MiddlewareDesignerService {
     );
 
     if (needsAuth || needsAuthz) {
-      code += `// Add authentication services\n`;
+      code += `// Add authentication and authorization services\n`;
       if (needsAuth) {
-        code += `builder.Services.AddAuthentication();\n`;
+        // Generate authentication based on scheme
+        const authMiddlewares = pipeline.middlewares.filter((m) => m.type === 'Authentication');
+        for (const authMiddleware of authMiddlewares) {
+          const config = authMiddleware.config as MiddlewareConfig;
+          code += this.generateAuthenticationServiceCode(config);
+        }
       }
       if (needsAuthz) {
         code += `builder.Services.AddAuthorization();\n`;
@@ -605,6 +629,96 @@ public class ${className} : IExceptionHandler
 `;
   }
 
+  private generateAuthenticationServiceCode(config: MiddlewareConfig): string {
+    let code = '';
+    const scheme = config.authScheme || 'JwtBearer';
+
+    switch (scheme) {
+      case 'JwtBearer':
+        code += `// JWT Bearer Authentication - for API authentication\n`;
+        code += `// Client sends JWT tokens in Authorization header, no user interaction\n`;
+        code += `builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n`;
+        code += `    .AddJwtBearer(options =>\n`;
+        code += `    {\n`;
+        if (config.jwtAuthority) {
+          code += `        options.Authority = "${config.jwtAuthority}";\n`;
+        }
+        if (config.jwtAudience) {
+          code += `        options.Audience = "${config.jwtAudience}";\n`;
+        }
+        code += `        options.RequireHttpsMetadata = ${config.jwtRequireHttpsMetadata ?? true};\n`;
+        code += `        options.TokenValidationParameters = new TokenValidationParameters\n`;
+        code += `        {\n`;
+        code += `            ValidateIssuer = ${config.jwtValidateIssuer ?? true},\n`;
+        code += `            ValidateAudience = ${config.jwtValidateAudience ?? true},\n`;
+        code += `            ValidateLifetime = ${config.jwtValidateLifetime ?? true},\n`;
+        code += `            ValidateIssuerSigningKey = true\n`;
+        code += `        };\n`;
+        code += `    });\n`;
+        break;
+
+      case 'OpenIdConnect':
+        code += `// OpenID Connect Authentication - for web applications with user interaction\n`;
+        code += `// Users are redirected to the identity provider for login/logout\n`;
+        code += `builder.Services.AddAuthentication(options =>\n`;
+        code += `{\n`;
+        code += `    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;\n`;
+        code += `    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;\n`;
+        code += `})\n`;
+        code += `.AddCookie()\n`;
+        code += `.AddOpenIdConnect(options =>\n`;
+        code += `{\n`;
+        if (config.oidcAuthority) {
+          code += `    options.Authority = "${config.oidcAuthority}";\n`;
+        }
+        if (config.oidcClientId) {
+          code += `    options.ClientId = "${config.oidcClientId}";\n`;
+        }
+        if (config.oidcClientSecret) {
+          code += `    options.ClientSecret = "${config.oidcClientSecret}";\n`;
+        }
+        code += `    options.ResponseType = "${config.oidcResponseType || 'code'}";\n`;
+        code += `    options.SaveTokens = ${config.oidcSaveTokens ?? true};\n`;
+        code += `    options.GetClaimsFromUserInfoEndpoint = ${config.oidcGetClaimsFromUserInfoEndpoint ?? true};\n`;
+        if (config.oidcScopes && config.oidcScopes.length > 0) {
+          code += `    \n    // Add scopes\n`;
+          code += `    options.Scope.Clear();\n`;
+          for (const scope of config.oidcScopes) {
+            code += `    options.Scope.Add("${scope}");\n`;
+          }
+        }
+        code += `});\n`;
+        break;
+
+      case 'Cookie':
+        code += `// Cookie Authentication - for traditional web applications\n`;
+        code += `// Authentication state stored in browser cookie, typically with custom login page\n`;
+        code += `builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)\n`;
+        code += `    .AddCookie(options =>\n`;
+        code += `    {\n`;
+        if (config.cookieName) {
+          code += `        options.Cookie.Name = "${config.cookieName}";\n`;
+        }
+        if (config.cookieLoginPath) {
+          code += `        options.LoginPath = "${config.cookieLoginPath}";\n`;
+        }
+        if (config.cookieLogoutPath) {
+          code += `        options.LogoutPath = "${config.cookieLogoutPath}";\n`;
+        }
+        if (config.cookieAccessDeniedPath) {
+          code += `        options.AccessDeniedPath = "${config.cookieAccessDeniedPath}";\n`;
+        }
+        if (config.cookieExpireMinutes) {
+          code += `        options.ExpireTimeSpan = TimeSpan.FromMinutes(${config.cookieExpireMinutes});\n`;
+        }
+        code += `        options.SlidingExpiration = ${config.cookieSlidingExpiration ?? true};\n`;
+        code += `    });\n`;
+        break;
+    }
+
+    return code;
+  }
+
   // ========== JSON Import/Export ==========
 
   exportToJSON(pipeline: Pipeline): string {
@@ -784,31 +898,94 @@ public class ${className} : IExceptionHandler
       }
 
       case 'Authentication': {
-        const provider = config.authProvider || 'Bearer';
+        const scheme = config.authScheme || 'JwtBearer';
         const authHeader = context.headers['Authorization'] || context.headers['authorization'];
+        const hasCookie = Object.keys(context.cookies).length > 0 || context.headers['Cookie'] || context.headers['cookie'];
 
-        if (!context.isAuthenticated && !authHeader) {
+        let authSuccess = false;
+        let authMethod = '';
+        let failureReason = '';
+        let wwwAuthenticateValue = 'Bearer';
+
+        switch (scheme) {
+          case 'JwtBearer': {
+            authMethod = 'JWT Bearer';
+            wwwAuthenticateValue = 'Bearer';
+            // Check for Bearer token in Authorization header
+            if (context.isAuthenticated) {
+              authSuccess = true;
+            } else if (authHeader) {
+              const bearerMatch = authHeader.match(/^Bearer\s+(.+)$/i);
+              if (bearerMatch) {
+                const token = bearerMatch[1];
+                // Basic JWT format validation (header.payload.signature)
+                const jwtParts = token.split('.');
+                if (jwtParts.length === 3) {
+                  authSuccess = true;
+                } else {
+                  failureReason = 'Invalid JWT format (expected header.payload.signature)';
+                }
+              } else {
+                failureReason = 'Authorization header must use Bearer scheme';
+              }
+            } else {
+              failureReason = 'No Bearer token provided in Authorization header';
+            }
+            break;
+          }
+
+          case 'OpenIdConnect': {
+            authMethod = 'OpenID Connect';
+            wwwAuthenticateValue = 'Bearer';
+            // OIDC typically results in a cookie after redirect flow
+            if (context.isAuthenticated) {
+              authSuccess = true;
+            } else if (hasCookie) {
+              // Simulate having a valid session cookie from OIDC flow
+              authSuccess = true;
+            } else {
+              failureReason = 'No valid session. User would be redirected to identity provider.';
+            }
+            break;
+          }
+
+          case 'Cookie': {
+            authMethod = 'Cookie';
+            wwwAuthenticateValue = 'Cookie';
+            // Check for authentication cookie
+            if (context.isAuthenticated) {
+              authSuccess = true;
+            } else if (hasCookie) {
+              authSuccess = true;
+            } else {
+              failureReason = `No authentication cookie. User would be redirected to ${config.cookieLoginPath || '/Account/Login'}`;
+            }
+            break;
+          }
+        }
+
+        if (!authSuccess) {
           steps.push({
             ...stepBase,
-            action: `Authentication failed: No ${provider} token provided`,
+            action: `Authentication failed (${authMethod}): ${failureReason}`,
             decision: 'terminate',
-            context: { provider, authenticated: false },
+            context: { scheme, authMethod, authenticated: false, reason: failureReason },
           });
 
           return {
             terminated: true,
             statusCode: 401,
             statusText: 'Unauthorized',
-            headers: { 'WWW-Authenticate': provider },
-            body: 'Authentication required',
+            headers: { 'WWW-Authenticate': wwwAuthenticateValue },
+            body: `Authentication required: ${failureReason}`,
           };
         }
 
         steps.push({
           ...stepBase,
-          action: `Authentication successful: ${provider}`,
+          action: `Authentication successful (${authMethod})`,
           decision: 'continue',
-          context: { provider, authenticated: true },
+          context: { scheme, authMethod, authenticated: true },
         });
         break;
       }

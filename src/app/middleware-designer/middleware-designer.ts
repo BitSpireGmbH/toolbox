@@ -1,5 +1,6 @@
 import { Component, signal, computed, effect, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
   MiddlewareDesignerService,
@@ -36,7 +37,7 @@ interface MiddlewareLibraryItem {
         <div class="flex items-center gap-3">
           <button
             (click)="showLibrary.set(!showLibrary())"
-            [class]="showLibrary() ? 'bg-[#FF6F00] text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+            [class]="showLibrary() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
             class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="18" cy="18" r="3"></circle>
@@ -49,7 +50,7 @@ interface MiddlewareLibraryItem {
           </button>
           <button
             (click)="showSimulation.set(!showSimulation())"
-            [class]="showSimulation() ? 'bg-[#00ACC1] text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+            [class]="showSimulation() ? 'bg-brand-secondary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
             class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="18" cy="18" r="3"></circle>
@@ -60,6 +61,39 @@ interface MiddlewareLibraryItem {
             </svg>
             Simulation
           </button>
+          
+          <div class="inline-flex rounded-lg border border-gray-300 bg-white p-0.5 shadow-sm">
+            <button
+              (click)="splitRatio.set(100)"
+              [class]="splitRatio() === 100 ? 'bg-brand-primary text-white' : 'text-gray-700 hover:bg-gray-50'"
+              class="px-3 py-2 rounded-md text-xs font-semibold transition-all"
+              title="Canvas Only">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+              </svg>
+            </button>
+            <button
+              (click)="splitRatio.set(50)"
+              [class]="splitRatio() > 0 && splitRatio() < 100 ? 'bg-brand-primary text-white' : 'text-gray-700 hover:bg-gray-50'"
+              class="px-3 py-2 rounded-md text-xs font-semibold transition-all"
+              title="Split View">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <line x1="12" y1="3" x2="12" y2="21"></line>
+              </svg>
+            </button>
+            <button
+              (click)="splitRatio.set(0)"
+              [class]="splitRatio() === 0 ? 'bg-brand-primary text-white' : 'text-gray-700 hover:bg-gray-50'"
+              class="px-3 py-2 rounded-md text-xs font-semibold transition-all"
+              title="Code Only">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <polyline points="10 9 9 9 8 9"></polyline>
+                <polyline points="14 9 15 9 16 9"></polyline>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -103,7 +137,7 @@ interface MiddlewareLibraryItem {
       }
 
       <!-- Main Layout -->
-      <div class="grid gap-5" [class]="gridLayoutClass()">
+      <div class="gap-5" [class]="gridLayoutClass()">
         <!-- Middleware Library Sidebar -->
         @if (showLibrary()) {
           <div class="bg-white rounded-xl shadow-md border border-gray-200 p-5 h-fit sticky top-6">
@@ -112,11 +146,11 @@ interface MiddlewareLibraryItem {
               @for (item of middlewareLibrary; track item.type) {
                 <button
                   (click)="addMiddleware(item.type, item.defaultConfig)"
-                  class="w-full text-left p-2.5 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg hover:border-[#FF6F00] hover:shadow-sm transition-all duration-200 group">
+                  class="cursor-pointer w-full text-left p-2.5 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg hover:border-brand-primary hover:shadow-sm transition-all duration-200 group">
                   <div class="flex items-start gap-2.5">
-                    <div class="text-xl mt-0.5">{{ item.icon }}</div>
+                    <div class="text-gray-600 group-hover:text-brand-primary mt-0.5 flex-shrink-0" [innerHTML]="getSafeIcon(item.icon)"></div>
                     <div class="flex-1 min-w-0">
-                      <p class="font-medium text-sm text-gray-800 group-hover:text-[#FF6F00] transition-colors">
+                      <p class="font-medium text-sm text-gray-800 group-hover:text-brand-primary transition-colors">
                         {{ item.name }}
                       </p>
                       <p class="text-xs text-gray-600 mt-0.5 line-clamp-2">{{ item.description }}</p>
@@ -128,8 +162,12 @@ interface MiddlewareLibraryItem {
           </div>
         }
 
-        <!-- Canvas -->
-        <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+        <!-- Canvas & Code Container with Resizable Divider -->
+        <div class="flex gap-0 relative w-full">
+          <!-- Canvas -->
+          @if (splitRatio() > 0) {
+          <div class="flex-shrink-0 transition-all" [style]="canvasWidthStyle()">
+            <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
           <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-1.5 rounded-full" [class]="pipeline().middlewares.length > 0 ? 'bg-green-500' : 'bg-gray-300'"></div>
@@ -138,7 +176,7 @@ interface MiddlewareLibraryItem {
             <span class="text-xs text-gray-500">{{ pipeline().middlewares.length }} middleware(s)</span>
           </div>
 
-          <div class="p-4 min-h-[600px]">
+          <div [class]="splitRatio() === 100 ? 'p-4 min-h-[800px]' : 'p-4 min-h-[600px]'">
             @if (pipeline().middlewares.length === 0) {
               <div class="text-center py-20 text-gray-500">
                 <p class="text-base font-medium">No middleware added yet</p>
@@ -153,11 +191,11 @@ interface MiddlewareLibraryItem {
                   <div
                     cdkDrag
                     class="bg-gradient-to-br from-white to-gray-50 border rounded-lg p-3 hover:shadow-sm transition-all cursor-move"
-                    [class.border-[#FF6F00]]="selectedMiddleware()?.id === middleware.id"
+                    [class.border-brand-primary]="selectedMiddleware()?.id === middleware.id"
                     [class.shadow-sm]="selectedMiddleware()?.id === middleware.id"
                     [class.border-gray-200]="selectedMiddleware()?.id !== middleware.id">
                     <div class="flex items-start gap-3">
-                      <div class="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-[#FF6F00]/10 to-[#00ACC1]/10 rounded-lg flex items-center justify-center text-xs font-bold text-gray-700">
+                      <div class="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 rounded-lg flex items-center justify-center text-xs font-bold text-gray-700">
                         {{ middleware.order }}
                       </div>
                       <div class="flex-1 min-w-0">
@@ -166,7 +204,7 @@ interface MiddlewareLibraryItem {
                           <div class="flex gap-1.5">
                             <button
                               (click)="editMiddleware(middleware)"
-                              class="px-2 py-1 text-xs bg-[#00ACC1]/10 text-[#00ACC1] rounded hover:bg-[#00ACC1]/20 transition-all font-medium">
+                              class="px-2 py-1 text-xs bg-brand-secondary/10 text-brand-secondary rounded hover:bg-brand-secondary/20 transition-all font-medium">
                               Edit
                             </button>
                             <button
@@ -192,53 +230,70 @@ interface MiddlewareLibraryItem {
               </div>
             }
           </div>
-        </div>
-
-        <!-- Code Output -->
-        <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-          <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-              <div class="w-1.5 h-1.5 rounded-full" [class]="generatedCode() ? 'bg-[#FF6F00]' : 'bg-gray-300'"></div>
-              <h3 class="font-semibold text-sm text-gray-700">Generated C# Code</h3>
             </div>
-            <button
-              (click)="copyCode()"
-              [disabled]="!generatedCode()"
-              class="px-3 py-1 rounded-md text-xs font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-              [class]="generatedCode() ? 'text-[#FF6F00] hover:bg-[#FF6F00]/10' : 'text-gray-400'">
-              <span class="flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                Copy
-              </span>
-            </button>
           </div>
+          }
 
-          <textarea
-            [value]="generatedCode()"
-            readonly
-            class="w-full h-[600px] p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none"
-            placeholder="Generated C# code will appear here..."></textarea>
-
-          <!-- Minimal API Endpoints -->
-          @if (minimalAPIEndpoints().length > 0) {
-            <div class="px-4 py-3 bg-blue-50 border-t border-blue-200">
-              <h4 class="text-xs font-semibold text-blue-800 mb-2">📍 Minimal API Endpoints</h4>
-              @for (endpoint of minimalAPIEndpoints(); track endpoint.middlewareId) {
-                <div class="text-xs text-blue-700 font-mono mb-1">
-                  <span class="font-bold">{{ endpoint.method }}</span> {{ endpoint.path }}
-                </div>
-              }
+          <!-- Resizable Divider -->
+          @if (splitRatio() > 0 && splitRatio() < 100) {
+            <div
+              (mousedown)="startResize($event)"
+              [class]="isResizing() ? 'bg-brand-primary' : 'bg-gray-300 hover:bg-brand-primary'"
+              class="w-1 cursor-col-resize transition-colors flex-shrink-0 mx-2 relative group">
+              <div class="absolute inset-y-0 -left-1 -right-1"></div>
             </div>
           }
+
+        <!-- Code Output -->
+        @if (splitRatio() < 100) {
+        <div class="flex-shrink-0 transition-all" [style]="codeWidthStyle()">
+          <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
+            <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full" [class]="generatedCode() ? 'bg-green-500' : 'bg-gray-500'"></div>
+                <h3 class="font-semibold text-sm text-gray-200">Generated C# Code</h3>
+              </div>
+              <button
+                (click)="copyCode()"
+                [disabled]="!generatedCode()"
+                class="px-3 py-1 rounded-md text-xs font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                [class]="generatedCode() ? 'text-green-400 hover:bg-green-400/10' : 'text-gray-500'">
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  Copy
+                </span>
+              </button>
+            </div>
+
+            <textarea
+              [value]="generatedCode()"
+              readonly
+              [class]="splitRatio() === 0 ? 'w-full h-[800px] p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none' : 'w-full h-[600px] p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none'"
+              placeholder="Generated C# code will appear here..."></textarea>
+
+            <!-- Minimal API Endpoints -->
+            @if (minimalAPIEndpoints().length > 0) {
+              <div class="px-4 py-3 bg-blue-50 border-t border-blue-200">
+                <h4 class="text-xs font-semibold text-blue-800 mb-2">📍 Minimal API Endpoints</h4>
+                @for (endpoint of minimalAPIEndpoints(); track endpoint.middlewareId) {
+                  <div class="text-xs text-blue-700 font-mono mb-1">
+                    <span class="font-bold">{{ endpoint.method }}</span> {{ endpoint.path }}
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        }
         </div>
       </div>
 
         <!-- Simulation Panel -->
         @if (showSimulation()) {
-          <div class="mt-5 bg-white rounded-xl shadow-lg border-2 border-orange-100 p-6">
+          <div class="mt-5 bg-white rounded-xl shadow-lg border-2 border-brand-primary/20 p-6">
             <h2 class="text-lg font-bold text-gray-800 mb-4">Pipeline Simulation</h2>
 
             <div class="grid md:grid-cols-2 gap-5">
@@ -250,7 +305,7 @@ interface MiddlewareLibraryItem {
                     <label class="block text-sm font-medium text-gray-700 mb-1">HTTP Method</label>
                     <select
                       [(ngModel)]="simulationRequest.method"
-                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
                       <option value="GET">GET</option>
                       <option value="POST">POST</option>
                       <option value="PUT">PUT</option>
@@ -264,7 +319,7 @@ interface MiddlewareLibraryItem {
                     <input
                       type="text"
                       [(ngModel)]="simulationRequest.path"
-                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                       placeholder="/api/users">
                   </div>
 
@@ -272,7 +327,7 @@ interface MiddlewareLibraryItem {
                     <label class="block text-sm font-medium text-gray-700 mb-1">Headers (JSON)</label>
                     <textarea
                       [(ngModel)]="simulationHeadersText"
-                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none"
+                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
                       placeholder='{"Authorization": "Bearer token123"}'></textarea>
                   </div>
 
@@ -280,7 +335,7 @@ interface MiddlewareLibraryItem {
                     <label class="block text-sm font-medium text-gray-700 mb-1">Body</label>
                     <textarea
                       [(ngModel)]="simulationRequest.body"
-                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none"
+                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
                       placeholder='{"name": "John Doe"}'></textarea>
                   </div>
 
@@ -289,7 +344,7 @@ interface MiddlewareLibraryItem {
                       type="checkbox"
                       id="isAuth"
                       [(ngModel)]="simulationRequest.isAuthenticated"
-                      class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                      class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
                     <label for="isAuth" class="text-sm font-medium text-gray-700">Is Authenticated</label>
                   </div>
 
@@ -297,7 +352,7 @@ interface MiddlewareLibraryItem {
                     <label class="block text-sm font-medium text-gray-700 mb-1">Claims (JSON)</label>
                     <textarea
                       [(ngModel)]="simulationClaimsText"
-                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none"
+                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
                       placeholder='{"role": "admin", "userId": "123"}'></textarea>
                   </div>
 
@@ -308,14 +363,14 @@ interface MiddlewareLibraryItem {
                       [(ngModel)]="simulationRequestCount"
                       min="1"
                       max="500"
-                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                       placeholder="1">
                     <p class="text-xs text-gray-500 mt-1">Simulate multiple requests to test rate limiting behavior</p>
                   </div>
 
                   <button
                     (click)="runSimulation()"
-                    class="w-full px-4 py-2 bg-gradient-to-r from-orange-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all font-medium">
+                    class="w-full px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-lg hover:shadow-lg transition-all font-medium">
                     Run Simulation
                   </button>
                 </div>
@@ -408,20 +463,235 @@ interface MiddlewareLibraryItem {
                         </label>
                         <textarea
                           [(ngModel)]="editConfig.routesText"
-                          class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none font-mono text-sm"
+                          class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none font-mono text-sm"
                           placeholder="/api/*&#10;/users/:id"></textarea>
                       </div>
                     }
                     @case ('Authentication') {
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Provider</label>
-                        <select
-                          [(ngModel)]="editConfig.authProvider"
-                          class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
-                          <option value="Bearer">Bearer Token</option>
-                          <option value="Cookie">Cookie</option>
-                          <option value="Basic">Basic Auth</option>
-                        </select>
+                      <div class="space-y-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Authentication Scheme</label>
+                          <select
+                            [(ngModel)]="editConfig.authScheme"
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
+                            <option value="JwtBearer">JWT Bearer (API)</option>
+                            <option value="OpenIdConnect">OpenID Connect (Web App)</option>
+                            <option value="Cookie">Cookie Authentication</option>
+                          </select>
+                        </div>
+
+                        <!-- Scheme Explanation -->
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                          @switch (editConfig.authScheme) {
+                            @case ('JwtBearer') {
+                              <p class="font-semibold mb-1">🔑 JWT Bearer Authentication</p>
+                              <p>Use this to secure an <strong>API</strong>. The client sends JWT tokens in the Authorization header. There is no human interaction—tokens are obtained out-of-band (e.g., from another identity service).</p>
+                            }
+                            @case ('OpenIdConnect') {
+                              <p class="font-semibold mb-1">🌐 OpenID Connect Authentication</p>
+                              <p>Use this to secure a <strong>web application with user interaction</strong>. Users are redirected to an identity provider (IdP) for login/logout. Commonly used with Azure AD, IdentityServer, Auth0, etc.</p>
+                            }
+                            @case ('Cookie') {
+                              <p class="font-semibold mb-1">🍪 Cookie Authentication</p>
+                              <p>Use this for <strong>traditional web applications</strong> where authentication state is stored in a browser cookie. Typically used with a custom login page.</p>
+                            }
+                          }
+                        </div>
+
+                        <!-- JWT Bearer Configuration -->
+                        @if (editConfig.authScheme === 'JwtBearer') {
+                          <div class="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h4 class="font-semibold text-sm text-blue-800">JWT Bearer Settings</h4>
+
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Authority (Issuer URL)</label>
+                              <input
+                                type="text"
+                                [(ngModel)]="editConfig.jwtAuthority"
+                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                placeholder="https://login.microsoftonline.com/{tenant}/v2.0">
+                              <p class="text-xs text-gray-500 mt-1">The URL of the token issuer (identity provider)</p>
+                            </div>
+
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
+                              <input
+                                type="text"
+                                [(ngModel)]="editConfig.jwtAudience"
+                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                placeholder="api://my-api-client-id">
+                              <p class="text-xs text-gray-500 mt-1">The intended recipient of the token (your API identifier)</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                              <label class="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  [(ngModel)]="editConfig.jwtValidateIssuer"
+                                  class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                                <span class="text-sm text-gray-700">Validate Issuer</span>
+                              </label>
+                              <label class="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  [(ngModel)]="editConfig.jwtValidateAudience"
+                                  class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                                <span class="text-sm text-gray-700">Validate Audience</span>
+                              </label>
+                              <label class="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  [(ngModel)]="editConfig.jwtValidateLifetime"
+                                  class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                                <span class="text-sm text-gray-700">Validate Lifetime</span>
+                              </label>
+                              <label class="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  [(ngModel)]="editConfig.jwtRequireHttpsMetadata"
+                                  class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                                <span class="text-sm text-gray-700">Require HTTPS Metadata</span>
+                              </label>
+                            </div>
+                          </div>
+                        }
+
+                        <!-- OpenID Connect Configuration -->
+                        @if (editConfig.authScheme === 'OpenIdConnect') {
+                          <div class="space-y-3 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                            <h4 class="font-semibold text-sm text-purple-800">OpenID Connect Settings</h4>
+
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Authority</label>
+                              <input
+                                type="text"
+                                [(ngModel)]="editConfig.oidcAuthority"
+                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                placeholder="https://login.microsoftonline.com/{tenant}/v2.0">
+                              <p class="text-xs text-gray-500 mt-1">The OpenID Connect provider URL</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
+                                <input
+                                  type="text"
+                                  [(ngModel)]="editConfig.oidcClientId"
+                                  class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                  placeholder="your-client-id">
+                              </div>
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Client Secret</label>
+                                <input
+                                  type="password"
+                                  [(ngModel)]="editConfig.oidcClientSecret"
+                                  class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                  placeholder="••••••••">
+                              </div>
+                            </div>
+
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Response Type</label>
+                              <select
+                                [(ngModel)]="editConfig.oidcResponseType"
+                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
+                                <option value="code">Authorization Code (code)</option>
+                                <option value="id_token">ID Token (id_token)</option>
+                                <option value="code id_token">Hybrid (code id_token)</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Scopes (comma-separated)</label>
+                              <input
+                                type="text"
+                                [(ngModel)]="editConfig.oidcScopesText"
+                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                placeholder="openid, profile, email">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                              <label class="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  [(ngModel)]="editConfig.oidcSaveTokens"
+                                  class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                                <span class="text-sm text-gray-700">Save Tokens</span>
+                              </label>
+                              <label class="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  [(ngModel)]="editConfig.oidcGetClaimsFromUserInfoEndpoint"
+                                  class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                                <span class="text-sm text-gray-700">Get Claims from UserInfo</span>
+                              </label>
+                            </div>
+                          </div>
+                        }
+
+                        <!-- Cookie Configuration -->
+                        @if (editConfig.authScheme === 'Cookie') {
+                          <div class="space-y-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <h4 class="font-semibold text-sm text-green-800">Cookie Authentication Settings</h4>
+
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Cookie Name</label>
+                              <input
+                                type="text"
+                                [(ngModel)]="editConfig.cookieName"
+                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                placeholder=".AspNetCore.Cookies">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Login Path</label>
+                                <input
+                                  type="text"
+                                  [(ngModel)]="editConfig.cookieLoginPath"
+                                  class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                  placeholder="/Account/Login">
+                              </div>
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Logout Path</label>
+                                <input
+                                  type="text"
+                                  [(ngModel)]="editConfig.cookieLogoutPath"
+                                  class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                  placeholder="/Account/Logout">
+                              </div>
+                            </div>
+
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Access Denied Path</label>
+                              <input
+                                type="text"
+                                [(ngModel)]="editConfig.cookieAccessDeniedPath"
+                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                placeholder="/Account/AccessDenied">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Expire (minutes)</label>
+                                <input
+                                  type="number"
+                                  [(ngModel)]="editConfig.cookieExpireMinutes"
+                                  class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                                  placeholder="60">
+                              </div>
+                              <div class="flex items-end pb-2">
+                                <label class="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    [(ngModel)]="editConfig.cookieSlidingExpiration"
+                                    class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
+                                  <span class="text-sm text-gray-700">Sliding Expiration</span>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        }
                       </div>
                     }
                     @case ('Authorization') {
@@ -432,7 +702,7 @@ interface MiddlewareLibraryItem {
                         <input
                           type="text"
                           [(ngModel)]="editConfig.policiesText"
-                          class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                          class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                           placeholder="admin, manager">
                       </div>
                     }
@@ -445,7 +715,7 @@ interface MiddlewareLibraryItem {
                           <input
                             type="text"
                             [(ngModel)]="editConfig.allowedOriginsText"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                             placeholder="https://example.com, https://app.example.com">
                         </div>
                         <div>
@@ -455,7 +725,7 @@ interface MiddlewareLibraryItem {
                           <input
                             type="text"
                             [(ngModel)]="editConfig.allowedMethodsText"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                             placeholder="GET, POST, PUT, DELETE">
                         </div>
                         <div class="flex items-center gap-2">
@@ -463,7 +733,7 @@ interface MiddlewareLibraryItem {
                             type="checkbox"
                             id="allowCreds"
                             [(ngModel)]="editConfig.allowCredentials"
-                            class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                            class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
                           <label for="allowCreds" class="text-sm font-medium text-gray-700">
                             Allow Credentials
                           </label>
@@ -477,7 +747,7 @@ interface MiddlewareLibraryItem {
                           <input
                             type="text"
                             [(ngModel)]="editConfig.directory"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                             placeholder="wwwroot">
                         </div>
                       </div>
@@ -490,7 +760,7 @@ interface MiddlewareLibraryItem {
                             type="checkbox"
                             id="useIExceptionHandler"
                             [(ngModel)]="editConfig.useIExceptionHandler"
-                            class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                            class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
                           <label for="useIExceptionHandler" class="text-sm font-medium text-gray-700">
                             Use IExceptionHandler (TryHandleAsync pattern)
                           </label>
@@ -514,7 +784,7 @@ interface MiddlewareLibraryItem {
                               <input
                                 type="text"
                                 [(ngModel)]="editConfig.exceptionHandlerClass"
-                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                                 placeholder="GlobalExceptionHandler">
                             </div>
 
@@ -527,7 +797,7 @@ interface MiddlewareLibraryItem {
                                     [value]="true"
                                     [(ngModel)]="editConfig.returnHandled"
                                     name="returnHandled"
-                                    class="w-4 h-4 text-orange-600 border-gray-300 focus:ring-orange-500">
+                                    class="w-4 h-4 text-brand-primary border-gray-300 focus:ring-brand-primary">
                                   <span class="text-sm text-gray-700">
                                     <strong class="text-green-700">Return true</strong> — Exception is handled, stop calling other handlers
                                   </span>
@@ -538,7 +808,7 @@ interface MiddlewareLibraryItem {
                                     [value]="false"
                                     [(ngModel)]="editConfig.returnHandled"
                                     name="returnHandled"
-                                    class="w-4 h-4 text-orange-600 border-gray-300 focus:ring-orange-500">
+                                    class="w-4 h-4 text-brand-primary border-gray-300 focus:ring-brand-primary">
                                   <span class="text-sm text-gray-700">
                                     <strong class="text-yellow-700">Return false</strong> — Pass to next handler in registration order
                                   </span>
@@ -555,7 +825,7 @@ interface MiddlewareLibraryItem {
                             <input
                               type="text"
                               [(ngModel)]="editConfig.errorHandlerRoute"
-                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                               placeholder="/error">
                           </div>
                         }
@@ -569,21 +839,21 @@ interface MiddlewareLibraryItem {
                             <input
                               type="checkbox"
                               [(ngModel)]="editConfig.gzip"
-                              class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                              class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
                             <span class="text-sm text-gray-700">gzip</span>
                           </label>
                           <label class="flex items-center gap-2">
                             <input
                               type="checkbox"
                               [(ngModel)]="editConfig.brotli"
-                              class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                              class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
                             <span class="text-sm text-gray-700">brotli</span>
                           </label>
                           <label class="flex items-center gap-2">
                             <input
                               type="checkbox"
                               [(ngModel)]="editConfig.deflate"
-                              class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                              class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
                             <span class="text-sm text-gray-700">deflate</span>
                           </label>
                         </div>
@@ -596,7 +866,7 @@ interface MiddlewareLibraryItem {
                           <input
                             type="text"
                             [(ngModel)]="editConfig.policyName"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                             placeholder="fixed">
                         </div>
 
@@ -604,7 +874,7 @@ interface MiddlewareLibraryItem {
                           <label class="block text-sm font-medium text-gray-700 mb-1">Limiter Type</label>
                           <select
                             [(ngModel)]="editConfig.limiterType"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
                             <option value="FixedWindow">Fixed Window</option>
                             <option value="SlidingWindow">Sliding Window</option>
                             <option value="TokenBucket">Token Bucket</option>
@@ -642,7 +912,7 @@ interface MiddlewareLibraryItem {
                             <input
                               type="number"
                               [(ngModel)]="editConfig.permitLimit"
-                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                               placeholder="100">
                           </div>
                         } @else {
@@ -651,7 +921,7 @@ interface MiddlewareLibraryItem {
                             <input
                               type="number"
                               [(ngModel)]="editConfig.permitLimit"
-                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                               placeholder="10">
                           </div>
                         }
@@ -662,7 +932,7 @@ interface MiddlewareLibraryItem {
                             <input
                               type="number"
                               [(ngModel)]="editConfig.window"
-                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                               placeholder="60">
                           </div>
                         }
@@ -673,7 +943,7 @@ interface MiddlewareLibraryItem {
                             <input
                               type="number"
                               [(ngModel)]="editConfig.tokensPerPeriod"
-                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                               placeholder="10">
                           </div>
                           <div>
@@ -681,7 +951,7 @@ interface MiddlewareLibraryItem {
                             <input
                               type="number"
                               [(ngModel)]="editConfig.replenishmentPeriod"
-                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                              class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                               placeholder="30">
                           </div>
                         }
@@ -691,7 +961,7 @@ interface MiddlewareLibraryItem {
                           <input
                             type="number"
                             [(ngModel)]="editConfig.queueLimit"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                             placeholder="0">
                           <p class="text-xs text-gray-500 mt-1">Number of requests to queue when limit is reached (0 = no queue)</p>
                         </div>
@@ -704,14 +974,14 @@ interface MiddlewareLibraryItem {
                           <input
                             type="text"
                             [(ngModel)]="editConfig.className"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                             placeholder="MyCustomMiddleware">
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700 mb-1">Custom Code</label>
                           <textarea
                             [(ngModel)]="editConfig.customCode"
-                            class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none font-mono text-sm"
+                            class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none font-mono text-sm"
                             placeholder="// Custom middleware logic"></textarea>
                         </div>
                       </div>
@@ -722,7 +992,7 @@ interface MiddlewareLibraryItem {
                           <label class="block text-sm font-medium text-gray-700 mb-1">HTTP Method</label>
                           <select
                             [(ngModel)]="editConfig.httpMethod"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
                             <option value="GET">GET</option>
                             <option value="POST">POST</option>
                             <option value="PUT">PUT</option>
@@ -735,14 +1005,14 @@ interface MiddlewareLibraryItem {
                           <input
                             type="text"
                             [(ngModel)]="editConfig.path"
-                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                             placeholder="/api/users">
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700 mb-1">Handler Code</label>
                           <textarea
                             [(ngModel)]="editConfig.handlerCode"
-                            class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none font-mono text-sm"
+                            class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none font-mono text-sm"
                             placeholder="() => Results.Ok(new { message = &quot;Hello&quot; })"></textarea>
                         </div>
                       </div>
@@ -756,7 +1026,7 @@ interface MiddlewareLibraryItem {
                       <input
                         type="checkbox"
                         [(ngModel)]="editConfig.hasBranch"
-                        class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                        class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
                     </div>
 
                     @if (editConfig.hasBranch) {
@@ -818,7 +1088,7 @@ interface MiddlewareLibraryItem {
                 <div class="flex gap-3 mt-6">
                   <button
                     (click)="saveMiddlewareConfig()"
-                    class="flex-1 px-4 py-2 bg-gradient-to-r from-orange-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all font-medium">
+                    class="flex-1 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-lg hover:shadow-lg transition-all font-medium">
                     Save Changes
                   </button>
                   <button
@@ -836,6 +1106,17 @@ interface MiddlewareLibraryItem {
 })
 export class MiddlewareDesignerComponent {
   private readonly service = inject(MiddlewareDesignerService);
+  private readonly sanitizer = inject(DomSanitizer);
+
+  // SVG icon cache to avoid repeated sanitization
+  private readonly iconCache = new Map<string, SafeHtml>();
+
+  protected getSafeIcon(icon: string): SafeHtml {
+    if (!this.iconCache.has(icon)) {
+      this.iconCache.set(icon, this.sanitizer.bypassSecurityTrustHtml(icon));
+    }
+    return this.iconCache.get(icon)!;
+  }
 
   // State
   protected readonly pipeline = signal<Pipeline>({
@@ -851,6 +1132,8 @@ export class MiddlewareDesignerComponent {
   protected readonly generatedCode = signal<string>('');
   protected readonly simulationResult = signal(null as any);
   protected readonly copySuccess = signal<boolean>(false);
+  protected readonly splitRatio = signal<number>(50); // percentage for canvas width
+  protected readonly isResizing = signal<boolean>(false);
 
   // Computed
   protected readonly sortedMiddlewares = computed(() =>
@@ -864,9 +1147,21 @@ export class MiddlewareDesignerComponent {
   protected readonly gridLayoutClass = computed(() => {
     const showLib = this.showLibrary();
     if (showLib) {
-      return 'grid-cols-[300px_1fr_1fr]';
+      return 'grid grid-cols-[300px_1fr]';
     }
-    return 'grid-cols-2';
+    return 'grid grid-cols-1';
+  });
+
+  protected readonly canvasWidthStyle = computed(() => {
+    const ratio = this.splitRatio();
+    if (ratio === 100) return `width: 100%;`;
+    return `width: ${ratio}%;`;
+  });
+
+  protected readonly codeWidthStyle = computed(() => {
+    const ratio = this.splitRatio();
+    if (ratio === 0) return `width: 100%;`;
+    return `width: ${100 - ratio}%;`;
   });
 
   // Simulation state
@@ -893,63 +1188,63 @@ export class MiddlewareDesignerComponent {
     {
       type: 'Authentication',
       name: 'Authentication',
-      icon: '🔐',
-      description: 'Verify user identity',
-      defaultConfig: { authProvider: 'Bearer' },
+      icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
+      description: 'JWT Bearer, OpenID Connect, or Cookie authentication',
+      defaultConfig: { authScheme: 'JwtBearer', jwtValidateIssuer: true, jwtValidateAudience: true, jwtValidateLifetime: true, jwtRequireHttpsMetadata: true },
     },
     {
       type: 'Authorization',
       name: 'Authorization',
-      icon: '🛡️',
+      icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
       description: 'Check user permissions',
       defaultConfig: { policies: [] },
     },
     {
       type: 'CORS',
       name: 'CORS',
-      icon: '🌐',
+      icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
       description: 'Configure cross-origin requests',
       defaultConfig: { allowedOrigins: ['*'], allowedMethods: ['GET', 'POST'] },
     },
     {
       type: 'StaticFiles',
       name: 'Static Files',
-      icon: '📁',
+      icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
       description: 'Serve static files',
       defaultConfig: { directory: 'wwwroot' },
     },
     {
       type: 'ExceptionHandling',
       name: 'Exception Handling',
-      icon: '⚠️',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>',
       description: 'Handle exceptions globally (supports IExceptionHandler)',
       defaultConfig: { errorHandlerRoute: '/error' },
     },
     {
       type: 'Compression',
       name: 'Compression',
-      icon: '🗜️',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">  <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" /></svg>\n',
       description: 'Compress responses',
       defaultConfig: { algorithms: ['gzip', 'brotli'] },
     },
     {
       type: 'RateLimiting',
       name: 'Rate Limiting',
-      icon: '⏱️',
+      icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
       description: 'Limit request rates to protect your API',
       defaultConfig: { policyName: 'fixed', limiterType: 'FixedWindow', permitLimit: 100, window: 60, queueLimit: 0 },
     },
     {
       type: 'MinimalAPIEndpoint',
       name: 'Minimal API Endpoint',
-      icon: '🎯',
+      icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>',
       description: 'Define a minimal API endpoint',
       defaultConfig: { httpMethod: 'GET', path: '/api/hello', handlerCode: '() => "Hello World"' },
     },
     {
       type: 'Custom',
       name: 'Custom Middleware',
-      icon: '⚙️',
+      icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
       description: 'Add custom middleware logic',
       defaultConfig: { className: 'MyMiddleware', customCode: '' },
     },
@@ -999,8 +1294,30 @@ export class MiddlewareDesignerComponent {
     this.editConfig = {
       // Routing
       routesText: config.routes?.join('\n') || '',
-      // Auth
-      authProvider: config.authProvider || 'Bearer',
+      // Auth - new scheme-based config
+      authScheme: config.authScheme || 'JwtBearer',
+      // JWT Bearer settings
+      jwtAuthority: config.jwtAuthority || '',
+      jwtAudience: config.jwtAudience || '',
+      jwtValidateIssuer: config.jwtValidateIssuer ?? true,
+      jwtValidateAudience: config.jwtValidateAudience ?? true,
+      jwtValidateLifetime: config.jwtValidateLifetime ?? true,
+      jwtRequireHttpsMetadata: config.jwtRequireHttpsMetadata ?? true,
+      // OpenID Connect settings
+      oidcAuthority: config.oidcAuthority || '',
+      oidcClientId: config.oidcClientId || '',
+      oidcClientSecret: config.oidcClientSecret || '',
+      oidcResponseType: config.oidcResponseType || 'code',
+      oidcScopesText: config.oidcScopes?.join(', ') || 'openid, profile, email',
+      oidcSaveTokens: config.oidcSaveTokens ?? true,
+      oidcGetClaimsFromUserInfoEndpoint: config.oidcGetClaimsFromUserInfoEndpoint ?? true,
+      // Cookie settings
+      cookieName: config.cookieName || '.AspNetCore.Cookies',
+      cookieLoginPath: config.cookieLoginPath || '/Account/Login',
+      cookieLogoutPath: config.cookieLogoutPath || '/Account/Logout',
+      cookieAccessDeniedPath: config.cookieAccessDeniedPath || '/Account/AccessDenied',
+      cookieExpireMinutes: config.cookieExpireMinutes || 60,
+      cookieSlidingExpiration: config.cookieSlidingExpiration ?? true,
       // Authz
       policiesText: config.policies?.join(', ') || '',
       // CORS
@@ -1057,7 +1374,32 @@ export class MiddlewareDesignerComponent {
           .filter((s: string) => s);
         break;
       case 'Authentication':
-        newConfig.authProvider = this.editConfig.authProvider;
+        newConfig.authScheme = this.editConfig.authScheme;
+        // JWT Bearer settings
+        newConfig.jwtAuthority = this.editConfig.jwtAuthority;
+        newConfig.jwtAudience = this.editConfig.jwtAudience;
+        newConfig.jwtValidateIssuer = this.editConfig.jwtValidateIssuer;
+        newConfig.jwtValidateAudience = this.editConfig.jwtValidateAudience;
+        newConfig.jwtValidateLifetime = this.editConfig.jwtValidateLifetime;
+        newConfig.jwtRequireHttpsMetadata = this.editConfig.jwtRequireHttpsMetadata;
+        // OpenID Connect settings
+        newConfig.oidcAuthority = this.editConfig.oidcAuthority;
+        newConfig.oidcClientId = this.editConfig.oidcClientId;
+        newConfig.oidcClientSecret = this.editConfig.oidcClientSecret;
+        newConfig.oidcResponseType = this.editConfig.oidcResponseType;
+        newConfig.oidcScopes = this.editConfig.oidcScopesText
+          ?.split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s) || ['openid', 'profile', 'email'];
+        newConfig.oidcSaveTokens = this.editConfig.oidcSaveTokens;
+        newConfig.oidcGetClaimsFromUserInfoEndpoint = this.editConfig.oidcGetClaimsFromUserInfoEndpoint;
+        // Cookie settings
+        newConfig.cookieName = this.editConfig.cookieName;
+        newConfig.cookieLoginPath = this.editConfig.cookieLoginPath;
+        newConfig.cookieLogoutPath = this.editConfig.cookieLogoutPath;
+        newConfig.cookieAccessDeniedPath = this.editConfig.cookieAccessDeniedPath;
+        newConfig.cookieExpireMinutes = this.editConfig.cookieExpireMinutes;
+        newConfig.cookieSlidingExpiration = this.editConfig.cookieSlidingExpiration;
         break;
       case 'Authorization':
         newConfig.policies = this.editConfig.policiesText
@@ -1185,7 +1527,17 @@ export class MiddlewareDesignerComponent {
       case 'Routing':
         return `Routes: ${config.routes?.join(', ') || 'none'}`;
       case 'Authentication':
-        return `Provider: ${config.authProvider || 'Bearer'}`;
+        const scheme = config.authScheme || 'JwtBearer';
+        switch (scheme) {
+          case 'JwtBearer':
+            return `JWT Bearer: ${config.jwtAuthority || 'Configure authority'}`;
+          case 'OpenIdConnect':
+            return `OIDC: ${config.oidcAuthority || 'Configure authority'}`;
+          case 'Cookie':
+            return `Cookie: ${config.cookieLoginPath || '/Account/Login'}`;
+          default:
+            return `Scheme: ${scheme}`;
+        }
       case 'Authorization':
         return `Policies: ${config.policies?.join(', ') || 'none'}`;
       case 'CORS':
@@ -1222,5 +1574,35 @@ export class MiddlewareDesignerComponent {
     if (decision === 'continue') return 'bg-green-100 text-green-800';
     if (decision.includes('branch')) return 'bg-purple-100 text-purple-800';
     return 'bg-gray-100 text-gray-800';
+  }
+
+  // Resize handlers
+  protected startResize(event: MouseEvent): void {
+    event.preventDefault();
+    this.isResizing.set(true);
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!this.isResizing()) return;
+
+      const container = (event.target as HTMLElement).closest('.flex');
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const newRatio = (offsetX / rect.width) * 100;
+
+      // Clamp between 20% and 80% to prevent making panels too small
+      const clampedRatio = Math.max(20, Math.min(80, newRatio));
+      this.splitRatio.set(clampedRatio);
+    };
+
+    const onMouseUp = () => {
+      this.isResizing.set(false);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
 }
