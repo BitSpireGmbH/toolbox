@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build -- --configuration production
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -42,4 +42,5 @@ jobs:
         with:
           app-name: 'bitspire-toolkit'
           slot-name: 'Production'
-          package: .
+          package: ./dist/toolbox/browser
+
