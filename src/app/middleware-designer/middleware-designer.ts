@@ -9,6 +9,7 @@ import {
   MiddlewareConfig,
   SimulationRequest,
   MinimalAPIEndpoint,
+  BranchCondition,
 } from '../services/middleware-designer.service';
 import { MiddlewareLibraryItemComponent } from './components/middleware-library-item';
 import { MiddlewareNodeCardComponent } from './components/middleware-node-card';
@@ -570,7 +571,7 @@ export class MiddlewareDesignerComponent {
     return getMiddlewareConfigSummary(middleware);
   }
 
-  protected getBranchConditionText(condition: any): string {
+  protected getBranchConditionText(condition: BranchCondition): string {
     return getBranchConditionText(condition);
   }
 

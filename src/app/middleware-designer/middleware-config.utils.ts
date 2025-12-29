@@ -245,9 +245,14 @@ export function buildBranch(editConfig: EditConfig) {
     return undefined;
   }
 
+  // Validate required fields
+  if (!editConfig.branchConditionType || !editConfig.branchOperator) {
+    return undefined;
+  }
+
   const condition: BranchCondition = {
-    type: editConfig.branchConditionType!,
-    operator: editConfig.branchOperator!,
+    type: editConfig.branchConditionType,
+    operator: editConfig.branchOperator,
     key: editConfig.branchKey,
     value: editConfig.branchValue,
   };
