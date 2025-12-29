@@ -21,5 +21,9 @@ export const routes: Routes = [
   {
     path: 'middleware-designer',
     loadComponent: () => import('./middleware-designer/middleware-designer').then(m => m.MiddlewareDesignerComponent)
+  },
+  {
+    path: 'jwt-decoder',
+    loadComponent: () => import('./jwt-decoder/jwt-decoder').then(m => m.JwtDecoderComponent)
   }
 ];
