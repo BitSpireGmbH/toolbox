@@ -11,6 +11,7 @@ import {
   MinimalAPIEndpoint,
   BranchCondition,
 } from '../services/middleware-designer.service';
+import { SyntaxHighlightService } from '../services/syntax-highlight.service';
 import { MiddlewareLibraryItemComponent } from './components/middleware-library-item';
 import { MiddlewareNodeCardComponent } from './components/middleware-node-card';
 import { SimulationStepComponent } from './components/simulation-step';
@@ -31,32 +32,32 @@ import {
   imports: [FormsModule, DragDropModule, MiddlewareLibraryItemComponent, MiddlewareNodeCardComponent, SimulationStepComponent, ValidationMessagesComponent, MiddlewareEditModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-[1600px] mx-auto p-6">
+    <div class="max-w-[1600px] mx-auto p-6 bg-ide-panel min-h-screen">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 mb-1">Middleware Designer</h1>
-          <p class="text-sm text-gray-600">Build ASP.NET Core middleware pipelines visually</p>
+          <h1 class="text-2xl font-bold text-ide-text mb-1">Middleware Designer</h1>
+          <p class="text-sm text-ide-text-muted">Build ASP.NET Core middleware pipelines visually</p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
           <button
             (click)="showLibrary.set(!showLibrary())"
-            [class]="showLibrary() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
-            class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
+            [class]="showLibrary() ? 'bg-ide-accent text-white' : 'bg-ide-sidebar text-ide-text hover:bg-ide-bg'"
+            class="px-4 py-2 rounded-lg border border-ide-border font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
             Library
           </button>
           <button
             (click)="showSimulation.set(!showSimulation())"
-            [class]="showSimulation() ? 'bg-brand-secondary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
-            class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
+            [class]="showSimulation() ? 'bg-ide-success text-white' : 'bg-ide-sidebar text-ide-text hover:bg-ide-bg'"
+            class="px-4 py-2 rounded-lg border border-ide-border font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
             Simulation
           </button>
 
-          <div class="inline-flex rounded-lg border border-gray-300 bg-white p-0.5 shadow-sm">
+          <div class="inline-flex rounded-lg border border-ide-border bg-ide-sidebar p-0.5 shadow-sm">
             <button
               (click)="splitRatio.set(100)"
-              [class]="splitRatio() === 100 ? 'bg-brand-primary text-white' : 'text-gray-700 hover:bg-gray-50'"
+              [class]="splitRatio() === 100 ? 'bg-ide-accent text-white' : 'text-ide-text hover:bg-ide-panel'"
               class="px-3 py-2 rounded-md text-xs font-semibold transition-all"
               title="Canvas Only">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -65,7 +66,7 @@ import {
             </button>
             <button
               (click)="splitRatio.set(50)"
-              [class]="splitRatio() > 0 && splitRatio() < 100 ? 'bg-brand-primary text-white' : 'text-gray-700 hover:bg-gray-50'"
+              [class]="splitRatio() > 0 && splitRatio() < 100 ? 'bg-ide-accent text-white' : 'text-ide-text hover:bg-ide-panel'"
               class="px-3 py-2 rounded-md text-xs font-semibold transition-all"
               title="Split View">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -75,7 +76,7 @@ import {
             </button>
             <button
               (click)="splitRatio.set(0)"
-              [class]="splitRatio() === 0 ? 'bg-brand-primary text-white' : 'text-gray-700 hover:bg-gray-50'"
+              [class]="splitRatio() === 0 ? 'bg-ide-accent text-white' : 'text-ide-text hover:bg-ide-panel'"
               class="px-3 py-2 rounded-md text-xs font-semibold transition-all"
               title="Code Only">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -90,18 +91,18 @@ import {
 
       <!-- Pipeline Actions -->
       @if (showLibrary()) {
-        <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
+        <div class="bg-ide-sidebar rounded-xl shadow-lg border border-ide-border p-5 mb-6">
           <div class="flex gap-2 flex-wrap items-center">
             <button
               (click)="clearPipeline()"
-              class="px-3 py-2 text-sm bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium flex items-center gap-1.5">
+              class="px-3 py-2 text-sm bg-ide-panel border border-ide-border text-ide-text rounded-lg hover:bg-ide-bg transition-all font-medium flex items-center gap-1.5">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14"></path>
               </svg>
               Clear
             </button>
             @if (copySuccess()) {
-              <span class="text-xs text-green-600 font-medium">✓ Copied!</span>
+              <span class="text-xs text-ide-success font-medium">✓ Copied!</span>
             }
           </div>
 
@@ -118,8 +119,8 @@ import {
       <div class="gap-5" [class]="gridLayoutClass()">
         <!-- Middleware Library Sidebar -->
         @if (showLibrary()) {
-          <div class="bg-white rounded-xl shadow-md border border-gray-200 p-5 h-fit sticky top-6">
-            <h3 class="font-semibold text-sm text-gray-700 mb-3">Middleware Library</h3>
+          <div class="bg-ide-sidebar rounded-xl shadow-md border border-ide-border p-5 h-fit sticky top-6">
+            <h3 class="font-semibold text-sm text-ide-text mb-3">Middleware Library</h3>
             <div class="space-y-2 max-h-[800px] overflow-y-auto">
               @for (item of middlewareLibrary; track item.type) {
                 <app-middleware-library-item
@@ -135,18 +136,18 @@ import {
           <!-- Canvas -->
           @if (splitRatio() > 0) {
           <div class="flex-shrink-0 transition-all" [style]="canvasWidthStyle()">
-            <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
-          <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
+            <div class="group relative bg-ide-sidebar rounded-xl shadow-md border border-ide-border overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
+          <div class="bg-ide-bg px-4 py-2.5 border-b border-ide-border flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <div class="w-1.5 h-1.5 rounded-full" [class]="pipeline().middlewares.length > 0 ? 'bg-green-500' : 'bg-gray-300'"></div>
-              <h3 class="font-semibold text-sm text-gray-700">Pipeline Canvas</h3>
+              <div class="w-1.5 h-1.5 rounded-full" [class]="pipeline().middlewares.length > 0 ? 'bg-ide-success' : 'bg-ide-text-muted'"></div>
+              <h3 class="font-semibold text-sm text-ide-text">Pipeline Canvas</h3>
             </div>
-            <span class="text-xs text-gray-500">{{ pipeline().middlewares.length }} middleware(s)</span>
+            <span class="text-xs text-ide-text-muted">{{ pipeline().middlewares.length }} middleware(s)</span>
           </div>
 
           <div [class]="splitRatio() === 100 ? 'p-4 min-h-[800px]' : 'p-4 min-h-[600px]'">
             @if (pipeline().middlewares.length === 0) {
-              <div class="text-center py-20 text-gray-500">
+              <div class="text-center py-20 text-ide-text-muted">
                 <p class="text-base font-medium">No middleware added yet</p>
                 <p class="text-sm mt-1">Add middleware from the library to get started</p>
               </div>
@@ -158,10 +159,10 @@ import {
                 @for (middleware of sortedMiddlewares(); track middleware.id) {
                   <div
                     cdkDrag
-                    class="bg-white border rounded-lg p-3 hover:shadow-sm transition-all cursor-move"
-                    [class.border-brand-primary]="selectedMiddleware()?.id === middleware.id"
+                    class="bg-ide-panel border rounded-lg p-3 hover:shadow-sm transition-all cursor-move"
+                    [class.border-ide-accent]="selectedMiddleware()?.id === middleware.id"
                     [class.shadow-sm]="selectedMiddleware()?.id === middleware.id"
-                    [class.border-gray-200]="selectedMiddleware()?.id !== middleware.id">
+                    [class.border-ide-border]="selectedMiddleware()?.id !== middleware.id">
                     <app-middleware-node-card
                       [middleware]="middleware"
                       [configSummary]="getMiddlewareConfigSummary(middleware)"
@@ -181,7 +182,7 @@ import {
           @if (splitRatio() > 0 && splitRatio() < 100) {
             <div
               (mousedown)="startResize($event)"
-              [class]="isResizing() ? 'bg-brand-primary' : 'bg-gray-300 hover:bg-brand-primary'"
+              [class]="isResizing() ? 'bg-ide-accent' : 'bg-ide-border hover:bg-ide-accent'"
               class="w-1 cursor-col-resize transition-colors flex-shrink-0 mx-2 relative group">
               <div class="absolute inset-y-0 -left-1 -right-1"></div>
             </div>
@@ -190,17 +191,17 @@ import {
         <!-- Code Output -->
         @if (splitRatio() < 100) {
         <div class="flex-shrink-0 transition-all" [style]="codeWidthStyle()">
-          <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
-            <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center">
+          <div class="group relative bg-ide-bg rounded-xl shadow-md border border-ide-border overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
+            <div class="bg-ide-sidebar px-4 py-2.5 border-b border-ide-border flex justify-between items-center">
               <div class="flex items-center gap-2">
-                <div class="w-1.5 h-1.5 rounded-full" [class]="generatedCode() ? 'bg-green-500' : 'bg-gray-500'"></div>
-                <h3 class="font-semibold text-sm text-gray-200">Generated C# Code</h3>
+                <div class="w-1.5 h-1.5 rounded-full" [class]="generatedCode() ? 'bg-ide-success' : 'bg-ide-text-muted'"></div>
+                <h3 class="font-semibold text-sm text-ide-text">Generated C# Code</h3>
               </div>
               <button
                 (click)="copyCode()"
                 [disabled]="!generatedCode()"
                 class="px-3 py-1 rounded-md text-xs font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                [class]="generatedCode() ? 'text-green-400 hover:bg-green-400/10' : 'text-gray-500'">
+                [class]="generatedCode() ? 'text-ide-success hover:bg-ide-success/10' : 'text-ide-text-muted'">
                 <span class="flex items-center gap-1.5">
                   <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -211,19 +212,18 @@ import {
               </button>
             </div>
 
-            <textarea
-              [value]="generatedCode()"
-              readonly
-              [class]="splitRatio() === 0 ? 'w-full h-[800px] p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none' : 'w-full h-[600px] p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none'"
-              placeholder="Generated C# code will appear here..."></textarea>
+            <div
+              [innerHTML]="highlightedCode()"
+              [class]="splitRatio() === 0 ? 'w-full h-[800px] p-4 font-mono text-sm bg-ide-bg focus:outline-none overflow-auto' : 'w-full h-[600px] p-4 font-mono text-sm bg-ide-bg focus:outline-none overflow-auto'">
+            </div>
 
             <!-- Minimal API Endpoints -->
             @if (minimalAPIEndpoints().length > 0) {
-              <div class="px-4 py-3 bg-blue-50 border-t border-blue-200">
-                <h4 class="text-xs font-semibold text-blue-800 mb-2">📍 Minimal API Endpoints</h4>
+              <div class="px-4 py-3 bg-ide-keyword/10 border-t border-ide-border">
+                <h4 class="text-xs font-semibold text-ide-keyword mb-2">📍 Minimal API Endpoints</h4>
                 @for (endpoint of minimalAPIEndpoints(); track endpoint.middlewareId) {
-                  <div class="text-xs text-blue-700 font-mono mb-1">
-                    <span class="font-bold">{{ endpoint.method }}</span> {{ endpoint.path }}
+                  <div class="text-xs text-ide-text font-mono mb-1">
+                    <span class="font-bold text-ide-keyword">{{ endpoint.method }}</span> {{ endpoint.path }}
                   </div>
                 }
               </div>
@@ -236,19 +236,19 @@ import {
 
         <!-- Simulation Panel -->
         @if (showSimulation()) {
-          <div class="mt-5 bg-white rounded-xl shadow-lg border-2 border-brand-primary/20 p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">Pipeline Simulation</h2>
+          <div class="mt-5 bg-ide-sidebar rounded-xl shadow-lg border-2 border-ide-success/20 p-6">
+            <h2 class="text-lg font-bold text-ide-text mb-4">Pipeline Simulation</h2>
 
             <div class="grid md:grid-cols-2 gap-5">
               <!-- Input -->
               <div>
-                <h3 class="font-semibold text-gray-700 mb-3">Request Configuration</h3>
+                <h3 class="font-semibold text-ide-text mb-3">Request Configuration</h3>
                 <div class="space-y-3">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">HTTP Method</label>
+                    <label class="block text-sm font-medium text-ide-text mb-1">HTTP Method</label>
                     <select
                       [(ngModel)]="simulationRequest.method"
-                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
+                      class="w-full px-3 py-2 border-2 border-ide-border rounded-lg focus:outline-none focus:border-ide-accent bg-ide-panel text-ide-text">
                       <option value="GET">GET</option>
                       <option value="POST">POST</option>
                       <option value="PUT">PUT</option>
@@ -258,27 +258,27 @@ import {
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Path</label>
+                    <label class="block text-sm font-medium text-ide-text mb-1">Path</label>
                     <input
                       type="text"
                       [(ngModel)]="simulationRequest.path"
-                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                      class="w-full px-3 py-2 border-2 border-ide-border rounded-lg focus:outline-none focus:border-ide-accent bg-ide-panel text-ide-text"
                       placeholder="/api/users">
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Headers (JSON)</label>
+                    <label class="block text-sm font-medium text-ide-text mb-1">Headers (JSON)</label>
                     <textarea
                       [(ngModel)]="simulationHeadersText"
-                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
+                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-ide-border rounded-lg focus:outline-none focus:border-ide-accent resize-none bg-ide-panel text-ide-text"
                       placeholder='{"Authorization": "Bearer token123"}'></textarea>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Body</label>
+                    <label class="block text-sm font-medium text-ide-text mb-1">Body</label>
                     <textarea
                       [(ngModel)]="simulationRequest.body"
-                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
+                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-ide-border rounded-lg focus:outline-none focus:border-ide-accent resize-none bg-ide-panel text-ide-text"
                       placeholder='{"name": "John Doe"}'></textarea>
                   </div>
 
@@ -287,33 +287,33 @@ import {
                       type="checkbox"
                       id="isAuth"
                       [(ngModel)]="simulationRequest.isAuthenticated"
-                      class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
-                    <label for="isAuth" class="text-sm font-medium text-gray-700">Is Authenticated</label>
+                      class="w-4 h-4 text-ide-accent border-ide-border rounded focus:ring-ide-accent">
+                    <label for="isAuth" class="text-sm font-medium text-ide-text">Is Authenticated</label>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Claims (JSON)</label>
+                    <label class="block text-sm font-medium text-ide-text mb-1">Claims (JSON)</label>
                     <textarea
                       [(ngModel)]="simulationClaimsText"
-                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
+                      class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-ide-border rounded-lg focus:outline-none focus:border-ide-accent resize-none bg-ide-panel text-ide-text"
                       placeholder='{"role": "admin", "userId": "123"}'></textarea>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Request Count (for Rate Limiting)</label>
+                    <label class="block text-sm font-medium text-ide-text mb-1">Request Count (for Rate Limiting)</label>
                     <input
                       type="number"
                       [(ngModel)]="simulationRequestCount"
                       min="1"
                       max="500"
-                      class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
+                      class="w-full px-3 py-2 border-2 border-ide-border rounded-lg focus:outline-none focus:border-ide-accent bg-ide-panel text-ide-text"
                       placeholder="1">
-                    <p class="text-xs text-gray-500 mt-1">Simulate multiple requests to test rate limiting behavior</p>
+                    <p class="text-xs text-ide-text-muted mt-1">Simulate multiple requests to test rate limiting behavior</p>
                   </div>
 
                   <button
                     (click)="runSimulation()"
-                    class="w-full px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-blue-800 hover:shadow-md transition-all font-medium">
+                    class="w-full px-4 py-2 bg-ide-accent text-white rounded-lg hover:bg-blue-800 hover:shadow-md transition-all font-medium">
                     Run Simulation
                   </button>
                 </div>
@@ -321,20 +321,20 @@ import {
 
               <!-- Output -->
               <div>
-                <h3 class="font-semibold text-gray-700 mb-3">Execution Trace</h3>
+                <h3 class="font-semibold text-ide-text mb-3">Execution Trace</h3>
 
                 @if (simulationResult(); as result) {
                   <div class="space-y-3">
                     <!-- Response Summary -->
-                    <div class="p-3 rounded-lg" [class]="result.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
-                      <p class="text-sm font-semibold" [class]="result.success ? 'text-green-800' : 'text-red-800'">
+                    <div class="p-3 rounded-lg border" [class]="result.success ? 'bg-ide-success/10 border-ide-success' : 'bg-ide-error/10 border-ide-error'">
+                      <p class="text-sm font-semibold" [class]="result.success ? 'text-ide-success' : 'text-ide-error'">
                         Response: {{ result.response.statusCode }} {{ result.response.statusText }}
                       </p>
-                      <p class="text-xs" [class]="result.success ? 'text-green-700' : 'text-red-700'">
+                      <p class="text-xs text-ide-text-muted">
                         Duration: {{ result.duration }}ms
                       </p>
                       @if (result.response.terminated) {
-                        <p class="text-xs" [class]="result.success ? 'text-green-700' : 'text-red-700'">
+                        <p class="text-xs text-ide-text-muted">
                           Terminated by: {{ result.response.terminatedBy }}
                         </p>
                       }
@@ -353,14 +353,14 @@ import {
 
                     <!-- Response Body -->
                     @if (result.response.body) {
-                      <div class="p-3 bg-gray-900 text-green-400 font-mono text-xs rounded-lg">
-                        <p class="font-semibold text-green-300 mb-1">Response Body:</p>
+                      <div class="p-3 bg-ide-bg text-ide-success font-mono text-xs rounded-lg border border-ide-border">
+                        <p class="font-semibold text-ide-text mb-1">Response Body:</p>
                         <pre class="whitespace-pre-wrap">{{ result.response.body }}</pre>
                       </div>
                     }
                   </div>
                 } @else {
-                  <div class="text-center py-12 text-gray-500">
+                  <div class="text-center py-12 text-ide-text-muted">
                     <p class="text-sm">No simulation results yet</p>
                     <p class="text-xs mt-1">Configure the request and click "Run Simulation"</p>
                   </div>
@@ -381,6 +381,7 @@ import {
 })
 export class MiddlewareDesignerComponent {
   private readonly service = inject(MiddlewareDesignerService);
+  private readonly highlightService = inject(SyntaxHighlightService);
 
   // State
   protected readonly pipeline = signal<Pipeline>({
@@ -394,6 +395,7 @@ export class MiddlewareDesignerComponent {
   protected readonly selectedMiddleware = signal<MiddlewareNode | null>(null);
   protected readonly validationResult = signal(this.service.validatePipeline(this.pipeline()));
   protected readonly generatedCode = signal<string>('');
+  protected readonly highlightedCode = signal<string>('');
   protected readonly simulationResult = signal(null as any);
   protected readonly copySuccess = signal<boolean>(false);
   protected readonly splitRatio = signal<number>(50); // percentage for canvas width
@@ -456,9 +458,13 @@ export class MiddlewareDesignerComponent {
       const p = this.pipeline();
       this.validationResult.set(this.service.validatePipeline(p));
       if (p.middlewares.length > 0) {
-        this.generatedCode.set(this.service.generateCSharpCode(p));
+        const code = this.service.generateCSharpCode(p);
+        this.generatedCode.set(code);
+        this.highlightedCode.set(this.highlightService.highlight(code, 'csharp'));
       } else {
-        this.generatedCode.set('// Add middleware to generate code');
+        const placeholderCode = '// Add middleware to generate code';
+        this.generatedCode.set(placeholderCode);
+        this.highlightedCode.set(this.highlightService.highlight(placeholderCode, 'csharp'));
       }
     });
   }

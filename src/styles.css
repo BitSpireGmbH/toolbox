@@ -1,6 +1,23 @@
 @import "tailwindcss";
+@import "highlight.js/styles/vs2015.css";
 
 @theme {
-  --color-brand-primary: #1976D2;
-  --color-brand-secondary: #9C27B0;
+  /* VS Code / Visual Studio inspired colors for .NET developers */
+  --color-brand-primary: #007ACC; /* VS Code blue */
+  --color-brand-secondary: #68217A; /* VS purple */
+  
+  /* IDE color palette */
+  --color-ide-bg: #1E1E1E; /* Editor background */
+  --color-ide-sidebar: #252526; /* Sidebar background */
+  --color-ide-panel: #2D2D30; /* Panel background */
+  --color-ide-border: #3E3E42; /* Border color */
+  --color-ide-text: #D4D4D4; /* Main text */
+  --color-ide-text-muted: #858585; /* Muted text */
+  --color-ide-accent: #007ACC; /* Accent blue */
+  --color-ide-success: #4EC9B0; /* Success/cyan */
+  --color-ide-warning: #CE9178; /* Warning/orange */
+  --color-ide-error: #F48771; /* Error/red */
+  --color-ide-keyword: #569CD6; /* Keyword blue */
+  --color-ide-string: #CE9178; /* String orange */
+  --color-ide-comment: #6A9955; /* Comment green */
 }

@@ -1,11 +1,11 @@
-<div class="flex h-screen overflow-hidden bg-gray-900">
+<div class="flex h-screen overflow-hidden bg-ide-bg">
   <app-navmenu
     [sidebarOpen]="sidebarOpen()"
     [version]="version()"
     (toggleSidebar)="toggleSidebar()"
     (closeSidebar)="closeSidebar()" />
 
-  <main class="flex-1 overflow-y-auto bg-gray-50 md:pt-0 pt-14">
+  <main class="flex-1 overflow-y-auto bg-ide-panel md:pt-0 pt-14">
     <router-outlet />
   </main>
 </div>

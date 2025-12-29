@@ -1,12 +1,12 @@
 <!-- Desktop Sidebar -->
 <div
-  class="hidden md:flex flex-col bg-gray-950 border-r border-gray-800 shrink-0 transition-all duration-200 ease-in-out"
+  class="hidden md:flex flex-col bg-ide-sidebar border-r border-ide-border shrink-0 transition-all duration-200 ease-in-out"
   [class.w-12]="!sidebarOpen()"
   [class.w-48]="sidebarOpen()">
-  <div class="flex items-center h-12 border-b border-gray-800" [class.justify-center]="!sidebarOpen()" [class.px-3]="sidebarOpen()">
+  <div class="flex items-center h-12 border-b border-ide-border" [class.justify-center]="!sidebarOpen()" [class.px-3]="sidebarOpen()">
     <button
       (click)="onToggleSidebar()"
-      class="text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all p-2 rounded"
+      class="text-ide-text-muted hover:text-ide-text hover:bg-ide-panel transition-all p-2 rounded"
       [attr.aria-expanded]="sidebarOpen()"
       aria-label="Toggle sidebar panel">
       <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -14,16 +14,16 @@
       </svg>
     </button>
     @if (sidebarOpen()) {
-      <span class="ml-2 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap overflow-hidden">Explorer</span>
+      <span class="ml-2 text-xs font-semibold text-ide-text-muted uppercase tracking-wider whitespace-nowrap overflow-hidden">Explorer</span>
     }
   </div>
 
   <nav class="flex-1 flex flex-col py-2 gap-1 overflow-y-auto" aria-label="Main navigation">
     <a
       routerLink="/home"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      routerLinkActive="text-ide-text bg-ide-panel border-l-2 border-ide-accent"
       [routerLinkActiveOptions]="{exact: false}"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      class="w-full flex items-center h-10 text-ide-text-muted hover:text-ide-text hover:bg-ide-panel transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
@@ -35,7 +35,7 @@
       @if (sidebarOpen()) {
         <span class="text-sm whitespace-nowrap overflow-hidden">Home</span>
       } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+        <span class="absolute left-full ml-2 px-2 py-1 bg-ide-panel text-ide-text text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none border border-ide-border">
           Home
         </span>
       }
@@ -43,8 +43,8 @@
 
     <a
       routerLink="/csharp-json"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      routerLinkActive="text-ide-text bg-ide-panel border-l-2 border-ide-accent"
+      class="w-full flex items-center h-10 text-ide-text-muted hover:text-ide-text hover:bg-ide-panel transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
@@ -57,7 +57,7 @@
       @if (sidebarOpen()) {
         <span class="text-sm whitespace-nowrap overflow-hidden">JSON → C#</span>
       } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+        <span class="absolute left-full ml-2 px-2 py-1 bg-ide-panel text-ide-text text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none border border-ide-border">
           JSON → C#
         </span>
       }
@@ -65,8 +65,8 @@
 
     <a
       routerLink="/csharp-typescript"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      routerLinkActive="text-ide-text bg-ide-panel border-l-2 border-ide-accent"
+      class="w-full flex items-center h-10 text-ide-text-muted hover:text-ide-text hover:bg-ide-panel transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
@@ -78,7 +78,7 @@
       @if (sidebarOpen()) {
         <span class="text-sm whitespace-nowrap overflow-hidden">C# ↔ TypeScript</span>
       } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+        <span class="absolute left-full ml-2 px-2 py-1 bg-ide-panel text-ide-text text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none border border-ide-border">
           C# ↔ TypeScript
         </span>
       }
@@ -86,8 +86,8 @@
 
     <a
       routerLink="/middleware-designer"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      routerLinkActive="text-ide-text bg-ide-panel border-l-2 border-ide-accent"
+      class="w-full flex items-center h-10 text-ide-text-muted hover:text-ide-text hover:bg-ide-panel transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
@@ -98,7 +98,7 @@
       @if (sidebarOpen()) {
         <span class="text-sm whitespace-nowrap overflow-hidden">Middleware Designer</span>
       } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+        <span class="absolute left-full ml-2 px-2 py-1 bg-ide-panel text-ide-text text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none border border-ide-border">
           Middleware Designer
         </span>
       }
@@ -106,8 +106,8 @@
 
     <a
       routerLink="/jwt-decoder"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      routerLinkActive="text-ide-text bg-ide-panel border-l-2 border-ide-accent"
+      class="w-full flex items-center h-10 text-ide-text-muted hover:text-ide-text hover:bg-ide-panel transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
@@ -119,7 +119,7 @@
       @if (sidebarOpen()) {
         <span class="text-sm whitespace-nowrap overflow-hidden">JWT Decoder</span>
       } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+        <span class="absolute left-full ml-2 px-2 py-1 bg-ide-panel text-ide-text text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none border border-ide-border">
           JWT Decoder
         </span>
       }
@@ -127,8 +127,8 @@
   </nav>
 
   @if (sidebarOpen()) {
-    <div class="px-3 py-3 border-t border-gray-800">
-      <div class="flex items-center gap-2 text-xs text-gray-500">
+    <div class="px-3 py-3 border-t border-ide-border">
+      <div class="flex items-center gap-2 text-xs text-ide-text-muted">
         <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
           <path d="M12 6v6l4 2"></path>
@@ -140,16 +140,16 @@
 </div>
 
 <!-- Mobile Header -->
-<div class="md:hidden fixed top-0 left-0 right-0 z-40 bg-gray-950 border-b border-gray-800 h-14 flex items-center justify-between px-4">
-  <a href="/" class="flex items-center gap-2 text-white" aria-label="Home">
-    <svg class="w-6 h-6 text-brand-primary" viewBox="0 0 24 24" fill="currentColor">
+<div class="md:hidden fixed top-0 left-0 right-0 z-40 bg-ide-sidebar border-b border-ide-border h-14 flex items-center justify-between px-4">
+  <a href="/" class="flex items-center gap-2 text-ide-text" aria-label="Home">
+    <svg class="w-6 h-6 text-ide-accent" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
     </svg>
     <span class="font-semibold text-sm">.NET Toolbox</span>
   </a>
   <button
     (click)="onToggleSidebar()"
-    class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all"
+    class="p-2 text-ide-text-muted hover:text-ide-text hover:bg-ide-panel rounded-lg transition-all"
     [attr.aria-expanded]="sidebarOpen()"
     aria-label="Toggle navigation menu">
     <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -169,18 +169,18 @@
     class="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
     aria-hidden="true"></div>
 
-  <aside class="md:hidden fixed top-14 right-0 bottom-0 w-72 bg-gray-900 z-50 border-l border-gray-800 overflow-y-auto animate-slide-in">
+  <aside class="md:hidden fixed top-14 right-0 bottom-0 w-72 bg-ide-sidebar z-50 border-l border-ide-border overflow-y-auto animate-slide-in">
     <nav class="py-4" aria-label="Mobile navigation">
       <div class="px-4 mb-3">
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Navigation</span>
+        <span class="text-xs font-semibold text-ide-text-muted uppercase tracking-wider">Navigation</span>
       </div>
 
       <a
         routerLink="/home"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-ide-accent/20 text-ide-accent border-r-2 border-ide-accent"
         [routerLinkActiveOptions]="{exact: false}"
         (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        class="flex items-center gap-3 px-4 py-3 text-ide-text-muted hover:bg-ide-panel hover:text-ide-text transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -190,9 +190,9 @@
 
       <a
         routerLink="/csharp-json"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-ide-accent/20 text-ide-accent border-r-2 border-ide-accent"
         (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        class="flex items-center gap-3 px-4 py-3 text-ide-text-muted hover:bg-ide-panel hover:text-ide-text transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
@@ -203,9 +203,9 @@
 
       <a
         routerLink="/csharp-typescript"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-ide-accent/20 text-ide-accent border-r-2 border-ide-accent"
         (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        class="flex items-center gap-3 px-4 py-3 text-ide-text-muted hover:bg-ide-panel hover:text-ide-text transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="16 18 22 12 16 6"></polyline>
           <polyline points="8 6 2 12 8 18"></polyline>
@@ -215,9 +215,9 @@
 
       <a
         routerLink="/middleware-designer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-ide-accent/20 text-ide-accent border-r-2 border-ide-accent"
         (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        class="flex items-center gap-3 px-4 py-3 text-ide-text-muted hover:bg-ide-panel hover:text-ide-text transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
         </svg>
@@ -227,9 +227,9 @@
 
       <a
         routerLink="/jwt-decoder"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-ide-accent/20 text-ide-accent border-r-2 border-ide-accent"
         (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        class="flex items-center gap-3 px-4 py-3 text-ide-text-muted hover:bg-ide-panel hover:text-ide-text transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -238,8 +238,8 @@
       </a>
     </nav>
 
-    <div class="absolute bottom-0 left-0 right-0 px-4 py-4 border-t border-gray-800 bg-gray-900">
-      <div class="flex items-center justify-between text-xs text-gray-500">
+    <div class="absolute bottom-0 left-0 right-0 px-4 py-4 border-t border-ide-border bg-ide-sidebar">
+      <div class="flex items-center justify-between text-xs text-ide-text-muted">
         <span>{{ version() }}</span>
         <span>© 2025 Bitspire</span>
       </div>
