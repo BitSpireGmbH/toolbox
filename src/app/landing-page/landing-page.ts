@@ -123,7 +123,7 @@ import { RouterLink } from '@angular/router';
         <!-- Footer Info -->
         <div class="mt-16 text-center text-gray-500 text-sm space-y-2">
           <p class="font-medium">Built with Angular • Powered by .NET</p>
-          <p class="text-xs">Instant conversions • No data stored • Open source</p>
+          <p class="text-xs">Instant conversions • No data stored • <a href="https://github.com/BitSpireGmbH/toolbox">Open source</a></p>
         </div>
       </div>
     </div>
