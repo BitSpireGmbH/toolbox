@@ -31,13 +31,13 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
           <div class="inline-flex rounded-lg border border-gray-300 bg-white p-0.5 shadow-sm">
             <button
               (click)="switchDirection('csharp-to-typescript')"
-              [class]="direction() === 'csharp-to-typescript' ? 'bg-gradient-to-r from-brand-secondary to-purple-700 text-white shadow-md' : 'text-gray-700 hover:bg-gray-50'"
+              [class]="direction() === 'csharp-to-typescript' ? 'bg-brand-secondary text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50'"
               class="px-5 py-2 rounded-md font-semibold text-sm transition-all">
               C# → TS
             </button>
             <button
               (click)="switchDirection('typescript-to-csharp')"
-              [class]="direction() === 'typescript-to-csharp' ? 'bg-gradient-to-r from-brand-secondary to-purple-700 text-white shadow-md' : 'text-gray-700 hover:bg-gray-50'"
+              [class]="direction() === 'typescript-to-csharp' ? 'bg-brand-secondary text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50'"
               class="px-5 py-2 rounded-md font-semibold text-sm transition-all">
               TS → C#
             </button>
