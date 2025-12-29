@@ -11,4 +11,13 @@ import { environment } from '../environments/environment';
 export class App {
   protected readonly title = signal('toolbox');
   protected readonly version = signal(environment.version);
+  protected readonly sidebarOpen = signal(false);
+
+  protected toggleSidebar(): void {
+    this.sidebarOpen.set(!this.sidebarOpen());
+  }
+
+  protected closeSidebar(): void {
+    this.sidebarOpen.set(false);
+  }
 }

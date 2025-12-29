@@ -1,6 +1,30 @@
 <div class="flex h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+  <!-- Hamburger Menu Button (Mobile/Tablet) -->
+  <button
+    (click)="toggleSidebar()"
+    class="fixed top-4 left-4 z-50 md:hidden bg-white rounded-lg shadow-lg p-2 hover:bg-gray-50 transition-all"
+    aria-label="Toggle navigation menu">
+    <svg class="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      @if (!sidebarOpen()) {
+        <path d="M3 12h18M3 6h18M3 18h18"></path>
+      } @else {
+        <path d="M6 18L18 6M6 6l12 12"></path>
+      }
+    </svg>
+  </button>
+
+  <!-- Backdrop Overlay (Mobile/Tablet) -->
+  @if (sidebarOpen()) {
+    <div
+      (click)="closeSidebar()"
+      class="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm transition-opacity"
+      aria-hidden="true"></div>
+  }
+
   <!-- Sidebar -->
-  <aside class="w-64 bg-gradient-to-b from-brand-primary to-blue-700 flex flex-col shadow-2xl">
+  <aside
+    [class.translate-x-0]="sidebarOpen()"
+    class="fixed md:relative inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-brand-primary to-blue-700 flex flex-col shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
     <!-- Logo Section -->
     <div class="p-6 border-b border-white/10">
       <div class="relative">
@@ -18,6 +42,7 @@
         routerLink="/home"
         routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
         [routerLinkActiveOptions]="{exact: false}"
+        (click)="closeSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -32,6 +57,7 @@
       <a
         routerLink="/csharp-json"
         routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
+        (click)="closeSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -46,6 +72,7 @@
       <a
         routerLink="/csharp-typescript"
         routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
+        (click)="closeSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="16 18 22 12 16 6"></polyline>
@@ -60,6 +87,7 @@
       <a
         routerLink="/middleware-designer"
         routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
+        (click)="closeSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 2v6m0 4v2m0 4v4"></path>

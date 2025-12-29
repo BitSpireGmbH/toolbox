@@ -25,25 +25,29 @@ import { RouterLink } from '@angular/router';
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- JSON -> C# Card -->
           <a routerLink="/csharp-json"
-             class="group relative block bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-500 p-8 border border-gray-200 hover:border-brand-primary/50 hover:-translate-y-1 overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+             class="group relative block bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-300 p-8 border-2 border-gray-200 hover:border-brand-primary overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/0 via-brand-primary/0 to-brand-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-primary to-transparent"></div>
+              <div class="absolute bottom-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-brand-primary to-transparent"></div>
+            </div>
             <div class="relative">
               <div class="flex items-center gap-4 mb-6">
-                <div class="w-14 h-14 bg-gradient-to-br from-brand-primary to-blue-700 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <div class="w-14 h-14 bg-gradient-to-br from-brand-primary to-blue-600 rounded-lg flex items-center justify-center text-white shadow-md group-hover:shadow-lg group-hover:shadow-brand-primary/25 transition-all duration-300">
                   <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
                   </svg>
                 </div>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-primary transition-colors">JSON → C#</h2>
+                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-primary transition-colors duration-300">JSON → C#</h2>
                   <span class="text-sm text-gray-500 font-medium">One-way Converter</span>
                 </div>
               </div>
-              <p class="text-gray-600 leading-relaxed">Convert JSON to C# classes. Supports records, structs, System.Text.Json, Newtonsoft.Json, and source generators.</p>
-              <div class="mt-6 flex items-center gap-2 text-brand-primary font-semibold text-sm group-hover:gap-3 transition-all">
+              <p class="text-gray-600 leading-relaxed mb-6">Convert JSON to C# classes. Supports records, structs, System.Text.Json, Newtonsoft.Json, and source generators.</p>
+              <div class="flex items-center gap-2 text-brand-primary font-semibold text-sm">
                 <span>Start Converting</span>
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
               </div>
@@ -52,25 +56,29 @@ import { RouterLink } from '@angular/router';
 
           <!-- C# <-> TypeScript Card -->
           <a routerLink="/csharp-typescript"
-             class="group relative block bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-500 p-8 border border-gray-200 hover:border-brand-secondary/50 hover:-translate-y-1 overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-brand-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+             class="group relative block bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-300 p-8 border-2 border-gray-200 hover:border-brand-secondary overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-secondary/0 via-brand-secondary/0 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-secondary to-transparent"></div>
+              <div class="absolute bottom-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-brand-secondary to-transparent"></div>
+            </div>
             <div class="relative">
               <div class="flex items-center gap-4 mb-6">
-                <div class="w-14 h-14 bg-gradient-to-br from-brand-secondary to-purple-700 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <div class="w-14 h-14 bg-gradient-to-br from-brand-secondary to-purple-600 rounded-lg flex items-center justify-center text-white shadow-md group-hover:shadow-lg group-hover:shadow-brand-secondary/25 transition-all duration-300">
                   <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="16 18 22 12 16 6"></polyline>
                     <polyline points="8 6 2 12 8 18"></polyline>
                   </svg>
                 </div>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-secondary transition-colors">C# ↔ TypeScript</h2>
+                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-secondary transition-colors duration-300">C# ↔ TypeScript</h2>
                   <span class="text-sm text-gray-500 font-medium">Bidirectional Converter</span>
                 </div>
               </div>
-              <p class="text-gray-600 leading-relaxed">Convert between C# classes and TypeScript interfaces/types. Perfect for full-stack development with Angular, React, or Vue.</p>
-              <div class="mt-6 flex items-center gap-2 text-brand-secondary font-semibold text-sm group-hover:gap-3 transition-all">
+              <p class="text-gray-600 leading-relaxed mb-6">Convert between C# classes and TypeScript interfaces/types. Perfect for full-stack development with Angular, React, or Vue.</p>
+              <div class="flex items-center gap-2 text-brand-secondary font-semibold text-sm">
                 <span>Start Converting</span>
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
               </div>
@@ -79,11 +87,15 @@ import { RouterLink } from '@angular/router';
 
           <!-- Middleware Designer Card -->
           <a routerLink="/middleware-designer"
-             class="group relative block bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-500 p-8 border border-gray-200 hover:border-brand-primary/50 hover:-translate-y-1 overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+             class="group relative block bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-300 p-8 border-2 border-gray-200 hover:border-brand-primary overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/0 via-purple-500/0 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-primary to-transparent"></div>
+              <div class="absolute bottom-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-brand-secondary to-transparent"></div>
+            </div>
             <div class="relative">
               <div class="flex items-center gap-4 mb-6">
-                <div class="w-14 h-14 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <div class="w-14 h-14 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center text-white shadow-md group-hover:shadow-lg group-hover:shadow-brand-primary/25 transition-all duration-300">
                   <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <circle cx="18" cy="18" r="3"></circle>
                     <circle cx="6" cy="6" r="3"></circle>
@@ -93,14 +105,14 @@ import { RouterLink } from '@angular/router';
                   </svg>
                 </div>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-primary transition-colors">Middleware</h2>
+                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-primary transition-colors duration-300">Middleware</h2>
                   <span class="text-sm text-gray-500 font-medium">Visual Designer</span>
                 </div>
               </div>
-              <p class="text-gray-600 leading-relaxed">Build ASP.NET Core middleware pipelines visually. Simulate requests, test flows, and export ready-to-use C# code.</p>
-              <div class="mt-6 flex items-center gap-2 text-brand-primary font-semibold text-sm group-hover:gap-3 transition-all">
+              <p class="text-gray-600 leading-relaxed mb-6">Build ASP.NET Core middleware pipelines visually. Simulate requests, test flows, and export ready-to-use C# code.</p>
+              <div class="flex items-center gap-2 text-brand-primary font-semibold text-sm">
                 <span>Start Designing</span>
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
               </div>
