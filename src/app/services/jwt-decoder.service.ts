@@ -55,7 +55,12 @@ export class JwtDecoderService {
 
     try {
       // Decode header manually (jwt-decode only decodes payload by default)
-      const header = JSON.parse(atob(parts[0])) as JwtHeader;
+      let header: JwtHeader;
+      try {
+        header = JSON.parse(atob(parts[0])) as JwtHeader;
+      } catch (error) {
+        throw new Error('Invalid JWT header: The header is not properly Base64 encoded');
+      }
       
       // Decode payload using jwt-decode library
       const payload = jwtDecode<JwtPayload>(cleanToken);
