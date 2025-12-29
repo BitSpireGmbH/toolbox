@@ -121,27 +121,27 @@ import { RouterLink } from '@angular/router';
 
           <!-- JWT Decoder Card -->
           <a routerLink="/jwt-decoder"
-             class="group relative block bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-300 p-8 border-2 border-gray-200 hover:border-yellow-500 overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/0 via-yellow-500/0 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+             class="group relative block bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-300 p-8 border-2 border-gray-200 hover:border-brand-secondary overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-secondary/0 via-brand-secondary/0 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
-              <div class="absolute bottom-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
+              <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-secondary to-transparent"></div>
+              <div class="absolute bottom-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-brand-secondary to-transparent"></div>
             </div>
             <div class="relative">
               <div class="flex items-center gap-4 mb-6">
-                <div class="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center text-white shadow-md group-hover:shadow-lg group-hover:shadow-yellow-500/25 transition-all duration-300">
+                <div class="w-14 h-14 bg-gradient-to-br from-brand-secondary to-purple-700 rounded-lg flex items-center justify-center text-white shadow-md group-hover:shadow-lg group-hover:shadow-brand-secondary/25 transition-all duration-300">
                   <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                   </svg>
                 </div>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-yellow-600 transition-colors duration-300">JWT Decoder</h2>
+                  <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-secondary transition-colors duration-300">JWT Decoder</h2>
                   <span class="text-sm text-gray-500 font-medium">Token Inspector</span>
                 </div>
               </div>
               <p class="text-gray-600 leading-relaxed mb-6">Decode and inspect JWT tokens. View header, payload claims, and expiration with beginner-friendly explanations.</p>
-              <div class="flex items-center gap-2 text-yellow-600 font-semibold text-sm">
+              <div class="flex items-center gap-2 text-brand-secondary font-semibold text-sm">
                 <span>Start Decoding</span>
                 <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"></polyline>
