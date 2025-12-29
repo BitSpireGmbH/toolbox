@@ -1,3 +1,72 @@
-<main>
-</main>
-<router-outlet />
+<div class="flex h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gradient-to-b from-[#1976D2] to-[#1565C0] flex flex-col shadow-2xl">
+    <!-- Logo Section -->
+    <div class="p-6 border-b border-white/10">
+      <div class="relative">
+        <div class="absolute inset-0 bg-white/5 blur-xl rounded-full"></div>
+        <img src="bitspire-logo.webp" alt="Bitspire Logo" class="w-36 mx-auto relative drop-shadow-lg" />
+      </div>
+      <p class="text-center text-white/60 text-xs mt-3 font-medium tracking-wide">.NET SWISS ARMY</p>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
+      <a 
+        routerLink="/home" 
+        routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
+        [routerLinkActiveOptions]="{exact: false}"
+        class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span class="flex-1">Home</span>
+        <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </a>
+
+      <a 
+        routerLink="/csharp-json" 
+        routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
+        class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <span class="flex-1">JSON → C#</span>
+        <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </a>
+
+      <a 
+        routerLink="/csharp-typescript" 
+        routerLinkActive="bg-white/20 text-white font-semibold shadow-lg scale-105"
+        class="flex items-center gap-3 px-4 py-3 text-white/90 rounded-xl hover:bg-white/15 hover:scale-102 transition-all duration-200 group">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span class="flex-1">C# ↔ TypeScript</span>
+        <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </a>
+    </nav>
+
+    <!-- Footer Section -->
+    <div class="p-4 border-t border-white/10">
+      <div class="text-center text-white/50 text-xs space-y-1">
+        <p>v1.0.0 • Angular 21</p>
+        <p class="text-white/30">© 2025 Bitspire</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto">
+    <router-outlet />
+  </main>
+</div>
