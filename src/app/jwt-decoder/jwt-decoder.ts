@@ -11,8 +11,8 @@ import { JwtDecoderService, type DecodedJwt, type ClaimExplanation } from '../se
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 mb-1">JWT Decoder</h1>
-          <p class="text-sm text-gray-600">Decode and inspect JSON Web Tokens</p>
+          <h1 class="text-2xl font-bold text-vscode-text mb-1">JWT Decoder</h1>
+          <p class="text-sm text-vscode-text-muted">Decode and inspect JSON Web Tokens</p>
         </div>
         
         @if (decodedToken()) {
@@ -41,29 +41,33 @@ import { JwtDecoderService, type DecodedJwt, type ClaimExplanation } from '../se
 
       <!-- Input Area -->
       <div class="mb-6">
-        <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-          <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200">
+        <div class="bg-vscode-sidebar rounded-xl shadow-md border border-vscode-border overflow-hidden">
+          <div class="panel-header px-4 py-2.5 border-b border-vscode-border">
             <div class="flex items-center gap-2">
-              <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-              <h3 class="font-semibold text-sm text-gray-700">JWT Token</h3>
+              <span 
+                class="status-dot"
+                [class.active]="inputToken()"
+                [class.inactive]="!inputToken()">
+              </span>
+              <h3 class="font-semibold text-sm text-vscode-text">JWT Token</h3>
             </div>
           </div>
           <textarea
             [(ngModel)]="inputToken"
-            class="w-full h-32 p-4 font-mono text-sm focus:outline-none resize-none bg-gray-50/50"
+            class="w-full h-32 p-4 font-mono text-sm focus:outline-none resize-none bg-vscode-bg text-vscode-text code-editor"
             placeholder="Paste your JWT token here (e.g., eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...)
 
 You can paste the token with or without the 'Bearer' prefix."
           ></textarea>
         </div>
         @if (errorMessage()) {
-          <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+          <div class="mt-3 p-3 bg-red-900/20 border border-red-700 rounded-lg flex items-start gap-2">
             <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
-            <p class="text-sm text-red-700">{{ errorMessage() }}</p>
+            <p class="text-sm text-red-400">{{ errorMessage() }}</p>
           </div>
         }
       </div>
@@ -72,16 +76,16 @@ You can paste the token with or without the 'Bearer' prefix."
         <!-- Output Area -->
         <div class="grid md:grid-cols-2 gap-5">
           <!-- Header Section -->
-          <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-3 border-b border-blue-200">
+          <div class="bg-vscode-sidebar rounded-xl shadow-md border border-vscode-border overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-900/30 to-blue-800/30 px-4 py-3 border-b border-vscode-border">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                  <h3 class="font-semibold text-sm text-gray-800">Header</h3>
+                  <span class="status-dot active"></span>
+                  <h3 class="font-semibold text-sm text-vscode-text">Header</h3>
                 </div>
                 <button 
                   (click)="copyToClipboard(decodedToken()!.header)"
-                  class="px-2 py-1 rounded-md text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors">
+                  class="px-2 py-1 rounded-md text-xs font-semibold text-blue-400 hover:bg-blue-400/10 transition-colors">
                   <span class="flex items-center gap-1">
                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -94,33 +98,33 @@ You can paste the token with or without the 'Bearer' prefix."
             </div>
             <div class="p-4 space-y-3 max-h-[500px] overflow-y-auto">
               @for (field of headerExplanations(); track field.name) {
-                <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div class="bg-vscode-panel rounded-lg p-3 border border-vscode-border">
                   <div class="flex items-start justify-between mb-1">
-                    <code class="text-sm font-semibold text-blue-600">{{ field.name }}</code>
+                    <code class="text-sm font-semibold text-blue-400">{{ field.name }}</code>
                     @if (field.isStandard) {
-                      <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">Standard</span>
+                      <span class="text-xs px-2 py-0.5 bg-blue-900/30 text-blue-400 rounded-full font-medium">Standard</span>
                     } @else {
-                      <span class="text-xs px-2 py-0.5 bg-gray-200 text-gray-700 rounded-full font-medium">Custom</span>
+                      <span class="text-xs px-2 py-0.5 bg-vscode-border text-vscode-text-muted rounded-full font-medium">Custom</span>
                     }
                   </div>
-                  <div class="text-sm text-gray-900 font-mono mb-2 break-all">{{ formatValue(field.value) }}</div>
-                  <p class="text-xs text-gray-600 leading-relaxed">{{ field.explanation }}</p>
+                  <div class="text-sm text-vscode-success font-mono mb-2 break-all">{{ formatValue(field.value) }}</div>
+                  <p class="text-xs text-vscode-text-muted leading-relaxed">{{ field.explanation }}</p>
                 </div>
               }
             </div>
           </div>
 
           <!-- Payload Section -->
-          <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-green-50 to-green-100 px-4 py-3 border-b border-green-200">
+          <div class="bg-vscode-sidebar rounded-xl shadow-md border border-vscode-border overflow-hidden">
+            <div class="bg-gradient-to-r from-green-900/30 to-green-800/30 px-4 py-3 border-b border-vscode-border">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                  <h3 class="font-semibold text-sm text-gray-800">Payload (Claims)</h3>
+                  <span class="status-dot active"></span>
+                  <h3 class="font-semibold text-sm text-vscode-text">Payload (Claims)</h3>
                 </div>
                 <button 
                   (click)="copyToClipboard(decodedToken()!.payload)"
-                  class="px-2 py-1 rounded-md text-xs font-semibold text-green-600 hover:bg-green-100 transition-colors">
+                  class="px-2 py-1 rounded-md text-xs font-semibold text-green-400 hover:bg-green-400/10 transition-colors">
                   <span class="flex items-center gap-1">
                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -133,17 +137,17 @@ You can paste the token with or without the 'Bearer' prefix."
             </div>
             <div class="p-4 space-y-3 max-h-[500px] overflow-y-auto">
               @for (claim of claimExplanations(); track claim.name) {
-                <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div class="bg-vscode-panel rounded-lg p-3 border border-vscode-border">
                   <div class="flex items-start justify-between mb-1">
-                    <code class="text-sm font-semibold text-green-600">{{ claim.name }}</code>
+                    <code class="text-sm font-semibold text-green-400">{{ claim.name }}</code>
                     @if (claim.isStandard) {
-                      <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">Standard</span>
+                      <span class="text-xs px-2 py-0.5 bg-green-900/30 text-green-400 rounded-full font-medium">Standard</span>
                     } @else {
-                      <span class="text-xs px-2 py-0.5 bg-gray-200 text-gray-700 rounded-full font-medium">Custom</span>
+                      <span class="text-xs px-2 py-0.5 bg-vscode-border text-vscode-text-muted rounded-full font-medium">Custom</span>
                     }
                   </div>
-                  <div class="text-sm text-gray-900 font-mono mb-2 break-all">{{ formatValue(claim.value) }}</div>
-                  <p class="text-xs text-gray-600 leading-relaxed">{{ claim.explanation }}</p>
+                  <div class="text-sm text-vscode-success font-mono mb-2 break-all">{{ formatValue(claim.value) }}</div>
+                  <p class="text-xs text-vscode-text-muted leading-relaxed">{{ claim.explanation }}</p>
                 </div>
               }
             </div>
@@ -151,33 +155,33 @@ You can paste the token with or without the 'Bearer' prefix."
         </div>
 
         <!-- Info Panel -->
-        <div class="mt-5 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-md border border-blue-200 p-5">
+        <div class="mt-5 bg-gradient-to-br from-blue-900/20 to-purple-900/20 rounded-xl shadow-md border border-blue-700/30 p-5">
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="16" x2="12" y2="12"></line>
               <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
             <div class="flex-1">
-              <h4 class="font-semibold text-sm text-gray-900 mb-2">About JWT Tokens</h4>
-              <div class="text-xs text-gray-700 space-y-2 leading-relaxed">
+              <h4 class="font-semibold text-sm text-vscode-text mb-2">About JWT Tokens</h4>
+              <div class="text-xs text-vscode-text-muted space-y-2 leading-relaxed">
                 <p>
-                  <strong>JSON Web Tokens (JWT)</strong> are compact, URL-safe tokens used for secure information transmission between parties. 
+                  <strong class="text-vscode-text">JSON Web Tokens (JWT)</strong> are compact, URL-safe tokens used for secure information transmission between parties. 
                   Each token consists of three parts: Header, Payload, and Signature.
                 </p>
                 <p>
-                  <strong>Security Note:</strong> This decoder only reads and displays the token information. 
+                  <strong class="text-vscode-text">Security Note:</strong> This decoder only reads and displays the token information. 
                   JWTs are not encrypted (only signed), so never include sensitive data in the token itself. 
                   Always validate signatures on the server side.
                 </p>
                 @if (decodedToken()!.issuedAt) {
-                  <p><strong>Issued:</strong> {{ decodedToken()!.issuedAt!.toLocaleString() }}</p>
+                  <p><strong class="text-vscode-text">Issued:</strong> {{ decodedToken()!.issuedAt!.toLocaleString() }}</p>
                 }
                 @if (decodedToken()!.notBefore) {
-                  <p><strong>Not Before:</strong> {{ decodedToken()!.notBefore!.toLocaleString() }}</p>
+                  <p><strong class="text-vscode-text">Not Before:</strong> {{ decodedToken()!.notBefore!.toLocaleString() }}</p>
                 }
                 @if (decodedToken()!.expiresAt) {
-                  <p><strong>Expires:</strong> {{ decodedToken()!.expiresAt!.toLocaleString() }}</p>
+                  <p><strong class="text-vscode-text">Expires:</strong> {{ decodedToken()!.expiresAt!.toLocaleString() }}</p>
                 }
               </div>
             </div>
@@ -257,15 +261,15 @@ export class JwtDecoderComponent {
     const color = this.validityInfo()?.color;
     switch (color) {
       case 'green':
-        return 'bg-green-50 border-green-300 text-green-700';
+        return 'bg-green-900/20 border-green-700 text-green-400';
       case 'red':
-        return 'bg-red-50 border-red-300 text-red-700';
+        return 'bg-red-900/20 border-red-700 text-red-400';
       case 'orange':
-        return 'bg-orange-50 border-orange-300 text-orange-700';
+        return 'bg-orange-900/20 border-orange-700 text-orange-400';
       case 'blue':
-        return 'bg-blue-50 border-blue-300 text-blue-700';
+        return 'bg-blue-900/20 border-blue-700 text-blue-400';
       default:
-        return 'bg-gray-50 border-gray-300 text-gray-700';
+        return 'bg-vscode-border border-vscode-border text-vscode-text';
     }
   }
 }
