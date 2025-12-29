@@ -44,7 +44,7 @@ export interface BranchCondition {
 export interface MiddlewareConfig {
   // Routing
   routes?: string[];
-  
+
   // Authentication
   authScheme?: 'JwtBearer' | 'OpenIdConnect' | 'Cookie';
   // JWT Bearer settings (for API authentication)
@@ -69,28 +69,28 @@ export interface MiddlewareConfig {
   cookieAccessDeniedPath?: string;
   cookieExpireMinutes?: number;
   cookieSlidingExpiration?: boolean;
-  
+
   // Authorization
   policies?: string[];
-  
+
   // CORS
   allowedOrigins?: string[];
   allowedMethods?: string[];
   allowCredentials?: boolean;
-  
+
   // Static Files
   directory?: string;
   defaultFiles?: string[];
-  
+
   // Exception Handling
   errorHandlerRoute?: string;
   useIExceptionHandler?: boolean;
   exceptionHandlerClass?: string;
   returnHandled?: boolean; // true = handled (stops), false = continue to next handler
-  
+
   // Compression
   algorithms?: ('gzip' | 'brotli' | 'deflate')[];
-  
+
   // Rate Limiting
   policyName?: string;
   limiterType?: 'FixedWindow' | 'SlidingWindow' | 'TokenBucket' | 'Concurrency';
@@ -99,16 +99,16 @@ export interface MiddlewareConfig {
   queueLimit?: number;
   tokensPerPeriod?: number;
   replenishmentPeriod?: number; // seconds
-  
+
   // Custom
   className?: string;
   customCode?: string;
-  
+
   // Minimal API Endpoint
   httpMethod?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path?: string;
   handlerCode?: string;
-  
+
   // Index signature for compatibility
   [key: string]: unknown;
 }
@@ -192,23 +192,17 @@ export class MiddlewareDesignerService {
     }
 
     // Check for circular branches
-    const visited = new Set<string>();
-    const recursionStack = new Set<string>();
-
-    const detectCycle = (node: MiddlewareNode): boolean => {
+    const detectCycle = (node: MiddlewareNode, recursionStack: Set<string>): boolean => {
       if (recursionStack.has(node.id)) {
-        errors.push({
-          middlewareId: node.id,
-          message: 'Circular branch detected',
-        });
+        if (!errors.some(e => e.middlewareId === node.id && e.message === 'Circular branch detected')) {
+          errors.push({
+            middlewareId: node.id,
+            message: 'Circular branch detected',
+          });
+        }
         return true;
       }
 
-      if (visited.has(node.id)) {
-        return false;
-      }
-
-      visited.add(node.id);
       recursionStack.add(node.id);
 
       if (node.branch) {
@@ -216,18 +210,17 @@ export class MiddlewareDesignerService {
         const falseBranch = node.branch.onFalse || [];
 
         for (const child of [...trueBranch, ...falseBranch]) {
-          if (detectCycle(child)) {
+          if (detectCycle(child, new Set(recursionStack))) {
             return true;
           }
         }
       }
 
-      recursionStack.delete(node.id);
       return false;
     };
 
     for (const middleware of pipeline.middlewares) {
-      detectCycle(middleware);
+      detectCycle(middleware, new Set());
     }
 
     // Middleware order warnings
@@ -276,7 +269,7 @@ export class MiddlewareDesignerService {
     const needsAuthz = pipeline.middlewares.some((m) => m.type === 'Authorization');
     const needsCors = pipeline.middlewares.some((m) => m.type === 'CORS');
     const needsRateLimit = pipeline.middlewares.some((m) => m.type === 'RateLimiting');
-    const needsExceptionHandler = pipeline.middlewares.some((m) => 
+    const needsExceptionHandler = pipeline.middlewares.some((m) =>
       m.type === 'ExceptionHandling' && (m.config as MiddlewareConfig).useIExceptionHandler
     );
 
@@ -305,7 +298,7 @@ export class MiddlewareDesignerService {
       code += `// Add rate limiting services\n`;
       code += `builder.Services.AddRateLimiter(options =>\n`;
       code += `{\n`;
-      
+
       // Add rate limiting policies
       const rateLimitMiddlewares = pipeline.middlewares.filter((m) => m.type === 'RateLimiting');
       for (const rlm of rateLimitMiddlewares) {
@@ -314,7 +307,7 @@ export class MiddlewareDesignerService {
           code += `    options.AddPolicy("${config.policyName}", context =>\n`;
           code += `        RateLimitPartition.Get${config.limiterType}(\n`;
           code += `            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",\n`;
-          
+
           switch (config.limiterType) {
             case 'FixedWindow':
               code += `            factory: _ => new FixedWindowRateLimiterOptions\n`;
@@ -352,13 +345,13 @@ export class MiddlewareDesignerService {
           }
         }
       }
-      
+
       code += `});\n\n`;
     }
 
     if (needsExceptionHandler) {
       code += `// Add exception handler services\n`;
-      const exHandlers = pipeline.middlewares.filter((m) => 
+      const exHandlers = pipeline.middlewares.filter((m) =>
         m.type === 'ExceptionHandling' && (m.config as MiddlewareConfig).useIExceptionHandler
       );
       for (const handler of exHandlers) {
@@ -369,7 +362,7 @@ export class MiddlewareDesignerService {
       }
       code += `builder.Services.AddProblemDetails();\n`;
       code += `\n`;
-      
+
       // Generate the IExceptionHandler class implementations
       for (const handler of exHandlers) {
         const config = handler.config as MiddlewareConfig;
@@ -606,7 +599,7 @@ public class ${className} : IExceptionHandler
                 Title = "Bad Request",
                 Detail = argEx.Message
             }, cancellationToken);
-            
+
             return true; // Exception handled, stop calling other handlers
         }
 
@@ -808,6 +801,7 @@ public class ${className} : IExceptionHandler
           terminatedBy = middleware.type;
           statusCode = result.statusCode;
           statusText = result.statusText;
+          context.response.statusCode = statusCode;
           Object.assign(responseHeaders, result.headers);
           responseBody = result.body;
         }
@@ -1100,10 +1094,10 @@ public class ${className} : IExceptionHandler
             ...stepBase,
             action: `IExceptionHandler: ${config.exceptionHandlerClass || 'Handler'}.TryHandleAsync() → ${returnHandled ? 'true (handled, stops chain)' : 'false (passes to next handler)'}`,
             decision: 'continue',
-            context: { 
+            context: {
               handlerClass: config.exceptionHandlerClass,
               returnHandled,
-              explanation: returnHandled 
+              explanation: returnHandled
                 ? 'Exception is handled by this handler. No other IExceptionHandler will be called.'
                 : 'Exception is NOT handled. ASP.NET Core will call the next registered IExceptionHandler.'
             },
@@ -1143,25 +1137,25 @@ public class ${className} : IExceptionHandler
         const policyName = config.policyName || 'default';
         const limiterType = config.limiterType || 'FixedWindow';
         const permitLimit = config.permitLimit || 10;
-        
+
         // Initialize rate limit state for this policy if not exists
         if (!context.rateLimitState[policyName]) {
           context.rateLimitState[policyName] = { count: 0, limit: permitLimit };
         }
-        
+
         // Increment request count
         context.rateLimitState[policyName].count++;
         const currentCount = context.rateLimitState[policyName].count;
         const isRateLimited = currentCount > permitLimit;
-        
+
         if (isRateLimited) {
           steps.push({
             ...stepBase,
             action: `❌ Rate limit EXCEEDED for policy "${policyName}" (${limiterType}): ${currentCount}/${permitLimit} requests`,
             decision: 'terminate',
-            context: { 
-              policyName, 
-              limiterType, 
+            context: {
+              policyName,
+              limiterType,
               permitLimit,
               currentCount,
               exceeded: true,

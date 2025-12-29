@@ -34,7 +34,7 @@ export class CsharpJsonConverterService {
    */
   csharpToJson(csharpCode: string, options: CsharpToJsonOptions = {}): string {
     const indentation = options.indentation ?? 2;
-    
+
     try {
       const parsedClass = this.parseCsharpClass(csharpCode);
       const jsonObject = this.createJsonFromClass(parsedClass);
@@ -51,12 +51,12 @@ export class CsharpJsonConverterService {
     try {
       const jsonObject = JSON.parse(json);
       let result = this.generateCsharpClass(jsonObject, className, options);
-      
+
       // Add JsonSerializerContext if requested
       if (options.generateSerializerContext && options.serializer === 'System.Text.Json') {
         result += '\n\n' + this.generateJsonSerializerContext(className, options);
       }
-      
+
       return result;
     } catch (error) {
       throw new Error(`Failed to convert JSON to C#: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -100,13 +100,13 @@ export class CsharpJsonConverterService {
     } else {
       // Extract regular properties
       const propertyRegex = /(?:public|internal|private|protected)?\s*(virtual|override|sealed|abstract)?\s*(\w+(?:<[^>]+>)?(?:\[\])?)\??\s+(\w+)\s*\{\s*get;(?:\s*(?:set|init);?)?\s*\}/g;
-      
+
       let match;
       while ((match = propertyRegex.exec(cleanCode)) !== null) {
         const type = match[2];
         const name = match[3];
         const isNullable = cleanCode.includes(`${type}? ${name}`) || cleanCode.includes(`${type}?${name}`);
-        
+
         properties.push({ name, type, isNullable });
       }
     }
@@ -204,11 +204,11 @@ export class CsharpJsonConverterService {
     // Properties
     const entries = Object.entries(obj as Record<string, unknown>);
     for (const [key, value] of entries) {
-      const propertyName = options.convertSnakeCase && this.isSnakeCase(key) 
-        ? this.toPascalCase(key) 
+      const propertyName = options.convertSnakeCase && this.isSnakeCase(key)
+        ? this.toPascalCase(key)
         : this.toPascalCase(key);
       const propertyType = this.inferCsharpType(value, propertyName, options);
-      
+
       // Add serialization attribute if name differs or snake_case conversion
       const needsAttribute = key !== propertyName || (options.convertSnakeCase && this.isSnakeCase(key));
       if (needsAttribute) {
@@ -284,7 +284,7 @@ export class CsharpJsonConverterService {
         // Default to string array if empty
         return this.getCollectionType('string', options.enumerationType);
       }
-      
+
       const firstItem = value[0];
       const itemType = this.inferCsharpType(firstItem, propertyName, options);
       return this.getCollectionType(itemType, options.enumerationType);
@@ -341,9 +341,11 @@ export class CsharpJsonConverterService {
    * Convert to PascalCase
    */
   private toPascalCase(str: string): string {
+    if (!str) return '';
     return str
-      .split(/[-_\s]/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .split(/[-_\s]|(?=[A-Z])/)
+      .filter((word) => word.length > 0)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join('');
   }
 
@@ -360,7 +362,7 @@ export class CsharpJsonConverterService {
   private generateJsonSerializerContext(className: string, options: JsonToCsharpOptions): string {
     const lines: string[] = [];
     const contextName = `${className}JsonContext`;
-    
+
     lines.push('[JsonSourceGenerationOptions(');
     lines.push('    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,');
     lines.push('    GenerationMode = JsonSourceGenerationMode.Metadata)]');
@@ -368,7 +370,7 @@ export class CsharpJsonConverterService {
     lines.push(`public partial class ${contextName} : JsonSerializerContext`);
     lines.push('{');
     lines.push('}');
-    
+
     return lines.join('\n');
   }
 }

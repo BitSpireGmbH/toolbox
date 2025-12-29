@@ -56,12 +56,12 @@ export class CsharpTypescriptConverterService {
     try {
       const parsed = this.parseTypescript(typescriptCode);
       let result = this.generateCsharpClass(parsed, options);
-      
+
       // Add JsonSerializerContext if requested
       if (options.generateSerializerContext && options.serializer === 'System.Text.Json') {
         result += '\n\n' + this.generateJsonSerializerContext(parsed.name, options);
       }
-      
+
       return result;
     } catch (error) {
       throw new Error(`Failed to convert TypeScript to C#: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -99,33 +99,33 @@ export class CsharpTypescriptConverterService {
           const fullType = paramMatch[1];
           const name = paramMatch[2];
           const isNullable = param.includes('?');
-          properties.push({ 
-            name, 
-            type: fullType, 
+          properties.push({
+            name,
+            type: fullType,
             isNullable,
-            isOptional: false 
+            isOptional: false
           });
         }
       }
     } else {
       // Extract properties - improved regex to handle more cases
       const propertyRegex = /(?:public|internal|private|protected)?\s*(?:virtual|override|sealed|abstract|required)?\s*(\w+(?:<[^>]+>)?(?:\[\])?)\??\s+(\w+)\s*\{\s*get;(?:\s*(?:set|init);?)?\s*\}/g;
-      
+
       let match;
-      
+
       while ((match = propertyRegex.exec(cleanCode)) !== null) {
         const fullType = match[1];
         const name = match[2];
-        
+
         // Check if nullable
         const propertyLine = cleanCode.substring(match.index, match.index + match[0].length);
         const isNullable = propertyLine.includes(`${fullType}?`) || propertyLine.includes('?');
-        
-        properties.push({ 
-          name, 
-          type: fullType, 
+
+        properties.push({
+          name,
+          type: fullType,
           isNullable,
-          isOptional: false 
+          isOptional: false
         });
       }
     }
@@ -145,7 +145,7 @@ export class CsharpTypescriptConverterService {
     // Extract interface or type declaration
     const interfaceMatch = cleanCode.match(/(?:export\s+)?interface\s+(\w+)/);
     const typeMatch = cleanCode.match(/(?:export\s+)?type\s+(\w+)\s*=/);
-    
+
     if (!interfaceMatch && !typeMatch) {
       throw new Error('Could not find interface or type declaration');
     }
@@ -154,23 +154,28 @@ export class CsharpTypescriptConverterService {
     const name = (interfaceMatch || typeMatch)![1];
 
     // Extract properties
-    const propertyRegex = /(\w+)(\?)?:\s*([^;,\n]+)/g;
+    const propertyRegex = /(\w+)(\?)?:\s*((?:Record<[^>]+>|Array<[^>]+>|[^;,\n]+))/g;
     const properties: ParsedProperty[] = [];
     let match;
-    
+
     while ((match = propertyRegex.exec(cleanCode)) !== null) {
       const name = match[1];
       const isOptional = !!match[2];
       let type = match[3].trim();
-      
-      // Remove trailing semicolon or comma
-      type = type.replace(/[;,]$/, '').trim();
-      
-      properties.push({ 
-        name, 
-        type, 
+
+      // Remove trailing semicolon or comma if it's not part of Record/Array
+      if (!type.includes('<')) {
+        type = type.replace(/[;,]$/, '').trim();
+      } else {
+        // More robust trailing character removal for generic types
+        type = type.replace(/[;,]\s*$/, '').trim();
+      }
+
+      properties.push({
+        name,
+        type,
         isNullable: type.includes('null') || type.includes('undefined'),
-        isOptional 
+        isOptional
       });
     }
 
@@ -182,7 +187,7 @@ export class CsharpTypescriptConverterService {
    */
   private generateTypescriptDefinition(parsedClass: ParsedClass, options: CsharpToTypescriptOptions): string {
     const lines: string[] = [];
-    
+
     if (options.exportType === 'interface') {
       lines.push(`export interface ${parsedClass.name} {`);
     } else {
@@ -193,7 +198,7 @@ export class CsharpTypescriptConverterService {
       const tsType = this.csharpTypeToTypescript(prop.type, options);
       const optional = prop.isNullable ? '?' : '';
       const nullableType = prop.isNullable ? ` | null` : '';
-      
+
       lines.push(`  ${this.toCamelCase(prop.name)}${optional}: ${tsType}${nullableType};`);
     }
 
@@ -236,7 +241,7 @@ export class CsharpTypescriptConverterService {
       const propertyName = this.toPascalCase(prop.name);
       const csharpType = this.typescriptTypeToCsharp(prop.type, options);
       const nullable = (prop.isNullable || prop.isOptional) ? '?' : '';
-      
+
       // Add serialization attribute if names differ or snake_case conversion
       const needsAttribute = prop.name !== propertyName || (options.convertSnakeCase && this.isSnakeCase(prop.name));
       if (needsAttribute) {
@@ -418,7 +423,7 @@ export class CsharpTypescriptConverterService {
   private generateJsonSerializerContext(className: string, options: TypescriptToCsharpOptions): string {
     const lines: string[] = [];
     const contextName = `${className}JsonContext`;
-    
+
     lines.push('[JsonSourceGenerationOptions(');
     lines.push('    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,');
     lines.push('    GenerationMode = JsonSourceGenerationMode.Metadata)]');
@@ -426,7 +431,7 @@ export class CsharpTypescriptConverterService {
     lines.push(`public partial class ${contextName} : JsonSerializerContext`);
     lines.push('{');
     lines.push('}');
-    
+
     return lines.join('\n');
   }
 }
