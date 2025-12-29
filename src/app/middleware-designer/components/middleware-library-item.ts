@@ -13,6 +13,9 @@ export interface MiddlewareLibraryItemData {
 @Component({
   selector: 'app-middleware-library-item',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block'
+  },
   template: `
     <button
       (click)="itemClick.emit({ type: item().type, config: item().defaultConfig })"
