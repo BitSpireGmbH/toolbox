@@ -44,29 +44,15 @@ import {
             (click)="showLibrary.set(!showLibrary())"
             [class]="showLibrary() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
             class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="18" cy="18" r="3"></circle>
-              <circle cx="6" cy="6" r="3"></circle>
-              <path d="M6 9v6"></path>
-              <path d="M9 6h6"></path>
-              <path d="M9 18h6"></path>
-            </svg>
             Library
           </button>
           <button
             (click)="showSimulation.set(!showSimulation())"
             [class]="showSimulation() ? 'bg-brand-secondary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
             class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="18" cy="18" r="3"></circle>
-              <circle cx="6" cy="6" r="3"></circle>
-              <path d="M6 9v6"></path>
-              <path d="M9 6h6"></path>
-              <path d="M9 18h6"></path>
-            </svg>
             Simulation
           </button>
-          
+
           <div class="inline-flex rounded-lg border border-gray-300 bg-white p-0.5 shadow-sm">
             <button
               (click)="splitRatio.set(100)"
@@ -121,7 +107,7 @@ import {
 
           <!-- Validation Messages -->
           @if (validationResult()) {
-            <app-validation-messages 
+            <app-validation-messages
               [errors]="validationResult()!.errors"
               [warnings]="validationResult()!.warnings" />
           }
@@ -136,7 +122,7 @@ import {
             <h3 class="font-semibold text-sm text-gray-700 mb-3">Middleware Library</h3>
             <div class="space-y-2 max-h-[800px] overflow-y-auto">
               @for (item of middlewareLibrary; track item.type) {
-                <app-middleware-library-item 
+                <app-middleware-library-item
                   [item]="item"
                   (itemClick)="addMiddleware($event.type, $event.config)" />
               }
