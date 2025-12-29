@@ -1,6 +1,104 @@
 @import "tailwindcss";
+@import "highlight.js/styles/vs2015.css";
 
 @theme {
-  --color-brand-primary: #1976D2;
-  --color-brand-secondary: #9C27B0;
+  --color-brand-primary: #007acc;
+  --color-brand-secondary: #68217a;
+}
+
+/* Global IDE-like styles */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #1e1e1e;
+  color: #cccccc;
+}
+
+/* Code editor styling */
+.code-editor {
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  tab-size: 4;
+}
+
+/* Syntax highlighting adjustments for better readability */
+.hljs {
+  background: #1e1e1e !important;
+  color: #d4d4d4 !important;
+  padding: 1rem !important;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+/* Line numbers for code blocks */
+.code-with-lines {
+  counter-reset: line;
+}
+
+.code-with-lines .code-line {
+  counter-increment: line;
+  position: relative;
+  padding-left: 3.5rem;
+}
+
+.code-with-lines .code-line::before {
+  content: counter(line);
+  position: absolute;
+  left: 0;
+  width: 3rem;
+  text-align: right;
+  padding-right: 1rem;
+  color: #858585;
+  user-select: none;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4e4e4e;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+/* Button transitions */
+button {
+  transition: all 0.2s ease;
+}
+
+/* Input and textarea improvements */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.1);
+}
+
+/* Resizer cursor */
+.resize-handle {
+  cursor: col-resize;
 }

@@ -1,3 +1,4 @@
+/* Sidebar animations */
 @keyframes slide-in-right {
   from {
     transform: translateX(100%);
@@ -11,12 +12,14 @@
   animation: slide-in-right 0.2s ease-out;
 }
 
+/* Tooltip delay on hover */
 .group:hover .group-hover\:opacity-100 {
   transition-delay: 0.3s;
 }
 
+/* Sidebar scrollbar styling */
 aside::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 aside::-webkit-scrollbar-track {
@@ -25,19 +28,49 @@ aside::-webkit-scrollbar-track {
 
 aside::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 aside::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
-}
-
+/* Navigation active state */
+nav a[aria-current="page"],
 nav a[class*="border-brand-primary"] {
   font-weight: 500;
+}
+
+/* Panel header gradient (IDE-like) */
+.panel-header {
+  background: linear-gradient(180deg, #2d2d30 0%, #252526 100%);
+}
+
+/* Code panel styling */
+.code-panel {
+  background: #1e1e1e;
+  border: 1px solid #3e3e42;
+}
+
+/* Activity bar styling (VS Code inspired) */
+.activity-bar {
+  background: #333333;
+  border-right: 1px solid #3e3e42;
+}
+
+/* Status indicator dots */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.active {
+  background: #4ec9b0;
+  box-shadow: 0 0 4px #4ec9b0;
+}
+
+.status-dot.inactive {
+  background: #858585;
 }
