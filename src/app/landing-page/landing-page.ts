@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
           <div class="mb-6 relative inline-block">
             <div class="absolute inset-0 bg-gradient-to-r from-brand-primary to-brand-secondary blur-2xl opacity-20 rounded-full"></div>
             <a href="https://bitspire.ch" target="_blank" rel="noopener noreferrer" aria-label="Bitspire website" class="inline-block">
-              <img src="bitspire-logo.webp" alt="Bitspire Logo" class="w-56 mx-auto relative" />
+              <img src="assets/bitspire-logo.webp" alt="Bitspire Logo" class="w-56 mx-auto relative" />
             </a>
           </div>
           <h1 class="text-6xl font-bold bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent mb-4">
