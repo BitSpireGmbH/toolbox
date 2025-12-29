@@ -1,6 +1,5 @@
 import { Component, signal, computed, effect, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
   MiddlewareDesignerService,
@@ -12,18 +11,14 @@ import {
   BranchCondition,
   MinimalAPIEndpoint,
 } from '../services/middleware-designer.service';
-
-interface MiddlewareLibraryItem {
-  type: MiddlewareType;
-  name: string;
-  icon: string;
-  description: string;
-  defaultConfig: MiddlewareConfig;
-}
+import { MiddlewareLibraryItemComponent, MiddlewareLibraryItemData } from './components/middleware-library-item';
+import { MiddlewareNodeCardComponent } from './components/middleware-node-card';
+import { SimulationStepComponent } from './components/simulation-step';
+import { ValidationMessagesComponent } from './components/validation-messages';
 
 @Component({
   selector: 'app-middleware-designer',
-  imports: [FormsModule, DragDropModule],
+  imports: [FormsModule, DragDropModule, MiddlewareLibraryItemComponent, MiddlewareNodeCardComponent, SimulationStepComponent, ValidationMessagesComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-[1600px] mx-auto p-6">
@@ -116,22 +111,9 @@ interface MiddlewareLibraryItem {
 
           <!-- Validation Messages -->
           @if (validationResult()) {
-            @if (validationResult()!.errors.length > 0) {
-              <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p class="text-sm font-semibold text-red-800 mb-1">Errors:</p>
-                @for (error of validationResult()!.errors; track error.middlewareId) {
-                  <p class="text-sm text-red-700">• {{ error.message }}</p>
-                }
-              </div>
-            }
-            @if (validationResult()!.warnings.length > 0) {
-              <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p class="text-sm font-semibold text-yellow-800 mb-1">Warnings:</p>
-                @for (warning of validationResult()!.warnings; track warning.middlewareId) {
-                  <p class="text-sm text-yellow-700">• {{ warning.message }}</p>
-                }
-              </div>
-            }
+            <app-validation-messages 
+              [errors]="validationResult()!.errors"
+              [warnings]="validationResult()!.warnings" />
           }
         </div>
       }
@@ -144,19 +126,9 @@ interface MiddlewareLibraryItem {
             <h3 class="font-semibold text-sm text-gray-700 mb-3">Middleware Library</h3>
             <div class="space-y-2 max-h-[800px] overflow-y-auto">
               @for (item of middlewareLibrary; track item.type) {
-                <button
-                  (click)="addMiddleware(item.type, item.defaultConfig)"
-                  class="cursor-pointer w-full text-left p-2.5 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg hover:border-brand-primary hover:shadow-sm transition-all duration-200 group">
-                  <div class="flex items-start gap-2.5">
-                    <div class="text-gray-600 group-hover:text-brand-primary mt-0.5 flex-shrink-0" [innerHTML]="getSafeIcon(item.icon)"></div>
-                    <div class="flex-1 min-w-0">
-                      <p class="font-medium text-sm text-gray-800 group-hover:text-brand-primary transition-colors">
-                        {{ item.name }}
-                      </p>
-                      <p class="text-xs text-gray-600 mt-0.5 line-clamp-2">{{ item.description }}</p>
-                    </div>
-                  </div>
-                </button>
+                <app-middleware-library-item 
+                  [item]="item"
+                  (itemClick)="addMiddleware($event.type, $event.config)" />
               }
             </div>
           </div>
@@ -190,41 +162,17 @@ interface MiddlewareLibraryItem {
                 @for (middleware of sortedMiddlewares(); track middleware.id) {
                   <div
                     cdkDrag
-                    class="bg-gradient-to-br from-white to-gray-50 border rounded-lg p-3 hover:shadow-sm transition-all cursor-move"
+                    class="bg-white border rounded-lg p-3 hover:shadow-sm transition-all cursor-move"
                     [class.border-brand-primary]="selectedMiddleware()?.id === middleware.id"
                     [class.shadow-sm]="selectedMiddleware()?.id === middleware.id"
                     [class.border-gray-200]="selectedMiddleware()?.id !== middleware.id">
-                    <div class="flex items-start gap-3">
-                      <div class="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 rounded-lg flex items-center justify-center text-xs font-bold text-gray-700">
-                        {{ middleware.order }}
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between">
-                          <h4 class="font-semibold text-sm text-gray-800">{{ middleware.type }}</h4>
-                          <div class="flex gap-1.5">
-                            <button
-                              (click)="editMiddleware(middleware)"
-                              class="px-2 py-1 text-xs bg-brand-secondary/10 text-brand-secondary rounded hover:bg-brand-secondary/20 transition-all font-medium">
-                              Edit
-                            </button>
-                            <button
-                              (click)="deleteMiddleware(middleware.id)"
-                              class="px-2 py-1 text-xs bg-red-50 text-red-700 rounded hover:bg-red-100 transition-all font-medium">
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                        @if (getMiddlewareConfigSummary(middleware); as summary) {
-                          <p class="text-xs text-gray-600 mt-1">{{ summary }}</p>
-                        }
-                        @if (middleware.branch) {
-                          <div class="mt-2 p-2 bg-purple-50 border border-purple-200 rounded text-xs">
-                            <p class="font-semibold text-purple-800">Branch Condition:</p>
-                            <p class="text-purple-700">{{ getBranchConditionText(middleware.branch.condition) }}</p>
-                          </div>
-                        }
-                      </div>
-                    </div>
+                    <app-middleware-node-card
+                      [middleware]="middleware"
+                      [configSummary]="getMiddlewareConfigSummary(middleware)"
+                      [branchText]="middleware.branch ? getBranchConditionText(middleware.branch.condition) : ''"
+                      [selected]="selectedMiddleware()?.id === middleware.id"
+                      (edit)="editMiddleware(middleware)"
+                      (delete)="deleteMiddleware(middleware.id)" />
                   </div>
                 }
               </div>
@@ -370,7 +318,7 @@ interface MiddlewareLibraryItem {
 
                   <button
                     (click)="runSimulation()"
-                    class="w-full px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-lg hover:shadow-lg transition-all font-medium">
+                    class="w-full px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-blue-800 hover:shadow-md transition-all font-medium">
                     Run Simulation
                   </button>
                 </div>
@@ -400,21 +348,11 @@ interface MiddlewareLibraryItem {
                     <!-- Steps -->
                     <div class="space-y-2 max-h-[500px] overflow-y-auto">
                       @for (step of result.steps; track step.order) {
-                        <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                          <div class="flex items-start justify-between">
-                            <p class="text-sm font-semibold text-gray-800">
-                              {{ step.order }}. {{ step.middlewareName }}
-                            </p>
-                            @if (step.decision) {
-                              <span
-                                class="px-2 py-0.5 text-xs rounded font-medium"
-                                [class]="getDecisionClass(step.decision)">
-                                {{ step.decision }}
-                              </span>
-                            }
-                          </div>
-                          <p class="text-xs text-gray-700 mt-1">{{ step.action }}</p>
-                        </div>
+                        <app-simulation-step
+                          [order]="step.order"
+                          [middlewareName]="step.middlewareName"
+                          [action]="step.action"
+                          [decision]="step.decision" />
                       }
                     </div>
 
@@ -1088,12 +1026,12 @@ interface MiddlewareLibraryItem {
                 <div class="flex gap-3 mt-6">
                   <button
                     (click)="saveMiddlewareConfig()"
-                    class="flex-1 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-lg hover:shadow-lg transition-all font-medium">
+                    class="flex-1 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-blue-800 hover:shadow-md transition-all font-medium">
                     Save Changes
                   </button>
                   <button
                     (click)="closeEditModal()"
-                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all">
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-medium">
                     Cancel
                   </button>
                 </div>
@@ -1106,17 +1044,6 @@ interface MiddlewareLibraryItem {
 })
 export class MiddlewareDesignerComponent {
   private readonly service = inject(MiddlewareDesignerService);
-  private readonly sanitizer = inject(DomSanitizer);
-
-  // SVG icon cache to avoid repeated sanitization
-  private readonly iconCache = new Map<string, SafeHtml>();
-
-  protected getSafeIcon(icon: string): SafeHtml {
-    if (!this.iconCache.has(icon)) {
-      this.iconCache.set(icon, this.sanitizer.bypassSecurityTrustHtml(icon));
-    }
-    return this.iconCache.get(icon)!;
-  }
 
   // State
   protected readonly pipeline = signal<Pipeline>({
@@ -1184,7 +1111,7 @@ export class MiddlewareDesignerComponent {
   protected editConfig: any = {};
 
   // Middleware library
-  protected readonly middlewareLibrary: MiddlewareLibraryItem[] = [
+  protected readonly middlewareLibrary: MiddlewareLibraryItemData[] = [
     {
       type: 'Authentication',
       name: 'Authentication',
@@ -1567,13 +1494,6 @@ export class MiddlewareDesignerComponent {
     if (condition.key) parts.push(`[${condition.key}]`);
     if (condition.value) parts.push(`"${condition.value}"`);
     return parts.join(' ');
-  }
-
-  protected getDecisionClass(decision: string): string {
-    if (decision === 'terminate') return 'bg-red-100 text-red-800';
-    if (decision === 'continue') return 'bg-green-100 text-green-800';
-    if (decision.includes('branch')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-800';
   }
 
   // Resize handlers
