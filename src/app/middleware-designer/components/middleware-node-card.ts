@@ -6,7 +6,7 @@ import { MiddlewareNode, MiddlewareConfig } from '../../services/middleware-desi
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex items-start gap-3">
-      <div class="flex-shrink-0 w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center text-xs font-bold text-gray-700">
+      <div class="flex-shrink-0 w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-700">
         {{ middleware().order }}
       </div>
       <div class="flex-1 min-w-0">
@@ -43,7 +43,6 @@ export class MiddlewareNodeCardComponent {
   readonly middleware = input.required<MiddlewareNode>();
   readonly configSummary = input<string>();
   readonly branchText = input<string>();
-  readonly selected = input<boolean>(false);
 
   readonly edit = output<void>();
   readonly delete = output<void>();

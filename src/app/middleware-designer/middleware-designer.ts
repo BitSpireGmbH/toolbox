@@ -170,7 +170,6 @@ import { ValidationMessagesComponent } from './components/validation-messages';
                       [middleware]="middleware"
                       [configSummary]="getMiddlewareConfigSummary(middleware)"
                       [branchText]="middleware.branch ? getBranchConditionText(middleware.branch.condition) : ''"
-                      [selected]="selectedMiddleware()?.id === middleware.id"
                       (edit)="editMiddleware(middleware)"
                       (delete)="deleteMiddleware(middleware.id)" />
                   </div>
