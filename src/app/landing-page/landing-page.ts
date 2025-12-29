@@ -46,10 +46,10 @@ import { RouterLink } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-base font-bold text-ide-text group-hover:text-ide-accent transition-colors duration-300">JSON → C#</h3>
-                    <span class="text-xs text-ide-text-muted font-medium">Data Converter</span>
+                    <p class="text-xs text-ide-text-muted font-medium mt-0.5">Convert JSON to C# classes in real-time</p>
                   </div>
                 </div>
-                <p class="text-sm text-ide-text-muted leading-relaxed mb-3">Convert JSON to C# classes with support for records, structs, and various serializers.</p>
+
                 <div class="flex items-center gap-1.5 text-ide-accent font-semibold text-xs">
                   <span>Open Tool</span>
                   <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -73,10 +73,10 @@ import { RouterLink } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-base font-bold text-ide-text group-hover:text-ide-success transition-colors duration-300">C# ↔ TypeScript</h3>
-                    <span class="text-xs text-ide-text-muted font-medium">Bidirectional</span>
+                    <p class="text-xs text-ide-text-muted font-medium mt-0.5">Real-time bidirectional conversion</p>
                   </div>
                 </div>
-                <p class="text-sm text-ide-text-muted leading-relaxed mb-3">Convert between C# classes and TypeScript interfaces for full-stack development.</p>
+
                 <div class="flex items-center gap-1.5 text-ide-success font-semibold text-xs">
                   <span>Open Tool</span>
                   <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -100,10 +100,10 @@ import { RouterLink } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-base font-bold text-ide-text group-hover:text-ide-warning transition-colors duration-300">JWT Decoder</h3>
-                    <span class="text-xs text-ide-text-muted font-medium">Token Inspector</span>
+                    <p class="text-xs text-ide-text-muted font-medium mt-0.5">Decode and inspect JSON Web Tokens</p>
                   </div>
                 </div>
-                <p class="text-sm text-ide-text-muted leading-relaxed mb-3">Decode and inspect JSON Web Tokens with claim explanations and validity checks.</p>
+
                 <div class="flex items-center gap-1.5 text-ide-warning font-semibold text-xs">
                   <span>Open Tool</span>
                   <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -130,10 +130,10 @@ import { RouterLink } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-base font-bold text-ide-text group-hover:text-ide-keyword transition-colors duration-300">Middleware Designer</h3>
-                    <span class="text-xs text-ide-text-muted font-medium">Pipeline Builder</span>
+                    <p class="text-xs text-ide-text-muted font-medium mt-0.5">Build ASP.NET Core middleware pipelines</p>
                   </div>
                 </div>
-                <p class="text-sm text-ide-text-muted leading-relaxed mb-3">Build ASP.NET Core middleware pipelines visually and export ready-to-use C# code.</p>
+
                 <div class="flex items-center gap-1.5 text-ide-keyword font-semibold text-xs">
                   <span>Open Tool</span>
                   <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -147,8 +147,9 @@ import { RouterLink } from '@angular/router';
 
         <!-- Footer Info -->
         <footer class="mt-16 text-center text-ide-text-muted text-sm space-y-2">
-          <p class="font-medium">Built with Angular • Privacy-first • Open source</p>
-          <p class="text-xs">All processing happens in your browser • No data sent to servers</p>
+          <p class="font-medium">
+            <a href="https://github.com/BitSpireGmbH/toolbox" target="_blank" rel="noopener noreferrer" class="hover:text-ide-accent transition-colors">Open source</a> • All processing happens in your browser
+          </p>
         </footer>
       </div>
     </div>
