@@ -72,6 +72,23 @@ export class PackageCentralizerService {
   }
 
   /**
+   * Format IncludeAssets string with consistent capitalization
+   */
+  private formatIncludeAssets(includeAssets: string | undefined): string {
+    if (!includeAssets) {
+      return 'Runtime;Build;Native;Contentfiles;Analyzers';
+    }
+    
+    return includeAssets
+      .split(';')
+      .map(part => {
+        const trimmed = part.trim();
+        return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+      })
+      .join(';');
+  }
+
+  /**
    * Parse a version string into a SemVer object
    */
   parseVersion(version: string): SemVer {
@@ -372,17 +389,12 @@ export class PackageCentralizerService {
           const projectPkgs = packageToProjects.get(packageName);
           if (!projectPkgs) continue;
           const pkg = projectPkgs[0].pkg;
+          const version = packageVersions.get(packageName);
+          const includeAssets = this.formatIncludeAssets(pkg.includeAssets);
           
-          // Format IncludeAssets (capitalize first letter of each part)
-          const includeAssets = pkg.includeAssets
-            ?.split(';')
-            .map(part => {
-              const trimmed = part.trim();
-              return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
-            })
-            .join(';') || 'Runtime;Build;Native;Contentfiles;Analyzers';
-          
-          content += `    <GlobalPackageReference Include="${packageName}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
+          if (version) {
+            content += `    <GlobalPackageReference Include="${packageName}" Version="${version}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
+          }
         }
 
         // Add GlobalPackageReference for single-project analyzers
@@ -395,15 +407,7 @@ export class PackageCentralizerService {
           if (!projectPkgs) continue;
           const pkg = projectPkgs[0].pkg;
           const version = packageVersions.get(packageName);
-          
-          // Format IncludeAssets (capitalize first letter of each part)
-          const includeAssets = pkg.includeAssets
-            ?.split(';')
-            .map(part => {
-              const trimmed = part.trim();
-              return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
-            })
-            .join(';') || 'Runtime;Build;Native;Contentfiles;Analyzers';
+          const includeAssets = this.formatIncludeAssets(pkg.includeAssets);
           
           if (version) {
             content += `    <GlobalPackageReference Include="${packageName}" Version="${version}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
