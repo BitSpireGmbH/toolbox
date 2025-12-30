@@ -340,20 +340,28 @@ export class PackageCentralizerService {
       }
     }
 
-    // If using global analyzers, identify multi-project analyzers
+    // If using global analyzers, identify multi-project analyzers and single-project analyzers
     const globalAnalyzers = new Set<string>();
+    const singleProjectAnalyzers = new Set<string>();
     if (useGlobalAnalyzers) {
       for (const [packageName, projectPkgs] of packageToProjects) {
-        // Check if used in multiple projects and is an analyzer
-        if (projectPkgs.length > 1 && this.isAnalyzer(projectPkgs[0].pkg)) {
-          globalAnalyzers.add(packageName);
+        // Check if it's an analyzer
+        if (this.isAnalyzer(projectPkgs[0].pkg)) {
+          if (projectPkgs.length > 1) {
+            // Multi-project analyzer
+            globalAnalyzers.add(packageName);
+          } else {
+            // Single-project analyzer
+            singleProjectAnalyzers.add(packageName);
+          }
         }
       }
 
-      // Add GlobalPackageReference section if there are any
-      if (globalAnalyzers.size > 0) {
+      // Add Global Packages ItemGroup if there are any global or single-project analyzers
+      if (globalAnalyzers.size > 0 || singleProjectAnalyzers.size > 0) {
         content += `  <ItemGroup Label="Global Packages">\n`;
         
+        // Add GlobalPackageReference for multi-project analyzers
         const sortedGlobalAnalyzers = [...globalAnalyzers].sort((a, b) => 
           a.toLowerCase().localeCompare(b.toLowerCase())
         );
@@ -373,6 +381,15 @@ export class PackageCentralizerService {
           
           content += `    <GlobalPackageReference Include="${packageName}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
         }
+
+        // Add PackageVersion with $(GlobalAnalyzerPackageVersion) for single-project analyzers
+        const sortedSingleProjectAnalyzers = [...singleProjectAnalyzers].sort((a, b) => 
+          a.toLowerCase().localeCompare(b.toLowerCase())
+        );
+
+        for (const packageName of sortedSingleProjectAnalyzers) {
+          content += `    <PackageVersion Include="${packageName}" Version="$(GlobalAnalyzerPackageVersion)" />\n`;
+        }
         
         content += `  </ItemGroup>\n`;
       }
@@ -382,9 +399,9 @@ export class PackageCentralizerService {
       // Group packages by project, using resolved versions
       for (const project of projects) {
         // Get unique package names for this project, sorted alphabetically
-        // Exclude global analyzers from individual project groups
+        // Exclude global analyzers and single-project analyzers from individual project groups
         const projectPackages = [...new Set(project.packages.map(p => p.name))]
-          .filter(pkgName => !globalAnalyzers.has(pkgName))
+          .filter(pkgName => !globalAnalyzers.has(pkgName) && !singleProjectAnalyzers.has(pkgName))
           .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
         if (projectPackages.length === 0) continue;
@@ -397,16 +414,7 @@ export class PackageCentralizerService {
         for (const packageName of projectPackages) {
           const version = packageVersions.get(packageName);
           if (version) {
-            // Check if this is an analyzer used in a single project
-            const projectPkgs = packageToProjects.get(packageName);
-            const isSingleProjectAnalyzer = projectPkgs && projectPkgs.length === 1 && 
-              this.isAnalyzer(projectPkgs[0].pkg) && useGlobalAnalyzers;
-            
-            if (isSingleProjectAnalyzer) {
-              content += `    <PackageVersion Include="${packageName}" Version="$(GlobalAnalyzerPackageVersion)" />\n`;
-            } else {
-              content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
-            }
+            content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
           }
         }
 
@@ -414,9 +422,9 @@ export class PackageCentralizerService {
       }
     } else {
       // Single ItemGroup with all packages sorted alphabetically
-      // Exclude global analyzers
+      // Exclude global analyzers and single-project analyzers
       const allPackages = [...packageVersions.keys()]
-        .filter(pkgName => !globalAnalyzers.has(pkgName))
+        .filter(pkgName => !globalAnalyzers.has(pkgName) && !singleProjectAnalyzers.has(pkgName))
         .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
       if (allPackages.length > 0) {
@@ -425,16 +433,7 @@ export class PackageCentralizerService {
         for (const packageName of allPackages) {
           const version = packageVersions.get(packageName);
           if (version) {
-            // Check if this is an analyzer used in a single project
-            const projectPkgs = packageToProjects.get(packageName);
-            const isSingleProjectAnalyzer = projectPkgs && projectPkgs.length === 1 && 
-              this.isAnalyzer(projectPkgs[0].pkg) && useGlobalAnalyzers;
-            
-            if (isSingleProjectAnalyzer) {
-              content += `    <PackageVersion Include="${packageName}" Version="$(GlobalAnalyzerPackageVersion)" />\n`;
-            } else {
-              content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
-            }
+            content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
           }
         }
 
