@@ -8,7 +8,6 @@ import {
   MiddlewareType,
   MiddlewareConfig,
   SimulationRequest,
-  MinimalAPIEndpoint,
   BranchCondition,
 } from '../services/middleware-designer.service';
 import { MiddlewareLibraryItemComponent } from './components/middleware-library-item';

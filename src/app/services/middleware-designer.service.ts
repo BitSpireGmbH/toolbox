@@ -254,6 +254,26 @@ export class MiddlewareDesignerService {
       });
     }
 
+    // Check for middleware after MinimalAPIEndpoint
+    // In ASP.NET Core minimal APIs, app.MapGet() etc. just REGISTER endpoints.
+    // The actual endpoint execution happens via implicit endpoint middleware at the END.
+    // So middleware placed AFTER MapGet in code actually runs BEFORE the endpoint handler!
+    const sortedMiddlewares = [...pipeline.middlewares].sort((a, b) => a.order - b.order);
+    for (let i = 0; i < sortedMiddlewares.length; i++) {
+      const middleware = sortedMiddlewares[i];
+      if (middleware.type === 'MinimalAPIEndpoint') {
+        // Check if there are any middlewares after this one
+        const middlewaresAfter = sortedMiddlewares.slice(i + 1);
+        for (const afterMiddleware of middlewaresAfter) {
+          warnings.push({
+            middlewareId: afterMiddleware.id,
+            message: `⚠️ Code order ≠ Execution order: This middleware appears after the endpoint (${(middleware.config as MiddlewareConfig).httpMethod} ${(middleware.config as MiddlewareConfig).path}) in code, but will actually execute BEFORE the endpoint handler runs. In ASP.NET Core, app.MapXxx() only registers endpoints - all app.Use() middleware runs before endpoint execution regardless of code position.`,
+          });
+        }
+        break; // Only warn once for the first MinimalAPIEndpoint
+      }
+    }
+
     return {
       valid: errors.length === 0,
       errors,
@@ -493,12 +513,13 @@ export class MiddlewareDesignerService {
 
       case 'MinimalAPIEndpoint':
         if (config.httpMethod && config.path && config.handlerCode) {
-          const method = config.httpMethod.toLowerCase();
+          // ASP.NET Core uses PascalCase for method names: MapGet, MapPost, MapPut, MapDelete, MapPatch
+          const methodName = config.httpMethod.charAt(0).toUpperCase() + config.httpMethod.slice(1).toLowerCase();
           if (config.policyName) {
-            code += `${indent}app.Map${config.httpMethod}("${config.path}", ${config.handlerCode})\n`;
+            code += `${indent}app.Map${methodName}("${config.path}", ${config.handlerCode})\n`;
             code += `${indent}    .RequireRateLimiting("${config.policyName}");\n`;
           } else {
-            code += `${indent}app.Map${config.httpMethod}("${config.path}", ${config.handlerCode});\n`;
+            code += `${indent}app.Map${methodName}("${config.path}", ${config.handlerCode});\n`;
           }
         }
         break;
@@ -803,6 +824,21 @@ public class ${className} : IExceptionHandler
 
     const sortedMiddlewares = [...pipeline.middlewares].sort((a, b) => a.order - b.order);
 
+    // ASP.NET Core execution order: All app.Use() middleware runs BEFORE endpoint handlers (MapGet, etc.)
+    // This is because app.MapXxx() only REGISTERS endpoints - the actual endpoint middleware runs at the end
+    // So we need to reorder: run all non-endpoint middleware first, then endpoints
+    const regularMiddlewares = sortedMiddlewares.filter(m => m.type !== 'MinimalAPIEndpoint');
+    const endpointMiddlewares = sortedMiddlewares.filter(m => m.type === 'MinimalAPIEndpoint');
+    const executionOrderMiddlewares = [...regularMiddlewares, ...endpointMiddlewares];
+
+    // If there are middlewares placed after endpoints in code order, add an info step
+    const hasMiddlewareAfterEndpoint = sortedMiddlewares.some((m, i) => {
+      if (m.type === 'MinimalAPIEndpoint') {
+        return sortedMiddlewares.slice(i + 1).some(after => after.type !== 'MinimalAPIEndpoint');
+      }
+      return false;
+    });
+
     // Simulate multiple requests if requestCount > 1
     for (let reqNum = 1; reqNum <= requestCount && !terminated; reqNum++) {
       context.requestNumber = reqNum;
@@ -819,8 +855,20 @@ public class ${className} : IExceptionHandler
         });
       }
 
-      for (let i = 0; i < sortedMiddlewares.length && !terminated; i++) {
-        const middleware = sortedMiddlewares[i];
+      if (hasMiddlewareAfterEndpoint && reqNum === 1) {
+        steps.push({
+          order: steps.length + 1,
+          middlewareName: 'Pipeline Info',
+          middlewareType: 'Custom',
+          action: `⚠️ Note: Code order ≠ Execution order! Some middleware appears after MapXxx() in code but runs BEFORE the endpoint. Simulation shows actual execution order.`,
+          decision: 'info',
+          context: { warning: 'execution-order-differs-from-code-order' },
+          timestamp: Date.now(),
+        });
+      }
+
+      for (let i = 0; i < executionOrderMiddlewares.length && !terminated; i++) {
+        const middleware = executionOrderMiddlewares[i];
         const result = this.simulateMiddleware(middleware, context, steps);
 
         if (result.terminated) {
@@ -1222,9 +1270,20 @@ public class ${className} : IExceptionHandler
         if (config.httpMethod === context.method && config.path === context.path) {
           steps.push({
             ...stepBase,
-            action: `Minimal API endpoint matched: ${config.httpMethod} ${config.path}`,
-            decision: 'terminate',
-            context: { method: config.httpMethod, path: config.path },
+            action: `✅ Minimal API endpoint matched: ${config.httpMethod} ${config.path}`,
+            decision: 'terminate (endpoint handler executes, response returned)',
+            context: { method: config.httpMethod, path: config.path, isTerminal: true },
+          });
+
+          // Add a note explaining the execution order
+          steps.push({
+            order: steps.length + 1,
+            middlewareName: 'Pipeline Info',
+            middlewareType: 'MinimalAPIEndpoint',
+            action: `ℹ️ Note: In ASP.NET Core, app.MapXxx() only REGISTERS endpoints. Any app.Use() middleware placed after MapXxx() in code actually runs BEFORE the endpoint handler. The visual order in the designer matches code order, but actual execution order differs.`,
+            decision: 'info',
+            context: { reason: 'Endpoint registration vs middleware execution order' },
+            timestamp: Date.now(),
           });
 
           context.response.statusCode = 200;
@@ -1241,8 +1300,8 @@ public class ${className} : IExceptionHandler
 
         steps.push({
           ...stepBase,
-          action: `Minimal API endpoint not matched`,
-          decision: 'continue',
+          action: `Minimal API endpoint not matched (expected ${config.httpMethod} ${config.path}, got ${context.method} ${context.path})`,
+          decision: 'continue (path did not match, checking next middleware)',
           context: { expected: `${config.httpMethod} ${config.path}`, actual: `${context.method} ${context.path}` },
         });
         break;

@@ -214,7 +214,8 @@ describe('MiddlewareDesignerService', () => {
 
       const code = service.generateCSharpCode(pipeline);
 
-      expect(code).toContain('app.MapGET("/api/hello", () => "Hello World");');
+      // ASP.NET Core uses PascalCase: MapGet, MapPost, etc.
+      expect(code).toContain('app.MapGet("/api/hello", () => "Hello World");');
     });
 
     it('should generate branch conditions', () => {
@@ -1094,6 +1095,177 @@ describe('MiddlewareDesignerService', () => {
       const endpoints = service.extractMinimalAPIEndpoints(pipeline);
 
       expect(endpoints).toHaveLength(0);
+    });
+  });
+
+  describe('Middleware after MinimalAPIEndpoint warning', () => {
+    it('should warn when middleware is placed after MinimalAPIEndpoint', () => {
+      const pipeline: Pipeline = {
+        id: '1',
+        name: 'Test',
+        middlewares: [
+          {
+            id: '1',
+            type: 'MinimalAPIEndpoint',
+            order: 0,
+            config: { httpMethod: 'GET', path: '/api/users', handlerCode: '() => "Hello"' },
+          },
+          { id: '2', type: 'Custom', order: 1, config: { className: 'MyMiddleware' } },
+        ],
+      };
+
+      const result = service.validatePipeline(pipeline);
+
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings.some((w) => w.middlewareId === '2')).toBe(true);
+      expect(result.warnings.some((w) => w.message.includes('Code order') && w.message.includes('Execution order'))).toBe(true);
+    });
+
+    it('should not warn when middleware is placed before MinimalAPIEndpoint', () => {
+      const pipeline: Pipeline = {
+        id: '1',
+        name: 'Test',
+        middlewares: [
+          { id: '1', type: 'Authentication', order: 0, config: {} },
+          { id: '2', type: 'Custom', order: 1, config: { className: 'MyMiddleware' } },
+          {
+            id: '3',
+            type: 'MinimalAPIEndpoint',
+            order: 2,
+            config: { httpMethod: 'GET', path: '/api/users', handlerCode: '() => "Hello"' },
+          },
+        ],
+      };
+
+      const result = service.validatePipeline(pipeline);
+
+      // Should not have warnings about execution order (may have other warnings)
+      expect(result.warnings.every((w) => !w.message.includes('Code order'))).toBe(true);
+    });
+
+    it('should warn for multiple middlewares after MinimalAPIEndpoint', () => {
+      const pipeline: Pipeline = {
+        id: '1',
+        name: 'Test',
+        middlewares: [
+          {
+            id: '1',
+            type: 'MinimalAPIEndpoint',
+            order: 0,
+            config: { httpMethod: 'GET', path: '/api/users', handlerCode: '() => "Hello"' },
+          },
+          { id: '2', type: 'Custom', order: 1, config: { className: 'Middleware1' } },
+          { id: '3', type: 'Authentication', order: 2, config: {} },
+        ],
+      };
+
+      const result = service.validatePipeline(pipeline);
+
+      // Both middlewares after endpoint should have warnings
+      expect(result.warnings.filter((w) => w.message.includes('Code order')).length).toBe(2);
+    });
+  });
+
+  describe('Simulation execution order with MinimalAPIEndpoint', () => {
+    it('should execute middleware before endpoint even if placed after in code order', () => {
+      const pipeline: Pipeline = {
+        id: '1',
+        name: 'Test',
+        middlewares: [
+          {
+            id: '1',
+            type: 'MinimalAPIEndpoint',
+            order: 0,
+            config: { httpMethod: 'GET', path: '/api/users', handlerCode: '() => "Hello"' },
+          },
+          { id: '2', type: 'Custom', order: 1, config: { className: 'MyMiddleware' } },
+        ],
+      };
+
+      const request: SimulationRequest = {
+        method: 'GET',
+        path: '/api/users',
+        headers: {},
+        query: {},
+        isAuthenticated: false,
+        claims: {},
+        cookies: {},
+      };
+
+      const result = service.simulatePipeline(pipeline, request);
+
+      // Find the step indices
+      const customMiddlewareStepIndex = result.steps.findIndex(
+        (s) => s.middlewareName === 'Custom' && s.action.includes('MyMiddleware')
+      );
+      const endpointStepIndex = result.steps.findIndex(
+        (s) => s.middlewareType === 'MinimalAPIEndpoint' && s.action.includes('matched')
+      );
+
+      // Custom middleware should execute before the endpoint
+      expect(customMiddlewareStepIndex).toBeLessThan(endpointStepIndex);
+    });
+
+    it('should show info step when code order differs from execution order', () => {
+      const pipeline: Pipeline = {
+        id: '1',
+        name: 'Test',
+        middlewares: [
+          {
+            id: '1',
+            type: 'MinimalAPIEndpoint',
+            order: 0,
+            config: { httpMethod: 'GET', path: '/api/users', handlerCode: '() => "Hello"' },
+          },
+          { id: '2', type: 'Custom', order: 1, config: { className: 'MyMiddleware' } },
+        ],
+      };
+
+      const request: SimulationRequest = {
+        method: 'GET',
+        path: '/api/users',
+        headers: {},
+        query: {},
+        isAuthenticated: false,
+        claims: {},
+        cookies: {},
+      };
+
+      const result = service.simulatePipeline(pipeline, request);
+
+      // Should have an info step about execution order
+      expect(result.steps.some((s) => s.action.includes('Code order') && s.action.includes('Execution order'))).toBe(true);
+    });
+
+    it('should not show info step when no middleware is after endpoint', () => {
+      const pipeline: Pipeline = {
+        id: '1',
+        name: 'Test',
+        middlewares: [
+          { id: '1', type: 'Authentication', order: 0, config: {} },
+          {
+            id: '2',
+            type: 'MinimalAPIEndpoint',
+            order: 1,
+            config: { httpMethod: 'GET', path: '/api/users', handlerCode: '() => "Hello"' },
+          },
+        ],
+      };
+
+      const request: SimulationRequest = {
+        method: 'GET',
+        path: '/api/users',
+        headers: {},
+        query: {},
+        isAuthenticated: true,
+        claims: {},
+        cookies: {},
+      };
+
+      const result = service.simulatePipeline(pipeline, request);
+
+      // Should not have the execution order warning info step
+      expect(result.steps.every((s) => !s.action.includes('Code order ≠ Execution order'))).toBe(true);
     });
   });
 });
