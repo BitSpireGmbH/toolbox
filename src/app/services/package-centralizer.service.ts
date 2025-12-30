@@ -385,13 +385,29 @@ export class PackageCentralizerService {
           content += `    <GlobalPackageReference Include="${packageName}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
         }
 
-        // Add PackageVersion with $(GlobalAnalyzerPackageVersion) for single-project analyzers
+        // Add GlobalPackageReference for single-project analyzers
         const sortedSingleProjectAnalyzers = [...singleProjectAnalyzers].sort((a, b) => 
           a.toLowerCase().localeCompare(b.toLowerCase())
         );
 
         for (const packageName of sortedSingleProjectAnalyzers) {
-          content += `    <PackageVersion Include="${packageName}" Version="$(GlobalAnalyzerPackageVersion)" />\n`;
+          const projectPkgs = packageToProjects.get(packageName);
+          if (!projectPkgs) continue;
+          const pkg = projectPkgs[0].pkg;
+          const version = packageVersions.get(packageName);
+          
+          // Format IncludeAssets (capitalize first letter of each part)
+          const includeAssets = pkg.includeAssets
+            ?.split(';')
+            .map(part => {
+              const trimmed = part.trim();
+              return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+            })
+            .join(';') || 'Runtime;Build;Native;Contentfiles;Analyzers';
+          
+          if (version) {
+            content += `    <GlobalPackageReference Include="${packageName}" Version="${version}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
+          }
         }
         
         content += `  </ItemGroup>\n`;

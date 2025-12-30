@@ -180,7 +180,7 @@ interface ProjectTab {
                 </label>
                 <div>
                   <span class="text-sm font-medium text-gray-700">Use Global Analyzers</span>
-                  <p class="text-xs text-gray-500">Create GlobalPackageReference for analyzers used in multiple projects</p>
+                  <p class="text-xs text-gray-500">Create GlobalPackageReference for all analyzer packages</p>
                 </div>
               </div>
 

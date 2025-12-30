@@ -811,7 +811,7 @@ describe('PackageCentralizerService', () => {
       expect(result).toContain('IncludeAssets="Runtime;Build;Native;Contentfiles;Analyzers;Buildtransitive"');
     });
 
-    it('should use $(GlobalAnalyzerPackageVersion) for single-project analyzers', () => {
+    it('should use GlobalPackageReference with version for single-project analyzers', () => {
       const packageVersions = new Map([
         ['Microsoft.SourceLink.GitHub', '8.0.0']
       ]);
@@ -833,8 +833,10 @@ describe('PackageCentralizerService', () => {
 
       const result = service.generateDirectoryPackagesProps(packageVersions, projects, true, true);
 
-      expect(result).toContain('<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="$(GlobalAnalyzerPackageVersion)" />');
-      expect(result).not.toContain('GlobalPackageReference');
+      expect(result).toContain('<GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0"');
+      expect(result).toContain('PrivateAssets="All"');
+      expect(result).toContain('IncludeAssets=');
+      expect(result).not.toContain('$(GlobalAnalyzerPackageVersion)');
     });
 
     it('should not create GlobalPackageReference when useGlobalAnalyzers is false', () => {
@@ -928,8 +930,8 @@ describe('PackageCentralizerService', () => {
       // Should have GlobalPackageReference for multi-project analyzer
       expect(result).toContain('<GlobalPackageReference Include="Meziantou.Analyzer"');
       
-      // Should have $(GlobalAnalyzerPackageVersion) for single-project analyzer
-      expect(result).toContain('<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="$(GlobalAnalyzerPackageVersion)" />');
+      // Should have GlobalPackageReference with version for single-project analyzer
+      expect(result).toContain('<GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0"');
       
       // Should have regular version for non-analyzer
       expect(result).toContain('<PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />');
