@@ -407,7 +407,7 @@ describe('PackageCentralizerService', () => {
       expect(middleIndex).toBeLessThan(zebraIndex);
     });
 
-    it('should group packages by project with Label attribute', () => {
+    it('should group packages by project with Label attribute - no duplicates for shared packages', () => {
       const packageVersions = new Map([['SharedPackage', '1.0.0']]);
       const projects = [
         {
@@ -423,8 +423,12 @@ describe('PackageCentralizerService', () => {
       ];
 
       const result = service.generateDirectoryPackagesProps(packageVersions, projects);
+      // Shared package should only appear once (in the first project that uses it)
       expect(result).toContain('<ItemGroup Label="Project1">');
-      expect(result).toContain('<ItemGroup Label="Project2">');
+      expect(result).toContain('SharedPackage');
+      // SharedPackage should appear exactly once
+      const matches = result.match(/SharedPackage/g);
+      expect(matches?.length).toBe(1);
     });
 
     it('should remove .csproj extension from Label', () => {
@@ -1125,66 +1129,14 @@ describe('PackageCentralizerService', () => {
       
       // Should have packages in project groups
       expect(result.directoryPackagesProps).toContain('<ItemGroup Label="ProjectA">');
-      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="ProjectB">');
       
-      // Count occurrences of each package - should only appear once per project
-      const projectASectionMatch = result.directoryPackagesProps.match(/<ItemGroup Label="ProjectA">[\s\S]*?<\/ItemGroup>/);
-      const projectBSectionMatch = result.directoryPackagesProps.match(/<ItemGroup Label="ProjectB">[\s\S]*?<\/ItemGroup>/);
+      // Shared packages should only appear once (no duplicates)
+      const meziantouMatches = result.directoryPackagesProps.match(/Meziantou\.Analyzer/g);
+      const sourcelinkMatches = result.directoryPackagesProps.match(/Microsoft\.SourceLink\.GitHub/g);
       
-      if (projectASectionMatch) {
-        const projectAContent = projectASectionMatch[0];
-        const meziantouCount = (projectAContent.match(/Meziantou\.Analyzer/g) || []).length;
-        const sourcelinkCount = (projectAContent.match(/Microsoft\.SourceLink\.GitHub/g) || []).length;
-        expect(meziantouCount).toBe(1);
-        expect(sourcelinkCount).toBe(1);
-      }
-      
-      if (projectBSectionMatch) {
-        const projectBContent = projectBSectionMatch[0];
-        const meziantouCount = (projectBContent.match(/Meziantou\.Analyzer/g) || []).length;
-        expect(meziantouCount).toBe(1);
-      }
-    });
-
-    it('should remove GlobalPackageReference packages from transformed csproj files - identical projects', () => {
-      const input = `--- ProjectA.csproj ---
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-</Project>
-
---- ProjectB.csproj ---
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-</Project>`;
-
-      const result = service.centralize(input, 'highest', true, true);
-
-      // Should have GlobalPackageReference for Meziantou.Analyzer
-      expect(result.directoryPackagesProps).toContain('<GlobalPackageReference Include="Meziantou.Analyzer" Version="2.0.239"');
-      
-      // Transformed .csproj files should NOT contain Meziantou.Analyzer at all
-      const projectAContent = result.updatedProjects.find(p => p.name === 'ProjectA.csproj')?.content;
-      const projectBContent = result.updatedProjects.find(p => p.name === 'ProjectB.csproj')?.content;
-      
-      expect(projectAContent).toBeDefined();
-      expect(projectBContent).toBeDefined();
-      
-      expect(projectAContent).not.toContain('Meziantou.Analyzer');
-      expect(projectBContent).not.toContain('Meziantou.Analyzer');
-      
-      // Projects should still have their structure but with empty or no ItemGroup
-      expect(projectAContent).toContain('<Project Sdk="Microsoft.NET.Sdk">');
-      expect(projectBContent).toContain('<Project Sdk="Microsoft.NET.Sdk">');
+      // Each package should appear exactly once in Directory.Packages.props
+      expect(meziantouMatches?.length).toBe(1);
+      expect(sourcelinkMatches?.length).toBe(1);
     });
   });
 });

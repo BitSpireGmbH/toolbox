@@ -399,12 +399,15 @@ export class PackageCentralizerService {
     }
 
     if (groupByProject) {
+      // Track packages we've already added to avoid duplicates
+      const addedPackages = new Set<string>();
+      
       // Group packages by project, using resolved versions
       for (const project of projects) {
         // Get unique package names for this project, sorted alphabetically
-        // Exclude only global analyzers (multi-project) from individual project groups
+        // Exclude global analyzers and already-added packages
         const projectPackages = [...new Set(project.packages.map(p => p.name))]
-          .filter(pkgName => !globalAnalyzers.has(pkgName))
+          .filter(pkgName => !globalAnalyzers.has(pkgName) && !addedPackages.has(pkgName))
           .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
         if (projectPackages.length === 0) continue;
@@ -418,6 +421,7 @@ export class PackageCentralizerService {
           const version = packageVersions.get(packageName);
           if (version) {
             content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
+            addedPackages.add(packageName); // Mark as added
           }
         }
 
