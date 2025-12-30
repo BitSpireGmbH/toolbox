@@ -76,7 +76,7 @@ export class PackageCentralizerService {
    */
   private formatIncludeAssets(includeAssets: string | undefined): string {
     if (!includeAssets) {
-      return 'Runtime;Build;Native;Contentfiles;Analyzers';
+      return 'Runtime;Build;Native;Contentfiles;Analyzers;Buildtransitive';
     }
     
     return includeAssets
