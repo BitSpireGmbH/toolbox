@@ -190,8 +190,8 @@ import {
         <!-- Code Output -->
         @if (splitRatio() < 100) {
         <div class="flex-shrink-0 transition-all" [style]="codeWidthStyle()">
-          <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
-            <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center">
+          <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow h-full w-full flex flex-col">
+            <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center flex-shrink-0">
               <div class="flex items-center gap-2">
                 <div class="w-1.5 h-1.5 rounded-full" [class]="generatedCode() ? 'bg-green-500' : 'bg-gray-500'"></div>
                 <h3 class="font-semibold text-sm text-gray-200">Generated C# Code</h3>
@@ -214,20 +214,8 @@ import {
             <textarea
               [value]="generatedCode()"
               readonly
-              [class]="splitRatio() === 0 ? 'w-full h-[800px] p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none' : 'w-full h-[600px] p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none'"
+              class="w-full flex-grow p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none min-h-[600px]"
               placeholder="Generated C# code will appear here..."></textarea>
-
-            <!-- Minimal API Endpoints -->
-            @if (minimalAPIEndpoints().length > 0) {
-              <div class="px-4 py-3 bg-blue-50 border-t border-blue-200">
-                <h4 class="text-xs font-semibold text-blue-800 mb-2">📍 Minimal API Endpoints</h4>
-                @for (endpoint of minimalAPIEndpoints(); track endpoint.middlewareId) {
-                  <div class="text-xs text-blue-700 font-mono mb-1">
-                    <span class="font-bold">{{ endpoint.method }}</span> {{ endpoint.path }}
-                  </div>
-                }
-              </div>
-            }
           </div>
         </div>
         }
