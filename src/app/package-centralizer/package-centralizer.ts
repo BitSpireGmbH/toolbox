@@ -446,7 +446,7 @@ export class PackageCentralizerComponent {
             this.resolutionStrategy()
         );
 
-        const globalPackages = this.service['identifyGlobalPackages'](projectsWithPackages);
+        const globalPackages = this.service.identifyGlobalPackages(projectsWithPackages);
 
         const updatedProjects = projectsWithPackages.map(project => ({
             ...project,

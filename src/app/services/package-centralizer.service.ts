@@ -168,7 +168,7 @@ export class PackageCentralizerService {
   /**
    * Identify packages that appear in ALL projects with same version and attributes
    */
-  private identifyGlobalPackages(projects: ParsedProject[]): Set<string> {
+  identifyGlobalPackages(projects: ParsedProject[]): Set<string> {
     if (projects.length <= 1) {
       return new Set();
     }
@@ -403,13 +403,6 @@ export class PackageCentralizerService {
           if (pkg) {
             const hasChildElements = pkg.childElements.size > 0;
             const allAttributes = new Map(pkg.attributes);
-            
-            // Merge child elements with attributes for inline representation if no children
-            if (!hasChildElements && pkg.childElements.size > 0) {
-              for (const [key, value] of pkg.childElements) {
-                allAttributes.set(key, value);
-              }
-            }
             
             if (hasChildElements) {
               // Use multi-line format with child elements
