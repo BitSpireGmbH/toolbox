@@ -20,6 +20,9 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
       <p class="text-xs text-gray-700 mt-1">{{ action() }}</p>
     </div>
   `,
+  host: {
+    class: 'block'
+  },
   styles: []
 })
 export class SimulationStepComponent {
