@@ -7,16 +7,16 @@ import { JwtDecoderService, type DecodedJwt, type ClaimExplanation } from '../se
   imports: [FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-[1600px] mx-auto p-6">
+    <div class="max-w-400 mx-auto p-6">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 mb-1">JWT Decoder</h1>
           <p class="text-sm text-gray-600">Decode and inspect JSON Web Tokens</p>
         </div>
-        
+
         @if (decodedToken()) {
-          <div class="flex items-center gap-3 px-4 py-2 rounded-lg border" 
+          <div class="flex items-center gap-3 px-4 py-2 rounded-lg border"
                [class]="getValidityColorClasses()">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               @if (validityInfo()?.status === 'valid') {
@@ -42,7 +42,7 @@ import { JwtDecoderService, type DecodedJwt, type ClaimExplanation } from '../se
       <!-- Input Area -->
       <div class="mb-6">
         <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-          <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200">
+          <div class="bg-linear-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
               <h3 class="font-semibold text-sm text-gray-700">JWT Token</h3>
@@ -58,7 +58,7 @@ You can paste the token with or without the 'Bearer' prefix."
         </div>
         @if (errorMessage()) {
           <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -73,26 +73,15 @@ You can paste the token with or without the 'Bearer' prefix."
         <div class="grid md:grid-cols-2 gap-5">
           <!-- Header Section -->
           <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-3 border-b border-blue-200">
+            <div class="bg-linear-to-r from-blue-50 to-blue-100 px-4 py-3 border-b border-blue-200">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
                   <h3 class="font-semibold text-sm text-gray-800">Header</h3>
                 </div>
-                <button 
-                  (click)="copyToClipboard(decodedToken()!.header)"
-                  class="px-2 py-1 rounded-md text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors">
-                  <span class="flex items-center gap-1">
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    Copy
-                  </span>
-                </button>
               </div>
             </div>
-            <div class="p-4 space-y-3 max-h-[500px] overflow-y-auto">
+            <div class="p-4 space-y-3 max-h-125 overflow-y-auto">
               @for (field of headerExplanations(); track field.name) {
                 <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
                   <div class="flex items-start justify-between mb-1">
@@ -112,26 +101,15 @@ You can paste the token with or without the 'Bearer' prefix."
 
           <!-- Payload Section -->
           <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-green-50 to-green-100 px-4 py-3 border-b border-green-200">
+            <div class="bg-linear-to-r from-green-50 to-green-100 px-4 py-3 border-b border-green-200">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                   <h3 class="font-semibold text-sm text-gray-800">Payload (Claims)</h3>
                 </div>
-                <button 
-                  (click)="copyToClipboard(decodedToken()!.payload)"
-                  class="px-2 py-1 rounded-md text-xs font-semibold text-green-600 hover:bg-green-100 transition-colors">
-                  <span class="flex items-center gap-1">
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    Copy
-                  </span>
-                </button>
               </div>
             </div>
-            <div class="p-4 space-y-3 max-h-[500px] overflow-y-auto">
+            <div class="p-4 space-y-3 max-h-125 overflow-y-auto">
               @for (claim of claimExplanations(); track claim.name) {
                 <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
                   <div class="flex items-start justify-between mb-1">
@@ -151,23 +129,21 @@ You can paste the token with or without the 'Bearer' prefix."
         </div>
 
         <!-- Info Panel -->
-        <div class="mt-5 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-md border border-blue-200 p-5">
+        <div class="mt-5 bg-linear-to-br from-blue-50 to-purple-50 rounded-xl shadow-md border border-blue-200 p-5">
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-600 shrink-0 mt-0.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
             </svg>
             <div class="flex-1">
               <h4 class="font-semibold text-sm text-gray-900 mb-2">About JWT Tokens</h4>
               <div class="text-xs text-gray-700 space-y-2 leading-relaxed">
                 <p>
-                  <strong>JSON Web Tokens (JWT)</strong> are compact, URL-safe tokens used for secure information transmission between parties. 
+                  <strong>JSON Web Tokens (JWT)</strong> are compact, URL-safe tokens used for secure information transmission between parties.
                   Each token consists of three parts: Header, Payload, and Signature.
                 </p>
                 <p>
-                  <strong>Security Note:</strong> This decoder only reads and displays the token information. 
-                  JWTs are not encrypted (only signed), so never include sensitive data in the token itself. 
+                  <strong>Security Note:</strong> This decoder only reads and displays the token information.
+                  JWTs are not encrypted (only signed), so never include sensitive data in the token itself.
                   Always validate signatures on the server side.
                 </p>
                 @if (decodedToken()!.issuedAt) {
@@ -216,15 +192,15 @@ export class JwtDecoderComponent {
 
   protected decodeToken(): void {
     this.errorMessage.set('');
-    
+
     try {
       const decoded = this.decoderService.decodeToken(this.inputToken());
       this.decodedToken.set(decoded);
-      
+
       // Get explanations
       this.headerExplanations.set(this.decoderService.getHeaderExplanations(decoded.header));
       this.claimExplanations.set(this.decoderService.getClaimExplanations(decoded.payload));
-      
+
       // Get validity info
       this.validityInfo.set(this.decoderService.getValidityMessage(decoded));
     } catch (error) {
@@ -233,14 +209,6 @@ export class JwtDecoderComponent {
       this.claimExplanations.set([]);
       this.validityInfo.set(null);
       this.errorMessage.set(error instanceof Error ? error.message : 'An error occurred while decoding the token');
-    }
-  }
-
-  protected async copyToClipboard(data: unknown): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
     }
   }
 

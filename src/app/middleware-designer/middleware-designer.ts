@@ -120,7 +120,7 @@ import {
         @if (showLibrary()) {
           <div class="bg-white rounded-xl shadow-md border border-gray-200 p-5 h-fit sticky top-6">
             <h3 class="font-semibold text-sm text-gray-700 mb-3">Middleware Library</h3>
-            <div class="space-y-2 max-h-[800px] overflow-y-auto">
+            <div class="space-y-2 max-h-200 overflow-y-auto">
               @for (item of middlewareLibrary; track item.type) {
                 <app-middleware-library-item
                   [item]="item"
@@ -341,7 +341,7 @@ import {
                     </div>
 
                     <!-- Steps -->
-                    <div class="space-y-2 max-h-[500px] overflow-y-auto">
+                    <div class="space-y-2 max-h-125 overflow-y-auto">
                       @for (step of result.steps; track step.order) {
                         <app-simulation-step
                           [order]="step.order"
