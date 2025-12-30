@@ -166,7 +166,11 @@ export class PackageCentralizerService {
   }
 
   /**
-   * Identify packages that appear in ALL projects with same version and attributes
+   * Identify packages that appear in ALL projects with same version and attributes.
+   * These packages are candidates for GlobalPackageVersion entries.
+   * 
+   * @param projects - Array of parsed projects to analyze
+   * @returns Set of package names that appear in all projects with identical version and attributes
    */
   identifyGlobalPackages(projects: ParsedProject[]): Set<string> {
     if (projects.length <= 1) {
@@ -510,7 +514,11 @@ export class PackageCentralizerService {
 
   /**
    * Update csproj content to remove Version attributes from PackageReference elements
-   * and remove entire PackageReference elements for global packages
+   * and remove entire PackageReference elements for global packages.
+   * 
+   * @param content - The original csproj file content
+   * @param globalPackages - Set of package names that should be completely removed (default: empty set)
+   * @returns Updated csproj content with modifications applied
    */
   updateCsprojContent(content: string, globalPackages: Set<string> = new Set()): string {
     // First, remove entire PackageReference elements for global packages
@@ -557,7 +565,12 @@ export class PackageCentralizerService {
   }
 
   /**
-   * Main method to centralize packages from multiple projects
+   * Main method to centralize packages from multiple projects.
+   * 
+   * @param input - Raw text input containing one or more csproj files
+   * @param strategy - Strategy for resolving version conflicts (default: 'highest')
+   * @param groupByProject - Whether to group packages by project in output (default: true)
+   * @returns Result containing Directory.Packages.props content, updated projects, and conflict information
    */
   centralize(
     input: string,
