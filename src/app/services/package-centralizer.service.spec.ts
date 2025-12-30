@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PackageCentralizerService } from './package-centralizer.service';
+import { PackageCentralizerService, PackageReference } from './package-centralizer.service';
 
 describe('PackageCentralizerService', () => {
   let service: PackageCentralizerService;
@@ -676,6 +676,357 @@ describe('PackageCentralizerService', () => {
       expect(result.directoryPackagesProps).toContain('<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>');
       expect(result.directoryPackagesProps).toContain('FluentValidation');
       expect(result.directoryPackagesProps).toContain('Microsoft.AspNetCore.OpenApi');
+    });
+  });
+
+  describe('isAnalyzer', () => {
+    it('should return true for packages with PrivateAssets="all" and analyzers in IncludeAssets', () => {
+      const pkg: PackageReference = {
+        name: 'Meziantou.Analyzer',
+        version: '2.0.239',
+        originalLine: '',
+        privateAssets: 'all',
+        includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+      };
+      expect(service.isAnalyzer(pkg)).toBe(true);
+    });
+
+    it('should return true for packages with case-insensitive PrivateAssets and analyzers', () => {
+      const pkg: PackageReference = {
+        name: 'Analyzer.Package',
+        version: '1.0.0',
+        originalLine: '',
+        privateAssets: 'All',
+        includeAssets: 'Runtime;Build;Analyzers'
+      };
+      expect(service.isAnalyzer(pkg)).toBe(true);
+    });
+
+    it('should return false for packages without PrivateAssets', () => {
+      const pkg: PackageReference = {
+        name: 'NormalPackage',
+        version: '1.0.0',
+        originalLine: '',
+        includeAssets: 'analyzers'
+      };
+      expect(service.isAnalyzer(pkg)).toBe(false);
+    });
+
+    it('should return false for packages without analyzers in IncludeAssets', () => {
+      const pkg: PackageReference = {
+        name: 'SourceLink',
+        version: '8.0.0',
+        originalLine: '',
+        privateAssets: 'all',
+        includeAssets: 'runtime; build; native'
+      };
+      expect(service.isAnalyzer(pkg)).toBe(false);
+    });
+
+    it('should return false for packages without both PrivateAssets and IncludeAssets', () => {
+      const pkg: PackageReference = {
+        name: 'RegularPackage',
+        version: '1.0.0',
+        originalLine: ''
+      };
+      expect(service.isAnalyzer(pkg)).toBe(false);
+    });
+  });
+
+  describe('parsePackageReferences with PrivateAssets and IncludeAssets', () => {
+    it('should parse PrivateAssets and IncludeAssets from attributes', () => {
+      const content = `
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.239" PrivateAssets="all" IncludeAssets="runtime; build; analyzers" />
+      `;
+      const result = service.parsePackageReferences(content);
+      expect(result).toHaveLength(1);
+      expect(result[0].privateAssets).toBe('all');
+      expect(result[0].includeAssets).toBe('runtime; build; analyzers');
+    });
+
+    it('should parse PrivateAssets and IncludeAssets from inner elements', () => {
+      const content = `
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+      `;
+      const result = service.parsePackageReferences(content);
+      expect(result).toHaveLength(1);
+      expect(result[0].privateAssets).toBe('all');
+      expect(result[0].includeAssets).toBe('runtime; build; native; contentfiles; analyzers; buildtransitive');
+    });
+
+    it('should handle packages without PrivateAssets and IncludeAssets', () => {
+      const content = `
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      `;
+      const result = service.parsePackageReferences(content);
+      expect(result).toHaveLength(1);
+      expect(result[0].privateAssets).toBeUndefined();
+      expect(result[0].includeAssets).toBeUndefined();
+    });
+  });
+
+  describe('generateDirectoryPackagesProps with GlobalPackageReference', () => {
+    it('should generate GlobalPackageReference for analyzers used in multiple projects', () => {
+      const packageVersions = new Map([
+        ['Meziantou.Analyzer', '2.0.239'],
+        ['Microsoft.SourceLink.GitHub', '8.0.0']
+      ]);
+      const projects = [
+        {
+          name: 'Project1.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Meziantou.Analyzer',
+              version: '2.0.239',
+              originalLine: '',
+              privateAssets: 'all',
+              includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+            }
+          ]
+        },
+        {
+          name: 'Project2.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Meziantou.Analyzer',
+              version: '2.0.239',
+              originalLine: '',
+              privateAssets: 'all',
+              includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+            }
+          ]
+        }
+      ];
+
+      const result = service.generateDirectoryPackagesProps(packageVersions, projects, true, true);
+
+      expect(result).toContain('<ItemGroup Label="Global Packages">');
+      expect(result).toContain('<GlobalPackageReference Include="Meziantou.Analyzer"');
+      expect(result).toContain('PrivateAssets="All"');
+      expect(result).toContain('IncludeAssets="Runtime;Build;Native;Contentfiles;Analyzers;Buildtransitive"');
+    });
+
+    it('should use $(GlobalAnalyzerPackageVersion) for single-project analyzers', () => {
+      const packageVersions = new Map([
+        ['Microsoft.SourceLink.GitHub', '8.0.0']
+      ]);
+      const projects = [
+        {
+          name: 'Project1.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Microsoft.SourceLink.GitHub',
+              version: '8.0.0',
+              originalLine: '',
+              privateAssets: 'all',
+              includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+            }
+          ]
+        }
+      ];
+
+      const result = service.generateDirectoryPackagesProps(packageVersions, projects, true, true);
+
+      expect(result).toContain('<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="$(GlobalAnalyzerPackageVersion)" />');
+      expect(result).not.toContain('GlobalPackageReference');
+    });
+
+    it('should not create GlobalPackageReference when useGlobalAnalyzers is false', () => {
+      const packageVersions = new Map([
+        ['Meziantou.Analyzer', '2.0.239']
+      ]);
+      const projects = [
+        {
+          name: 'Project1.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Meziantou.Analyzer',
+              version: '2.0.239',
+              originalLine: '',
+              privateAssets: 'all',
+              includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+            }
+          ]
+        },
+        {
+          name: 'Project2.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Meziantou.Analyzer',
+              version: '2.0.239',
+              originalLine: '',
+              privateAssets: 'all',
+              includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+            }
+          ]
+        }
+      ];
+
+      const result = service.generateDirectoryPackagesProps(packageVersions, projects, true, false);
+
+      expect(result).not.toContain('GlobalPackageReference');
+      expect(result).toContain('<PackageVersion Include="Meziantou.Analyzer" Version="2.0.239" />');
+    });
+
+    it('should handle complex scenario with both global and single-project analyzers', () => {
+      const packageVersions = new Map([
+        ['Meziantou.Analyzer', '2.0.239'],
+        ['Microsoft.SourceLink.GitHub', '8.0.0'],
+        ['Newtonsoft.Json', '13.0.1']
+      ]);
+      const projects = [
+        {
+          name: 'Project1.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Meziantou.Analyzer',
+              version: '2.0.239',
+              originalLine: '',
+              privateAssets: 'all',
+              includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+            },
+            {
+              name: 'Microsoft.SourceLink.GitHub',
+              version: '8.0.0',
+              originalLine: '',
+              privateAssets: 'all',
+              includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+            },
+            {
+              name: 'Newtonsoft.Json',
+              version: '13.0.1',
+              originalLine: ''
+            }
+          ]
+        },
+        {
+          name: 'Project2.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Meziantou.Analyzer',
+              version: '2.0.239',
+              originalLine: '',
+              privateAssets: 'all',
+              includeAssets: 'runtime; build; native; contentfiles; analyzers; buildtransitive'
+            }
+          ]
+        }
+      ];
+
+      const result = service.generateDirectoryPackagesProps(packageVersions, projects, true, true);
+
+      // Should have GlobalPackageReference for multi-project analyzer
+      expect(result).toContain('<GlobalPackageReference Include="Meziantou.Analyzer"');
+      
+      // Should have $(GlobalAnalyzerPackageVersion) for single-project analyzer
+      expect(result).toContain('<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="$(GlobalAnalyzerPackageVersion)" />');
+      
+      // Should have regular version for non-analyzer
+      expect(result).toContain('<PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />');
+      
+      // GlobalPackageReference should not appear in individual project groups
+      expect(result).not.toMatch(/<ItemGroup Label="Project\d+">[^<]*<PackageVersion Include="Meziantou\.Analyzer"/);
+    });
+
+    it('should not treat non-analyzers as analyzers even if in multiple projects', () => {
+      const packageVersions = new Map([
+        ['Newtonsoft.Json', '13.0.1']
+      ]);
+      const projects = [
+        {
+          name: 'Project1.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Newtonsoft.Json',
+              version: '13.0.1',
+              originalLine: ''
+            }
+          ]
+        },
+        {
+          name: 'Project2.csproj',
+          content: '',
+          packages: [
+            {
+              name: 'Newtonsoft.Json',
+              version: '13.0.1',
+              originalLine: ''
+            }
+          ]
+        }
+      ];
+
+      const result = service.generateDirectoryPackagesProps(packageVersions, projects, true, true);
+
+      expect(result).not.toContain('GlobalPackageReference');
+      expect(result).toContain('<PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />');
+    });
+  });
+
+  describe('centralize with useGlobalAnalyzers', () => {
+    it('should handle global analyzers when enabled', () => {
+      const input = `--- Project1.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
+
+--- Project2.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', true, true);
+
+      expect(result.directoryPackagesProps).toContain('GlobalPackageReference');
+      expect(result.directoryPackagesProps).toContain('Meziantou.Analyzer');
+    });
+
+    it('should not create global analyzers when disabled', () => {
+      const input = `--- Project1.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
+
+--- Project2.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', true, false);
+
+      expect(result.directoryPackagesProps).not.toContain('GlobalPackageReference');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="Meziantou.Analyzer" Version="2.0.239" />');
     });
   });
 });

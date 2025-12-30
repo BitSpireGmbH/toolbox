@@ -169,6 +169,21 @@ interface ProjectTab {
                 </div>
               </div>
 
+              <div class="flex items-center gap-3">
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [ngModel]="useGlobalAnalyzers()"
+                    (ngModelChange)="useGlobalAnalyzers.set($event)"
+                    class="sr-only peer" />
+                  <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-primary/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
+                </label>
+                <div>
+                  <span class="text-sm font-medium text-gray-700">Use Global Analyzers</span>
+                  <p class="text-xs text-gray-500">Create GlobalPackageReference for analyzers used in multiple projects</p>
+                </div>
+              </div>
+
               <button
                 type="button"
                 (click)="centralize()"
@@ -343,6 +358,7 @@ export class PackageCentralizerComponent {
     protected readonly editingTabId = signal<number | null>(null);
     protected readonly resolutionStrategy = signal<VersionResolutionStrategy>('highest');
     protected readonly groupByProject = signal(true);
+    protected readonly useGlobalAnalyzers = signal(false);
     protected readonly result = signal<CentralizeResult | null>(null);
     protected readonly activeOutputTab = signal<string>('props');
 
@@ -454,7 +470,8 @@ export class PackageCentralizerComponent {
         const directoryPackagesProps = this.service.generateDirectoryPackagesProps(
             packageVersions,
             projectsWithPackages,
-            this.groupByProject()
+            this.groupByProject(),
+            this.useGlobalAnalyzers()
         );
 
         this.result.set({

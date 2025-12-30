@@ -7,6 +7,8 @@ export interface PackageReference {
   name: string;
   version: string;
   originalLine: string;
+  privateAssets?: string;
+  includeAssets?: string;
 }
 
 /**
@@ -58,6 +60,17 @@ interface SemVer {
   providedIn: 'root'
 })
 export class PackageCentralizerService {
+  /**
+   * Check if a package is an analyzer based on its PrivateAssets and IncludeAssets
+   */
+  isAnalyzer(pkg: PackageReference): boolean {
+    // An analyzer typically has PrivateAssets="all" and IncludeAssets containing "analyzers"
+    const hasPrivateAssets = pkg.privateAssets?.toLowerCase() === 'all';
+    const hasAnalyzersInIncludeAssets = pkg.includeAssets?.toLowerCase().includes('analyzers') || false;
+    
+    return hasPrivateAssets && hasAnalyzersInIncludeAssets;
+  }
+
   /**
    * Parse a version string into a SemVer object
    */
@@ -152,12 +165,13 @@ export class PackageCentralizerService {
     
     // Match PackageReference elements - handles both self-closing and with closing tag
     // Supports: Include="..." Version="..." or Include='...' Version='...'
-    const packageRefRegex = /<PackageReference\s+([^>]*(?:Include|Version)[^>]*)(?:\s*\/>|>[\s\S]*?<\/PackageReference>)/gi;
+    const packageRefRegex = /<PackageReference\s+([^>]*(?:Include|Version)[^>]*)(?:\s*\/>|>([\s\S]*?)<\/PackageReference>)/gi;
     
     let match;
     while ((match = packageRefRegex.exec(content)) !== null) {
       const fullMatch = match[0];
       const attributes = match[1];
+      const innerContent = match[2] || '';
       
       // Extract Include attribute
       const includeMatch = attributes.match(/Include\s*=\s*["']([^"']+)["']/i);
@@ -165,11 +179,31 @@ export class PackageCentralizerService {
       const versionMatch = attributes.match(/Version\s*=\s*["']([^"']+)["']/i);
       
       if (includeMatch && versionMatch) {
-        packages.push({
+        const pkg: PackageReference = {
           name: includeMatch[1].trim(),
           version: versionMatch[1].trim(),
           originalLine: fullMatch
-        });
+        };
+
+        // Extract PrivateAssets from attributes or inner content
+        const privateAssetsAttrMatch = attributes.match(/PrivateAssets\s*=\s*["']([^"']+)["']/i);
+        const privateAssetsInnerMatch = innerContent.match(/<PrivateAssets>([^<]+)<\/PrivateAssets>/i);
+        if (privateAssetsAttrMatch) {
+          pkg.privateAssets = privateAssetsAttrMatch[1].trim();
+        } else if (privateAssetsInnerMatch) {
+          pkg.privateAssets = privateAssetsInnerMatch[1].trim();
+        }
+
+        // Extract IncludeAssets from attributes or inner content
+        const includeAssetsAttrMatch = attributes.match(/IncludeAssets\s*=\s*["']([^"']+)["']/i);
+        const includeAssetsInnerMatch = innerContent.match(/<IncludeAssets>([^<]+)<\/IncludeAssets>/i);
+        if (includeAssetsAttrMatch) {
+          pkg.includeAssets = includeAssetsAttrMatch[1].trim();
+        } else if (includeAssetsInnerMatch) {
+          pkg.includeAssets = includeAssetsInnerMatch[1].trim();
+        }
+
+        packages.push(pkg);
       }
     }
 
@@ -287,7 +321,8 @@ export class PackageCentralizerService {
   generateDirectoryPackagesProps(
     packageVersions: Map<string, string>,
     projects: ParsedProject[],
-    groupByProject: boolean = true
+    groupByProject: boolean = true,
+    useGlobalAnalyzers: boolean = false
   ): string {
     let content = `<Project>
   <PropertyGroup>
@@ -295,11 +330,61 @@ export class PackageCentralizerService {
   </PropertyGroup>
 `;
 
+    // Build a map of package name to list of projects and their package details
+    const packageToProjects = new Map<string, { project: ParsedProject; pkg: PackageReference }[]>();
+    for (const project of projects) {
+      for (const pkg of project.packages) {
+        const existing = packageToProjects.get(pkg.name) || [];
+        existing.push({ project, pkg });
+        packageToProjects.set(pkg.name, existing);
+      }
+    }
+
+    // If using global analyzers, identify multi-project analyzers
+    const globalAnalyzers = new Set<string>();
+    if (useGlobalAnalyzers) {
+      for (const [packageName, projectPkgs] of packageToProjects) {
+        // Check if used in multiple projects and is an analyzer
+        if (projectPkgs.length > 1 && this.isAnalyzer(projectPkgs[0].pkg)) {
+          globalAnalyzers.add(packageName);
+        }
+      }
+
+      // Add GlobalPackageReference section if there are any
+      if (globalAnalyzers.size > 0) {
+        content += `  <ItemGroup Label="Global Packages">\n`;
+        
+        const sortedGlobalAnalyzers = [...globalAnalyzers].sort((a, b) => 
+          a.toLowerCase().localeCompare(b.toLowerCase())
+        );
+        
+        for (const packageName of sortedGlobalAnalyzers) {
+          const projectPkgs = packageToProjects.get(packageName)!;
+          const pkg = projectPkgs[0].pkg;
+          
+          // Format IncludeAssets (capitalize first letter of each part)
+          const includeAssets = pkg.includeAssets
+            ?.split(';')
+            .map(part => {
+              const trimmed = part.trim();
+              return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+            })
+            .join(';') || 'Runtime;Build;Native;contentFiles;Analyzers';
+          
+          content += `    <GlobalPackageReference Include="${packageName}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
+        }
+        
+        content += `  </ItemGroup>\n`;
+      }
+    }
+
     if (groupByProject) {
       // Group packages by project, using resolved versions
       for (const project of projects) {
         // Get unique package names for this project, sorted alphabetically
+        // Exclude global analyzers from individual project groups
         const projectPackages = [...new Set(project.packages.map(p => p.name))]
+          .filter(pkgName => !globalAnalyzers.has(pkgName))
           .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
         if (projectPackages.length === 0) continue;
@@ -312,7 +397,16 @@ export class PackageCentralizerService {
         for (const packageName of projectPackages) {
           const version = packageVersions.get(packageName);
           if (version) {
-            content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
+            // Check if this is an analyzer used in a single project
+            const projectPkgs = packageToProjects.get(packageName);
+            const isSingleProjectAnalyzer = projectPkgs && projectPkgs.length === 1 && 
+              this.isAnalyzer(projectPkgs[0].pkg) && useGlobalAnalyzers;
+            
+            if (isSingleProjectAnalyzer) {
+              content += `    <PackageVersion Include="${packageName}" Version="$(GlobalAnalyzerPackageVersion)" />\n`;
+            } else {
+              content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
+            }
           }
         }
 
@@ -320,7 +414,9 @@ export class PackageCentralizerService {
       }
     } else {
       // Single ItemGroup with all packages sorted alphabetically
+      // Exclude global analyzers
       const allPackages = [...packageVersions.keys()]
+        .filter(pkgName => !globalAnalyzers.has(pkgName))
         .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
       if (allPackages.length > 0) {
@@ -329,7 +425,16 @@ export class PackageCentralizerService {
         for (const packageName of allPackages) {
           const version = packageVersions.get(packageName);
           if (version) {
-            content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
+            // Check if this is an analyzer used in a single project
+            const projectPkgs = packageToProjects.get(packageName);
+            const isSingleProjectAnalyzer = projectPkgs && projectPkgs.length === 1 && 
+              this.isAnalyzer(projectPkgs[0].pkg) && useGlobalAnalyzers;
+            
+            if (isSingleProjectAnalyzer) {
+              content += `    <PackageVersion Include="${packageName}" Version="$(GlobalAnalyzerPackageVersion)" />\n`;
+            } else {
+              content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
+            }
           }
         }
 
@@ -371,7 +476,9 @@ export class PackageCentralizerService {
    */
   centralize(
     input: string,
-    strategy: VersionResolutionStrategy = 'highest'
+    strategy: VersionResolutionStrategy = 'highest',
+    groupByProject: boolean = true,
+    useGlobalAnalyzers: boolean = false
   ): CentralizeResult {
     const projects = this.parseProjects(input);
     
@@ -391,7 +498,12 @@ export class PackageCentralizerService {
       content: this.updateCsprojContent(project.content)
     }));
 
-    const directoryPackagesProps = this.generateDirectoryPackagesProps(packageVersions, projects);
+    const directoryPackagesProps = this.generateDirectoryPackagesProps(
+      packageVersions, 
+      projects,
+      groupByProject,
+      useGlobalAnalyzers
+    );
 
     return {
       directoryPackagesProps,
