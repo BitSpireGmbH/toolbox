@@ -7,6 +7,8 @@ export interface PackageReference {
   name: string;
   version: string;
   originalLine: string;
+  attributes: Map<string, string>; // Non-version attributes like PrivateAssets, IncludeAssets
+  childElements: Map<string, string>; // Child elements like <PrivateAssets>all</PrivateAssets>
 }
 
 /**
@@ -130,6 +132,71 @@ export class PackageCentralizerService {
   }
 
   /**
+   * Check if two packages have the same attributes and child elements
+   */
+  private packagesAreEquivalent(pkg1: PackageReference, pkg2: PackageReference): boolean {
+    if (pkg1.name !== pkg2.name || pkg1.version !== pkg2.version) {
+      return false;
+    }
+
+    // Merge attributes and child elements for comparison
+    const allAttrs1 = new Map<string, string>();
+    for (const [key, value] of pkg1.attributes) {
+      allAttrs1.set(key, value);
+    }
+    for (const [key, value] of pkg1.childElements) {
+      allAttrs1.set(key, value);
+    }
+
+    const allAttrs2 = new Map<string, string>();
+    for (const [key, value] of pkg2.attributes) {
+      allAttrs2.set(key, value);
+    }
+    for (const [key, value] of pkg2.childElements) {
+      allAttrs2.set(key, value);
+    }
+
+    // Check if both have same attributes
+    if (allAttrs1.size !== allAttrs2.size) return false;
+    for (const [key, value] of allAttrs1) {
+      if (allAttrs2.get(key) !== value) return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Identify packages that appear in ALL projects with same version and attributes.
+   * These packages are candidates for GlobalPackageVersion entries.
+   * 
+   * @param projects - Array of parsed projects to analyze
+   * @returns Set of package names that appear in all projects with identical version and attributes
+   */
+  identifyGlobalPackages(projects: ParsedProject[]): Set<string> {
+    if (projects.length <= 1) {
+      return new Set();
+    }
+
+    const globalPackages = new Set<string>();
+    
+    // Get packages from first project
+    const firstProject = projects[0];
+    
+    for (const pkg of firstProject.packages) {
+      // Check if this package appears in all other projects with exact same attributes
+      const appearsInAll = projects.slice(1).every(project => {
+        return project.packages.some(otherPkg => this.packagesAreEquivalent(pkg, otherPkg));
+      });
+      
+      if (appearsInAll) {
+        globalPackages.add(pkg.name);
+      }
+    }
+    
+    return globalPackages;
+  }
+
+  /**
    * Compare two semantic versions
    * Returns: negative if a < b, positive if a > b, 0 if equal
    */
@@ -152,12 +219,13 @@ export class PackageCentralizerService {
     
     // Match PackageReference elements - handles both self-closing and with closing tag
     // Supports: Include="..." Version="..." or Include='...' Version='...'
-    const packageRefRegex = /<PackageReference\s+([^>]*(?:Include|Version)[^>]*)(?:\s*\/>|>[\s\S]*?<\/PackageReference>)/gi;
+    const packageRefRegex = /<PackageReference\s+([^>]*(?:Include|Version)[^>]*)(?:\s*\/>|>([\s\S]*?)<\/PackageReference>)/gi;
     
     let match;
     while ((match = packageRefRegex.exec(content)) !== null) {
       const fullMatch = match[0];
       const attributes = match[1];
+      const innerContent = match[2] || '';
       
       // Extract Include attribute
       const includeMatch = attributes.match(/Include\s*=\s*["']([^"']+)["']/i);
@@ -165,10 +233,35 @@ export class PackageCentralizerService {
       const versionMatch = attributes.match(/Version\s*=\s*["']([^"']+)["']/i);
       
       if (includeMatch && versionMatch) {
+        const packageName = includeMatch[1].trim();
+        const version = versionMatch[1].trim();
+        
+        // Extract all other inline attributes (not Include or Version)
+        const attributeMap = new Map<string, string>();
+        const attrRegex = /(\w+)\s*=\s*["']([^"']+)["']/gi;
+        let attrMatch;
+        while ((attrMatch = attrRegex.exec(attributes)) !== null) {
+          const attrName = attrMatch[1];
+          const attrValue = attrMatch[2];
+          if (attrName.toLowerCase() !== 'include' && attrName.toLowerCase() !== 'version') {
+            attributeMap.set(attrName, attrValue);
+          }
+        }
+        
+        // Extract child elements
+        const childElements = new Map<string, string>();
+        const childElemRegex = /<(\w+)>([^<]+)<\/\1>/gi;
+        let childMatch;
+        while ((childMatch = childElemRegex.exec(innerContent)) !== null) {
+          childElements.set(childMatch[1], childMatch[2].trim());
+        }
+        
         packages.push({
-          name: includeMatch[1].trim(),
-          version: versionMatch[1].trim(),
-          originalLine: fullMatch
+          name: packageName,
+          version: version,
+          originalLine: fullMatch,
+          attributes: attributeMap,
+          childElements: childElements
         });
       }
     }
@@ -295,11 +388,88 @@ export class PackageCentralizerService {
   </PropertyGroup>
 `;
 
+    // Identify global packages
+    const globalPackages = this.identifyGlobalPackages(projects);
+    
+    // Add GlobalPackageReference section if we have global packages
+    if (globalPackages.size > 0) {
+      const sortedGlobalPackages = Array.from(globalPackages).sort((a, b) => 
+        a.toLowerCase().localeCompare(b.toLowerCase())
+      );
+      
+      content += `  <ItemGroup Label="Global">\n`;
+      
+      for (const packageName of sortedGlobalPackages) {
+        const version = packageVersions.get(packageName);
+        if (version) {
+          // Find the package to get its attributes and child elements
+          const pkg = projects[0].packages.find(p => p.name === packageName);
+          if (pkg) {
+            const hasChildElements = pkg.childElements.size > 0;
+            const allAttributes = new Map(pkg.attributes);
+            
+            if (hasChildElements) {
+              // Use multi-line format with child elements
+              content += `    <GlobalPackageVersion Include="${packageName}" Version="${version}"`;
+              
+              // Add inline attributes
+              for (const [key, value] of pkg.attributes) {
+                content += ` ${key}="${value}"`;
+              }
+              
+              content += `>\n`;
+              
+              // Add child elements
+              for (const [key, value] of pkg.childElements) {
+                content += `      <${key}>${value}</${key}>\n`;
+              }
+              
+              content += `    </GlobalPackageVersion>\n`;
+            } else {
+              // Use single-line format
+              content += `    <GlobalPackageVersion Include="${packageName}" Version="${version}"`;
+              
+              // Add inline attributes (including those from child elements)
+              for (const [key, value] of allAttributes) {
+                content += ` ${key}="${value}"`;
+              }
+              
+              content += ` />\n`;
+            }
+          }
+        }
+      }
+      
+      content += `  </ItemGroup>\n`;
+    }
+
+    // Get non-global packages
+    const nonGlobalPackages = new Map<string, string>();
+    for (const [pkgName, version] of packageVersions) {
+      if (!globalPackages.has(pkgName)) {
+        nonGlobalPackages.set(pkgName, version);
+      }
+    }
+
     if (groupByProject) {
       // Group packages by project, using resolved versions
+      // Only include packages from first occurrence to avoid duplicates
+      const packageToFirstProject = new Map<string, string>();
+      
       for (const project of projects) {
-        // Get unique package names for this project, sorted alphabetically
-        const projectPackages = [...new Set(project.packages.map(p => p.name))]
+        for (const pkg of project.packages) {
+          if (!globalPackages.has(pkg.name) && !packageToFirstProject.has(pkg.name)) {
+            packageToFirstProject.set(pkg.name, project.name);
+          }
+        }
+      }
+      
+      for (const project of projects) {
+        // Get unique package names for this project that appear first in this project
+        const projectPackages = project.packages
+          .filter(p => !globalPackages.has(p.name) && packageToFirstProject.get(p.name) === project.name)
+          .map(p => p.name)
+          .filter((name, index, self) => self.indexOf(name) === index)
           .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
         if (projectPackages.length === 0) continue;
@@ -319,15 +489,15 @@ export class PackageCentralizerService {
         content += `  </ItemGroup>\n`;
       }
     } else {
-      // Single ItemGroup with all packages sorted alphabetically
-      const allPackages = [...packageVersions.keys()]
+      // Single ItemGroup with all non-global packages sorted alphabetically
+      const allPackages = [...nonGlobalPackages.keys()]
         .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
       if (allPackages.length > 0) {
         content += `  <ItemGroup>\n`;
 
         for (const packageName of allPackages) {
-          const version = packageVersions.get(packageName);
+          const version = nonGlobalPackages.get(packageName);
           if (version) {
             content += `    <PackageVersion Include="${packageName}" Version="${version}" />\n`;
           }
@@ -344,34 +514,68 @@ export class PackageCentralizerService {
 
   /**
    * Update csproj content to remove Version attributes from PackageReference elements
+   * and remove entire PackageReference elements for global packages.
+   * 
+   * @param content - The original csproj file content
+   * @param globalPackages - Set of package names that should be completely removed (default: empty set)
+   * @returns Updated csproj content with modifications applied
    */
-  updateCsprojContent(content: string): string {
-    // Replace PackageReference elements by removing Version attribute
-    return content.replace(
-      /<PackageReference\s+([^>]*?)Version\s*=\s*["'][^"']*["']\s*([^>]*?)\s*\/>/gi,
-      (match, before, after) => {
-        const cleanBefore = before.trim();
-        const cleanAfter = after.trim();
-        const attributes = [cleanBefore, cleanAfter].filter(a => a).join(' ');
-        return `<PackageReference ${attributes} />`;
-      }
-    ).replace(
-      /<PackageReference\s+([^>]*?)Version\s*=\s*["'][^"']*["']\s*([^>]*?)>/gi,
-      (match, before, after) => {
-        const cleanBefore = before.trim();
-        const cleanAfter = after.trim();
-        const attributes = [cleanBefore, cleanAfter].filter(a => a).join(' ');
-        return `<PackageReference ${attributes}>`;
+  updateCsprojContent(content: string, globalPackages: Set<string> = new Set()): string {
+    // First, remove entire PackageReference elements for global packages
+    for (const packageName of globalPackages) {
+      // Match both self-closing and regular closing tags
+      const escapedName = packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const selfClosingRegex = new RegExp(
+        `<PackageReference\\s+[^>]*Include\\s*=\\s*["']${escapedName}["'][^>]*\\/>`,
+        'gi'
+      );
+      const regularRegex = new RegExp(
+        `<PackageReference\\s+[^>]*Include\\s*=\\s*["']${escapedName}["'][^>]*>[\\s\\S]*?<\\/PackageReference>`,
+        'gi'
+      );
+      
+      content = content.replace(selfClosingRegex, '');
+      content = content.replace(regularRegex, '');
+    }
+    
+    // Remove Version attribute from remaining PackageReference elements, preserving other attributes
+    // Handle self-closing tags
+    content = content.replace(
+      /<PackageReference\s+([^>]*?)\s*\/>/gi,
+      (match, attributes) => {
+        // Remove Version attribute while preserving everything else
+        const cleanedAttributes = attributes.replace(/\s*Version\s*=\s*["'][^"']*["']/gi, '');
+        const trimmed = cleanedAttributes.trim();
+        return `<PackageReference ${trimmed} />`;
       }
     );
+    
+    // Handle opening tags (with closing tag elsewhere)
+    content = content.replace(
+      /<PackageReference\s+([^>]*?)>/gi,
+      (match, attributes) => {
+        // Remove Version attribute while preserving everything else
+        const cleanedAttributes = attributes.replace(/\s*Version\s*=\s*["'][^"']*["']/gi, '');
+        const trimmed = cleanedAttributes.trim();
+        return `<PackageReference ${trimmed}>`;
+      }
+    );
+    
+    return content;
   }
 
   /**
-   * Main method to centralize packages from multiple projects
+   * Main method to centralize packages from multiple projects.
+   * 
+   * @param input - Raw text input containing one or more csproj files
+   * @param strategy - Strategy for resolving version conflicts (default: 'highest')
+   * @param groupByProject - Whether to group packages by project in output (default: true)
+   * @returns Result containing Directory.Packages.props content, updated projects, and conflict information
    */
   centralize(
     input: string,
-    strategy: VersionResolutionStrategy = 'highest'
+    strategy: VersionResolutionStrategy = 'highest',
+    groupByProject: boolean = true
   ): CentralizeResult {
     const projects = this.parseProjects(input);
     
@@ -385,13 +589,14 @@ export class PackageCentralizerService {
     }
 
     const { packageVersions, conflicts } = this.resolveVersionConflicts(projects, strategy);
+    const globalPackages = this.identifyGlobalPackages(projects);
     
     const updatedProjects = projects.map(project => ({
       ...project,
-      content: this.updateCsprojContent(project.content)
+      content: this.updateCsprojContent(project.content, globalPackages)
     }));
 
-    const directoryPackagesProps = this.generateDirectoryPackagesProps(packageVersions, projects);
+    const directoryPackagesProps = this.generateDirectoryPackagesProps(packageVersions, projects, groupByProject);
 
     return {
       directoryPackagesProps,

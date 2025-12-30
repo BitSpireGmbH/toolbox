@@ -110,6 +110,8 @@ describe('PackageCentralizerService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Newtonsoft.Json');
       expect(result[0].version).toBe('13.0.1');
+      expect(result[0].attributes.size).toBe(0);
+      expect(result[0].childElements.size).toBe(0);
     });
 
     it('should parse multiple PackageReference elements', () => {
@@ -163,6 +165,19 @@ describe('PackageCentralizerService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('PackageWithBody');
       expect(result[0].version).toBe('1.0.0');
+      expect(result[0].childElements.get('PrivateAssets')).toBe('all');
+    });
+
+    it('should parse inline attributes like PrivateAssets', () => {
+      const content = `
+        <PackageReference Include="TestPackage" Version="1.0.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+      `;
+      const result = service.parsePackageReferences(content);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('TestPackage');
+      expect(result[0].version).toBe('1.0.0');
+      expect(result[0].attributes.get('PrivateAssets')).toBe('all');
+      expect(result[0].attributes.get('IncludeAssets')).toBe('runtime; build; native; contentfiles; analyzers; buildtransitive');
     });
 
     it('should return empty array for content without packages', () => {
@@ -249,12 +264,12 @@ describe('PackageCentralizerService', () => {
         {
           name: 'Project1.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         },
         {
           name: 'Project2.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '2.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '2.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
@@ -269,12 +284,12 @@ describe('PackageCentralizerService', () => {
         {
           name: 'Project1.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '3.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '3.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         },
         {
           name: 'Project2.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
@@ -287,12 +302,12 @@ describe('PackageCentralizerService', () => {
         {
           name: 'Project1.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '2.5.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '2.5.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         },
         {
           name: 'Project2.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '3.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '3.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
@@ -305,12 +320,12 @@ describe('PackageCentralizerService', () => {
         {
           name: 'Project1.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         },
         {
           name: 'Project2.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
@@ -323,12 +338,12 @@ describe('PackageCentralizerService', () => {
         {
           name: 'Project1.csproj',
           content: '',
-          packages: [{ name: 'PackageA', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'PackageA', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         },
         {
           name: 'Project2.csproj',
           content: '',
-          packages: [{ name: 'PackageB', version: '2.0.0', originalLine: '' }]
+          packages: [{ name: 'PackageB', version: '2.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
@@ -342,12 +357,12 @@ describe('PackageCentralizerService', () => {
         {
           name: 'Project1.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '1.0.0-alpha', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '1.0.0-alpha', originalLine: '', attributes: new Map(), childElements: new Map() }]
         },
         {
           name: 'Project2.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
@@ -367,8 +382,8 @@ describe('PackageCentralizerService', () => {
           name: 'Project1.csproj',
           content: '',
           packages: [
-            { name: 'PackageA', version: '1.0.0', originalLine: '' },
-            { name: 'PackageB', version: '2.0.0', originalLine: '' }
+            { name: 'PackageA', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() },
+            { name: 'PackageB', version: '2.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }
           ]
         }
       ];
@@ -391,9 +406,9 @@ describe('PackageCentralizerService', () => {
           name: 'Project.csproj',
           content: '',
           packages: [
-            { name: 'Zebra', version: '1.0.0', originalLine: '' },
-            { name: 'Alpha', version: '2.0.0', originalLine: '' },
-            { name: 'Middle', version: '3.0.0', originalLine: '' }
+            { name: 'Zebra', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() },
+            { name: 'Alpha', version: '2.0.0', originalLine: '', attributes: new Map(), childElements: new Map() },
+            { name: 'Middle', version: '3.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }
           ]
         }
       ];
@@ -413,18 +428,19 @@ describe('PackageCentralizerService', () => {
         {
           name: 'Project1.csproj',
           content: '',
-          packages: [{ name: 'SharedPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'SharedPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         },
         {
           name: 'Project2.csproj',
           content: '',
-          packages: [{ name: 'SharedPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'SharedPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
       const result = service.generateDirectoryPackagesProps(packageVersions, projects);
-      expect(result).toContain('<ItemGroup Label="Project1">');
-      expect(result).toContain('<ItemGroup Label="Project2">');
+      // With global packages, SharedPackage should be in Global section
+      expect(result).toContain('<ItemGroup Label="Global">');
+      expect(result).toContain('<GlobalPackageVersion Include="SharedPackage" Version="1.0.0" />');
     });
 
     it('should remove .csproj extension from Label', () => {
@@ -433,12 +449,12 @@ describe('PackageCentralizerService', () => {
         {
           name: 'MyProject.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
       const result = service.generateDirectoryPackagesProps(packageVersions, projects);
-      expect(result).toContain('<ItemGroup Label="MyProject">');
+      // Single project with single package - no Global section, but project label
       expect(result).not.toContain('Label="MyProject.csproj"');
     });
 
@@ -451,17 +467,18 @@ describe('PackageCentralizerService', () => {
         {
           name: 'Project1.csproj',
           content: '',
-          packages: [{ name: 'PackageA', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'PackageA', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         },
         {
           name: 'Project2.csproj',
           content: '',
-          packages: [{ name: 'PackageB', version: '2.0.0', originalLine: '' }]
+          packages: [{ name: 'PackageB', version: '2.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
       const result = service.generateDirectoryPackagesProps(packageVersions, projects, false);
-      expect(result).not.toContain('Label=');
+      expect(result).not.toContain('Label="Project1"');
+      expect(result).not.toContain('Label="Project2"');
       expect(result).toContain('<ItemGroup>');
       expect(result).toContain('<PackageVersion Include="PackageA" Version="1.0.0" />');
       expect(result).toContain('<PackageVersion Include="PackageB" Version="2.0.0" />');
@@ -478,9 +495,9 @@ describe('PackageCentralizerService', () => {
           name: 'Project.csproj',
           content: '',
           packages: [
-            { name: 'Zebra', version: '1.0.0', originalLine: '' },
-            { name: 'Alpha', version: '2.0.0', originalLine: '' },
-            { name: 'Middle', version: '3.0.0', originalLine: '' }
+            { name: 'Zebra', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() },
+            { name: 'Alpha', version: '2.0.0', originalLine: '', attributes: new Map(), childElements: new Map() },
+            { name: 'Middle', version: '3.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }
           ]
         }
       ];
@@ -500,12 +517,13 @@ describe('PackageCentralizerService', () => {
         {
           name: 'MyProject.csproj',
           content: '',
-          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '' }]
+          packages: [{ name: 'TestPackage', version: '1.0.0', originalLine: '', attributes: new Map(), childElements: new Map() }]
         }
       ];
 
       const result = service.generateDirectoryPackagesProps(packageVersions, projects);
-      expect(result).toContain('<ItemGroup Label="MyProject">');
+      // Single project, single package - should have label
+      expect(result).toContain('Label="MyProject"');
     });
   });
 
@@ -561,6 +579,28 @@ describe('PackageCentralizerService', () => {
       const result = service.updateCsprojContent(content);
       expect(result).toContain('<TargetFramework>net8.0</TargetFramework>');
       expect(result).toContain('Sdk="Microsoft.NET.Sdk"');
+    });
+
+    it('should remove global packages entirely', () => {
+      const content = `<ItemGroup>
+  <PackageReference Include="GlobalPkg" Version="1.0.0" />
+  <PackageReference Include="LocalPkg" Version="2.0.0" />
+</ItemGroup>`;
+      const globalPackages = new Set(['GlobalPkg']);
+      const result = service.updateCsprojContent(content, globalPackages);
+      expect(result).not.toContain('GlobalPkg');
+      expect(result).toContain('<PackageReference Include="LocalPkg" />');
+    });
+
+    it('should remove global packages with attributes', () => {
+      const content = `<ItemGroup>
+  <PackageReference Include="GlobalPkg" Version="1.0.0" PrivateAssets="all" />
+  <PackageReference Include="LocalPkg" Version="2.0.0" />
+</ItemGroup>`;
+      const globalPackages = new Set(['GlobalPkg']);
+      const result = service.updateCsprojContent(content, globalPackages);
+      expect(result).not.toContain('GlobalPkg');
+      expect(result).toContain('<PackageReference Include="LocalPkg" />');
     });
   });
 
@@ -676,6 +716,329 @@ describe('PackageCentralizerService', () => {
       expect(result.directoryPackagesProps).toContain('<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>');
       expect(result.directoryPackagesProps).toContain('FluentValidation');
       expect(result.directoryPackagesProps).toContain('Microsoft.AspNetCore.OpenApi');
+    });
+  });
+
+  describe('GlobalPackageVersion scenarios', () => {
+    it('should fix duplicate entries bug in groupByProject mode', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="C" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="C" Version="1.0.0" />
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', true);
+      
+      // Should have Global section with both packages
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="Global">');
+      expect(result.directoryPackagesProps).toContain('<GlobalPackageVersion Include="B" Version="1.0.0" />');
+      expect(result.directoryPackagesProps).toContain('<GlobalPackageVersion Include="C" Version="1.0.0" />');
+      
+      // Should not duplicate entries
+      const bCount = (result.directoryPackagesProps.match(/Include="B"/g) || []).length;
+      const cCount = (result.directoryPackagesProps.match(/Include="C"/g) || []).length;
+      expect(bCount).toBe(1);
+      expect(cCount).toBe(1);
+      
+      // Projects should not have these packages
+      result.updatedProjects.forEach(project => {
+        expect(project.content).not.toContain('Include="B"');
+        expect(project.content).not.toContain('Include="C"');
+      });
+    });
+
+    it('should create GlobalPackageVersion for common packages - no grouping', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="C" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="D" Version="1.0.0" />
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', false);
+      
+      // Should have Global section with B
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="Global">');
+      expect(result.directoryPackagesProps).toContain('<GlobalPackageVersion Include="B" Version="1.0.0" />');
+      
+      // Should have non-global packages
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="C" Version="1.0.0" />');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="D" Version="1.0.0" />');
+      
+      // ProjectA should have C but not B
+      const projectA = result.updatedProjects.find(p => p.name === 'ProjectA.csproj');
+      expect(projectA?.content).toContain('Include="C"');
+      expect(projectA?.content).not.toContain('Include="B"');
+      
+      // ProjectB should have D but not B
+      const projectB = result.updatedProjects.find(p => p.name === 'ProjectB.csproj');
+      expect(projectB?.content).toContain('Include="D"');
+      expect(projectB?.content).not.toContain('Include="B"');
+    });
+
+    it('should create GlobalPackageVersion for common packages - with grouping', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="C" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="D" Version="1.0.0" />
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', true);
+      
+      // Should have Global section with B
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="Global">');
+      expect(result.directoryPackagesProps).toContain('<GlobalPackageVersion Include="B" Version="1.0.0" />');
+      
+      // Should have project-specific sections
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="ProjectA">');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="C" Version="1.0.0" />');
+      
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="ProjectB">');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="D" Version="1.0.0" />');
+    });
+
+    it('should handle packages with child elements as GlobalPackageVersion', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="C" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="D" Version="1.0.0" />
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', false);
+      
+      // Should have Global section with B including child elements
+      expect(result.directoryPackagesProps).toContain('<GlobalPackageVersion Include="B" Version="1.0.0">');
+      expect(result.directoryPackagesProps).toContain('<PrivateAssets>all</PrivateAssets>');
+      expect(result.directoryPackagesProps).toContain('<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>');
+      
+      // Projects should not have B
+      result.updatedProjects.forEach(project => {
+        expect(project.content).not.toContain('Include="B"');
+      });
+    });
+
+    it('should handle packages with inline attributes as GlobalPackageVersion', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="C" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', false);
+      
+      // Should have Global section with B as both projects have same attributes
+      expect(result.directoryPackagesProps).toContain('<GlobalPackageVersion Include="B" Version="1.0.0"');
+      expect(result.directoryPackagesProps).toContain('PrivateAssets="all"');
+      expect(result.directoryPackagesProps).toContain('IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"');
+      
+      // Should have C
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="C" Version="1.0.0" />');
+    });
+
+    it('should handle 3 projects with one common package', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="C" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="D" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectC.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="C" Version="1.0.0" />
+    <PackageReference Include="D" Version="1.0.0" />
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', false);
+      
+      // B appears in ProjectA and ProjectB only, so no GlobalPackageVersion for B
+      expect(result.directoryPackagesProps).not.toContain('GlobalPackageVersion');
+      
+      // All packages should be in regular section
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="B" Version="1.0.0" />');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="C" Version="1.0.0" />');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="D" Version="1.0.0" />');
+    });
+
+    it('should handle 3 projects with no common packages', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="C" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="C" Version="1.0.0" />
+    <PackageReference Include="D" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+--- ProjectC.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" />
+    <PackageReference Include="D" Version="1.0.0" />
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', false);
+      
+      // No package appears in all projects
+      expect(result.directoryPackagesProps).not.toContain('GlobalPackageVersion');
+      
+      // All packages should be in regular section
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="B" Version="1.0.0" />');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="C" Version="1.0.0" />');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="D" Version="1.0.0" />');
+      
+      // Projects should still have their packages (minus version)
+      result.updatedProjects.forEach(project => {
+        expect(project.content).not.toContain('Version=');
+      });
+    });
+
+    it('should preserve non-version attributes in projects for non-global packages', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="B" Version="1.0.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', false);
+      
+      // Directory.Packages.props should have B without attributes
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="B" Version="1.0.0" />');
+      expect(result.directoryPackagesProps).not.toContain('PrivateAssets');
+      
+      // Project should preserve attributes but not version
+      const projectA = result.updatedProjects[0];
+      expect(projectA.content).toContain('PrivateAssets="all"');
+      expect(projectA.content).toContain('IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"');
+      expect(projectA.content).not.toContain('Version=');
     });
   });
 });

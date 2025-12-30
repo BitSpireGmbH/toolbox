@@ -165,7 +165,7 @@ interface ProjectTab {
                 </label>
                 <div>
                   <span class="text-sm font-medium text-gray-700">Group by Project</span>
-                  <p class="text-xs text-gray-500">Create separate ItemGroups with Label for each project</p>
+                  <p class="text-xs text-gray-500">Create separate ItemGroups with Label for each project. Duplicate packages are assigned to the first project where they occur.</p>
                 </div>
               </div>
 
@@ -446,9 +446,11 @@ export class PackageCentralizerComponent {
             this.resolutionStrategy()
         );
 
+        const globalPackages = this.service.identifyGlobalPackages(projectsWithPackages);
+
         const updatedProjects = projectsWithPackages.map(project => ({
             ...project,
-            content: this.service.updateCsprojContent(project.content)
+            content: this.service.updateCsprojContent(project.content, globalPackages)
         }));
 
         const directoryPackagesProps = this.service.generateDirectoryPackagesProps(
