@@ -1076,5 +1076,59 @@ describe('PackageCentralizerService', () => {
         expect(projectASection[0]).not.toContain('Meziantou.Analyzer');
       }
     });
+
+    it('should not create duplicates when useGlobalAnalyzers is false', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', true, false);
+
+      // Should not have GlobalPackageReference
+      expect(result.directoryPackagesProps).not.toContain('GlobalPackageReference');
+      expect(result.directoryPackagesProps).not.toContain('Label="Global Packages"');
+      
+      // Should have packages in project groups
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="ProjectA">');
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="ProjectB">');
+      
+      // Count occurrences of each package - should only appear once per project
+      const projectASectionMatch = result.directoryPackagesProps.match(/<ItemGroup Label="ProjectA">[\s\S]*?<\/ItemGroup>/);
+      const projectBSectionMatch = result.directoryPackagesProps.match(/<ItemGroup Label="ProjectB">[\s\S]*?<\/ItemGroup>/);
+      
+      if (projectASectionMatch) {
+        const projectAContent = projectASectionMatch[0];
+        const meziantouCount = (projectAContent.match(/Meziantou\.Analyzer/g) || []).length;
+        const sourcelinkCount = (projectAContent.match(/Microsoft\.SourceLink\.GitHub/g) || []).length;
+        expect(meziantouCount).toBe(1);
+        expect(sourcelinkCount).toBe(1);
+      }
+      
+      if (projectBSectionMatch) {
+        const projectBContent = projectBSectionMatch[0];
+        const meziantouCount = (projectBContent.match(/Meziantou\.Analyzer/g) || []).length;
+        expect(meziantouCount).toBe(1);
+      }
+    });
   });
 });
