@@ -118,12 +118,8 @@ import { RouterLink } from '@angular/router';
               <div class="relative">
                 <div class="flex items-center gap-3 mb-3">
                   <div class="w-10 h-10 bg-linear-to-br from-brand-primary to-brand-secondary rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-brand-primary/25 transition-all duration-300" aria-hidden="true">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <circle cx="18" cy="18" r="3"></circle>
-                      <circle cx="6" cy="6" r="3"></circle>
-                      <path d="M6 9v6"></path>
-                      <path d="M9 6h6"></path>
-                      <path d="M9 18h6"></path>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
                     </svg>
                   </div>
                   <div>
@@ -134,6 +130,34 @@ import { RouterLink } from '@angular/router';
                 <p class="text-sm text-gray-600 leading-relaxed mb-3">Build ASP.NET Core middleware pipelines visually and export ready-to-use C# code.</p>
                 <div class="flex items-center gap-1.5 text-brand-primary font-semibold text-xs">
                   <span>Start Designing</span>
+                  <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </a>
+
+            <!-- Package Centralizer Card -->
+            <a routerLink="/package-centralizer"
+               class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-emerald-500 overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+              <div class="absolute inset-0 bg-linear-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 bg-linear-to-br from-emerald-500 to-teal-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-emerald-500/25 transition-all duration-300" aria-hidden="true">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                      <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                      <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-gray-900 group-hover:text-emerald-600 transition-colors duration-300">Package Centralizer</h3>
+                    <span class="text-xs text-gray-500 font-medium">NuGet CPM Tool</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed mb-3">Convert .NET projects to Central Package Management with Directory.Packages.props.</p>
+                <div class="flex items-center gap-1.5 text-emerald-600 font-semibold text-xs">
+                  <span>Start Centralizing</span>
                   <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>

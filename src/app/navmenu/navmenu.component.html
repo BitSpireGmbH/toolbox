@@ -120,6 +120,28 @@
         </span>
       }
     </a>
+
+    <a
+      routerLink="/package-centralizer"
+      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      [class.justify-center]="!sidebarOpen()"
+      [class.px-3]="sidebarOpen()"
+      [class.gap-3]="sidebarOpen()"
+      aria-label="Package Centralizer">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+      @if (sidebarOpen()) {
+        <span class="text-sm whitespace-nowrap overflow-hidden">Package Centralizer</span>
+      } @else {
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          Package Centralizer
+        </span>
+      }
+    </a>
   </nav>
 
   @if (sidebarOpen()) {
@@ -228,6 +250,19 @@
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
         <span class="font-medium">JWT Decoder</span>
+      </a>
+
+      <a
+        routerLink="/package-centralizer"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        (click)="onCloseSidebar()"
+        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        <span class="font-medium">Package Centralizer</span>
       </a>
     </nav>
 

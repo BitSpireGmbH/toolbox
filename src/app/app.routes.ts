@@ -25,5 +25,9 @@ export const routes: Routes = [
   {
     path: 'jwt-decoder',
     loadComponent: () => import('./jwt-decoder/jwt-decoder').then(m => m.JwtDecoderComponent)
+  },
+  {
+    path: 'package-centralizer',
+    loadComponent: () => import('./package-centralizer/package-centralizer').then(m => m.PackageCentralizerComponent)
   }
 ];
