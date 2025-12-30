@@ -6,15 +6,15 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center p-6">
-      <div class="max-w-[1600px] w-full">
+    <div class="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center p-6">
+      <div class="max-w-400 w-full">
         <!-- Header -->
         <header class="text-center mb-12 animate-fade-in">
           <div class="mb-6 relative inline-block">
-            <div class="absolute inset-0 bg-gradient-to-r from-brand-primary to-brand-secondary blur-2xl opacity-20 rounded-full"></div>
+            <div class="absolute inset-0 bg-linear-to-r from-brand-primary to-brand-secondary blur-2xl opacity-20 rounded-full"></div>
               <img src="assets/logo.webp" alt="Logo" class="w-56 mx-auto relative" width="224" height="auto" />
           </div>
-          <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent mb-4">
+          <h1 class="text-5xl md:text-6xl font-bold bg-linear-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent mb-4">
             Developer Toolbox
           </h1>
           <p class="text-xl text-gray-600 font-medium max-w-2xl mx-auto mb-6">
@@ -33,10 +33,10 @@ import { RouterLink } from '@angular/router';
             <!-- JSON -> C# Card -->
             <a routerLink="/csharp-json"
                class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-brand-primary overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2">
-              <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/0 via-brand-primary/0 to-brand-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="absolute inset-0 bg-linear-to-br from-brand-primary/0 via-brand-primary/0 to-brand-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div class="relative">
                 <div class="flex items-center gap-3 mb-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-brand-primary to-blue-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-brand-primary/25 transition-all duration-300" aria-hidden="true">
+                  <div class="w-10 h-10 bg-linear-to-br from-brand-primary to-blue-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-brand-primary/25 transition-all duration-300" aria-hidden="true">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                       <polyline points="14 2 14 8 20 8"></polyline>
@@ -60,10 +60,10 @@ import { RouterLink } from '@angular/router';
             <!-- C# <-> TypeScript Card -->
             <a routerLink="/csharp-typescript"
                class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-brand-secondary overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:ring-offset-2">
-              <div class="absolute inset-0 bg-gradient-to-br from-brand-secondary/0 via-brand-secondary/0 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="absolute inset-0 bg-linear-to-br from-brand-secondary/0 via-brand-secondary/0 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div class="relative">
                 <div class="flex items-center gap-3 mb-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-brand-secondary to-purple-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-brand-secondary/25 transition-all duration-300" aria-hidden="true">
+                  <div class="w-10 h-10 bg-linear-to-br from-brand-secondary to-purple-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-brand-secondary/25 transition-all duration-300" aria-hidden="true">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polyline points="16 18 22 12 16 6"></polyline>
                       <polyline points="8 6 2 12 8 18"></polyline>
@@ -87,10 +87,10 @@ import { RouterLink } from '@angular/router';
             <!-- JWT Decoder Card -->
             <a routerLink="/jwt-decoder"
                class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-amber-500 overflow-hidden focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
-              <div class="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="absolute inset-0 bg-linear-to-br from-amber-500/0 via-amber-500/0 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div class="relative">
                 <div class="flex items-center gap-3 mb-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-amber-500/25 transition-all duration-300" aria-hidden="true">
+                  <div class="w-10 h-10 bg-linear-to-br from-amber-500 to-orange-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-amber-500/25 transition-all duration-300" aria-hidden="true">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -114,10 +114,10 @@ import { RouterLink } from '@angular/router';
             <!-- Middleware Designer Card -->
             <a routerLink="/middleware-designer"
                class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-brand-primary overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2">
-              <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/0 via-purple-500/0 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="absolute inset-0 bg-linear-to-br from-brand-primary/0 via-purple-500/0 to-brand-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div class="relative">
                 <div class="flex items-center gap-3 mb-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-brand-primary/25 transition-all duration-300" aria-hidden="true">
+                  <div class="w-10 h-10 bg-linear-to-br from-brand-primary to-brand-secondary rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-brand-primary/25 transition-all duration-300" aria-hidden="true">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <circle cx="18" cy="18" r="3"></circle>
                       <circle cx="6" cy="6" r="3"></circle>

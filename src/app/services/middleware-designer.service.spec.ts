@@ -152,10 +152,10 @@ describe('MiddlewareDesignerService', () => {
 
       const code = service.generateCSharpCode(pipeline);
 
-      expect(code).toContain('app.UseCors(policy => policy');
-      expect(code).toContain('WithOrigins("https://example.com")');
-      expect(code).toContain('WithMethods("GET", "POST")');
-      expect(code).toContain('AllowCredentials()');
+      expect(code).toContain('app.UseCors(policy =>');
+      expect(code).toContain('policy.WithOrigins("https://example.com")');
+      expect(code).toContain('.WithMethods("GET", "POST")');
+      expect(code).toContain('.AllowCredentials()');
     });
 
     it('should generate static files configuration', () => {
@@ -1066,7 +1066,7 @@ describe('MiddlewareDesignerService', () => {
 
       expect(result.warnings.length).toBeGreaterThan(0);
       expect(result.warnings.some((w) => w.middlewareId === '2')).toBe(true);
-      expect(result.warnings.some((w) => w.message.includes('Code order') && w.message.includes('Execution order'))).toBe(true);
+      expect(result.warnings.some((w) => w.message.includes('Code order') && w.message.includes('execution order'))).toBe(true);
     });
 
     it('should not warn when middleware is placed before MinimalAPIEndpoint', () => {

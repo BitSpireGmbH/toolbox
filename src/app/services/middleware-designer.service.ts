@@ -125,9 +125,7 @@ export class MiddlewareDesignerService {
 
     // Add all unique service registrations
     if (serviceRegistrations.size > 0) {
-      for (const registration of serviceRegistrations) {
-        code += registration + '\n';
-      }
+      code += [...serviceRegistrations].join('\n') + '\n\n';
     }
 
     code += `var app = builder.Build();\n\n`;

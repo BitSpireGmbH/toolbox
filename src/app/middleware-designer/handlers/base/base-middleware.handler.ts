@@ -29,7 +29,19 @@ export abstract class BaseMiddlewareHandler implements IMiddlewareHandler {
   }
 
   validate(config: MiddlewareConfig, pipeline: Pipeline, middlewareId: string): ValidationIssue[] {
-    return [];
+    const issues: ValidationIssue[] = [];
+    const middlewareIndex = pipeline.middlewares.findIndex(m => m.id === middlewareId);
+    const endpointIndex = pipeline.middlewares.findIndex(m => m.type === 'MinimalAPIEndpoint');
+
+    if (this.type !== 'MinimalAPIEndpoint' && endpointIndex !== -1 && middlewareIndex > endpointIndex) {
+      issues.push({
+        type: 'warning',
+        middlewareId,
+        message: 'Code order differs from execution order. This middleware will run before the endpoint handler.',
+      });
+    }
+
+    return issues;
   }
 
   supportsBranching(): boolean {

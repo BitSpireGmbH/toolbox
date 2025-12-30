@@ -30,7 +30,7 @@ import {
   imports: [FormsModule, DragDropModule, MiddlewareLibraryItemComponent, MiddlewareNodeCardComponent, SimulationStepComponent, ValidationMessagesComponent, MiddlewareEditModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-[1600px] mx-auto p-6">
+    <div class="max-w-400 mx-auto p-6">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
@@ -89,7 +89,7 @@ import {
 
       <!-- Pipeline Actions -->
       @if (showLibrary()) {
-        <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
+        <div class="bg-linear-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
           <div class="flex gap-2 flex-wrap items-center">
             <button
               (click)="clearPipeline()"
@@ -133,9 +133,9 @@ import {
         <div class="flex gap-0 relative w-full">
           <!-- Canvas -->
           @if (splitRatio() > 0) {
-          <div class="flex-shrink-0 transition-all" [style]="canvasWidthStyle()">
+          <div class="shrink-0 transition-all" [style]="canvasWidthStyle()">
             <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
-          <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
+          <div class="bg-linear-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-1.5 rounded-full" [class]="pipeline().middlewares.length > 0 ? 'bg-green-500' : 'bg-gray-300'"></div>
               <h3 class="font-semibold text-sm text-gray-700">Pipeline Canvas</h3>
@@ -143,7 +143,7 @@ import {
             <span class="text-xs text-gray-500">{{ pipeline().middlewares.length }} middleware(s)</span>
           </div>
 
-          <div [class]="splitRatio() === 100 ? 'p-4 min-h-[800px]' : 'p-4 min-h-[600px]'">
+          <div [class]="splitRatio() === 100 ? 'p-4 min-h-200' : 'p-4 min-h-150'">
             @if (pipeline().middlewares.length === 0) {
               <div class="text-center py-20 text-gray-500">
                 <p class="text-base font-medium">No middleware added yet</p>
@@ -181,16 +181,16 @@ import {
             <div
               (mousedown)="startResize($event)"
               [class]="isResizing() ? 'bg-brand-primary' : 'bg-gray-300 hover:bg-brand-primary'"
-              class="w-1 cursor-col-resize transition-colors flex-shrink-0 mx-2 relative group">
+              class="w-1 cursor-col-resize transition-colors shrink-0 mx-2 relative group">
               <div class="absolute inset-y-0 -left-1 -right-1"></div>
             </div>
           }
 
         <!-- Code Output -->
         @if (splitRatio() < 100) {
-        <div class="flex-shrink-0 transition-all" [style]="codeWidthStyle()">
+        <div class="shrink-0 transition-all" [style]="codeWidthStyle()">
           <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow h-full w-full flex flex-col">
-            <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center flex-shrink-0">
+            <div class="bg-linear-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center shrink-0">
               <div class="flex items-center gap-2">
                 <div class="w-1.5 h-1.5 rounded-full" [class]="generatedCode() ? 'bg-green-500' : 'bg-gray-500'"></div>
                 <h3 class="font-semibold text-sm text-gray-200">Generated C# Code</h3>
@@ -213,7 +213,7 @@ import {
             <textarea
               [value]="generatedCode()"
               readonly
-              class="w-full flex-grow p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none min-h-[600px]"
+              class="w-full grow p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none min-h-150"
               placeholder="Generated C# code will appear here..."></textarea>
           </div>
         </div>

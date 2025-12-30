@@ -10,43 +10,38 @@ export class CorsHandler extends SecurityMiddlewareHandler {
   readonly type = 'CORS' as const;
 
   generateCode(config: MiddlewareConfig, indent = ''): string {
-    if (config.allowedOrigins && config.allowedOrigins.length > 0) {
-      return `${indent}app.UseCors("AllowSpecificOrigins");\n`;
-    }
-    return `${indent}app.UseCors();\n`;
-  }
-
-  override generateServiceRegistration(config: MiddlewareConfig): string {
-    let code = `builder.Services.AddCors(options =>\n`;
-    code += `{\n`;
-    code += `    options.AddPolicy("AllowSpecificOrigins", policy =>\n`;
-    code += `    {\n`;
+    let code = `${indent}app.UseCors(policy =>\n`;
+    code += `${indent}{\n`;
 
     if (config.allowedOrigins && config.allowedOrigins.length > 0) {
       const origins = config.allowedOrigins.map(o => `"${o}"`).join(', ');
-      code += `        policy.WithOrigins(${origins})\n`;
+      code += `${indent}    policy.WithOrigins(${origins})\n`;
     } else {
-      code += `        policy.AllowAnyOrigin()\n`;
+      code += `${indent}    policy.AllowAnyOrigin()\n`;
     }
 
     if (config.allowedMethods && config.allowedMethods.length > 0) {
       const methods = config.allowedMethods.map(m => `"${m}"`).join(', ');
-      code += `              .WithMethods(${methods})\n`;
+      code += `${indent}          .WithMethods(${methods})\n`;
     } else {
-      code += `              .AllowAnyMethod()\n`;
+      code += `${indent}          .AllowAnyMethod()\n`;
     }
 
-    code += `              .AllowAnyHeader()`;
+    code += `${indent}          .AllowAnyHeader()`;
 
     if (config.allowCredentials) {
-      code += `\n              .AllowCredentials()`;
+      code += `\n${indent}          .AllowCredentials()`;
     }
 
     code += `;\n`;
-    code += `    });\n`;
-    code += `});\n`;
+    code += `${indent}});\n`;
 
     return code;
+  }
+
+  override generateServiceRegistration(config: MiddlewareConfig): string {
+    // No separate service registration needed when policy is inline
+    return '';
   }
 
   simulate(

@@ -6,7 +6,7 @@ import type { MiddlewareNode, MiddlewareConfig } from '../models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex items-start gap-3">
-      <div class="flex-shrink-0 w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-700">
+      <div class="shrink-0 w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-700">
         {{ middleware().order }}
       </div>
       <div class="flex-1 min-w-0">
