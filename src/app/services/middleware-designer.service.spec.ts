@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 import {
   MiddlewareDesignerService,
   Pipeline,
@@ -6,12 +7,16 @@ import {
   SimulationRequest,
   BranchCondition,
 } from './middleware-designer.service';
+import { MiddlewareHandlerFactory } from '../middleware-designer/middleware-handler.factory';
 
 describe('MiddlewareDesignerService', () => {
   let service: MiddlewareDesignerService;
 
   beforeEach(() => {
-    service = new MiddlewareDesignerService();
+    TestBed.configureTestingModule({
+      providers: [MiddlewareDesignerService, MiddlewareHandlerFactory],
+    });
+    service = TestBed.inject(MiddlewareDesignerService);
   });
 
   describe('Validation', () => {

@@ -1,4 +1,4 @@
-import { MiddlewareNode, MiddlewareConfig, BranchCondition } from '../services/middleware-designer.service';
+import type { MiddlewareNode, MiddlewareConfig, BranchCondition } from './models';
 
 export interface EditConfig {
   // Routing

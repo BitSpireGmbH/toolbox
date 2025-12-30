@@ -1,6 +1,6 @@
 import { Component, input, output, ChangeDetectionStrategy, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MiddlewareNode } from '../../services/middleware-designer.service';
+import type { MiddlewareNode } from '../models';
 import { EditConfig } from '../middleware-config.utils';
 
 @Component({

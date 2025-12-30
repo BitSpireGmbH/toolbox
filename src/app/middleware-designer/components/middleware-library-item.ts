@@ -1,6 +1,6 @@
 import { Component, input, output, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { MiddlewareType, MiddlewareConfig } from '../../services/middleware-designer.service';
+import type { MiddlewareType, MiddlewareConfig } from '../models';
 
 export interface MiddlewareLibraryItemData {
   type: MiddlewareType;

@@ -1,5 +1,5 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { MiddlewareNode, MiddlewareConfig } from '../../services/middleware-designer.service';
+import type { MiddlewareNode, MiddlewareConfig } from '../models';
 
 @Component({
   selector: 'app-middleware-node-card',
