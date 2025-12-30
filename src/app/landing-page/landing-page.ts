@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
         <header class="text-center mb-12 animate-fade-in">
           <div class="mb-6 relative inline-block">
             <div class="absolute inset-0 bg-gradient-to-r from-brand-primary to-brand-secondary blur-2xl opacity-20 rounded-full"></div>
-              <img src="/assets/logo.webp" alt="Bitspire Logo" class="w-56 mx-auto relative" width="224" height="auto" />
+              <img src="/assets/logo.webp" alt="Logo" class="w-56 mx-auto relative" width="224" height="auto" />
           </div>
           <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent mb-4">
             Developer Toolbox

@@ -28,10 +28,7 @@
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
       aria-label="Home">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
+      <img class="w-5 h-5 shrink-0" aria-label="Home icon" alt="Home" src="/assets/logo_small.webp" />
       @if (sidebarOpen()) {
         <span class="text-sm whitespace-nowrap overflow-hidden">Home</span>
       } @else {
@@ -142,9 +139,7 @@
 <!-- Mobile Header -->
 <div class="md:hidden fixed top-0 left-0 right-0 z-40 bg-gray-950 border-b border-gray-800 h-14 flex items-center justify-between px-4">
   <a href="/" class="flex items-center gap-2 text-white" aria-label="Home">
-    <svg class="w-6 h-6 text-brand-primary" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-    </svg>
+    <img class="w-5 h-5 shrink-0" aria-label="Home icon" alt="Home" src="/assets/logo_small.webp" />
     <span class="font-semibold text-sm">.NET Toolbox</span>
   </a>
   <button
