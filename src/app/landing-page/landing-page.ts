@@ -164,6 +164,35 @@ import { RouterLink } from '@angular/router';
                 </div>
               </div>
             </a>
+
+            <!-- LINQ Visualizer Card -->
+            <a routerLink="/linq-visualizer"
+               class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-violet-500 overflow-hidden focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2">
+              <div class="absolute inset-0 bg-linear-to-br from-violet-500/0 via-violet-500/0 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 bg-linear-to-br from-violet-500 to-purple-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-violet-500/25 transition-all duration-300" aria-hidden="true">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 3v18h18"></path>
+                      <path d="M18 17V9"></path>
+                      <path d="M13 17V5"></path>
+                      <path d="M8 17v-3"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-gray-900 group-hover:text-violet-600 transition-colors duration-300">LINQ Visualizer</h3>
+                    <span class="text-xs text-gray-500 font-medium">Query Builder</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed mb-3">Visualize LINQ queries with interactive marble diagrams and see data flow in real-time.</p>
+                <div class="flex items-center gap-1.5 text-violet-600 font-semibold text-xs">
+                  <span>Start Visualizing</span>
+                  <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </a>
           </div>
         </main>
 

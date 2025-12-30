@@ -29,5 +29,9 @@ export const routes: Routes = [
   {
     path: 'package-centralizer',
     loadComponent: () => import('./package-centralizer/package-centralizer').then(m => m.PackageCentralizerComponent)
+  },
+  {
+    path: 'linq-visualizer',
+    loadComponent: () => import('./linq-visualizer/linq-visualizer').then(m => m.LinqVisualizerComponent)
   }
 ];
