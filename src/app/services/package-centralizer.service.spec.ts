@@ -811,7 +811,7 @@ describe('PackageCentralizerService', () => {
       expect(result).toContain('IncludeAssets="Runtime;Build;Native;Contentfiles;Analyzers;Buildtransitive"');
     });
 
-    it('should use GlobalPackageReference with version for single-project analyzers', () => {
+    it('should NOT use GlobalPackageReference for single-project analyzers', () => {
       const packageVersions = new Map([
         ['Microsoft.SourceLink.GitHub', '8.0.0']
       ]);
@@ -833,10 +833,10 @@ describe('PackageCentralizerService', () => {
 
       const result = service.generateDirectoryPackagesProps(packageVersions, projects, true, true);
 
-      expect(result).toContain('<GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0"');
-      expect(result).toContain('PrivateAssets="All"');
-      expect(result).toContain('IncludeAssets=');
-      expect(result).not.toContain('$(GlobalAnalyzerPackageVersion)');
+      // Single-project analyzers should remain as regular PackageVersion
+      expect(result).toContain('<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />');
+      expect(result).not.toContain('GlobalPackageReference');
+      expect(result).not.toContain('Label="Global Packages"');
     });
 
     it('should not create GlobalPackageReference when useGlobalAnalyzers is false', () => {
@@ -927,11 +927,12 @@ describe('PackageCentralizerService', () => {
 
       const result = service.generateDirectoryPackagesProps(packageVersions, projects, true, true);
 
-      // Should have GlobalPackageReference for multi-project analyzer
+      // Should have GlobalPackageReference for multi-project analyzer only
       expect(result).toContain('<GlobalPackageReference Include="Meziantou.Analyzer"');
       
-      // Should have GlobalPackageReference with version for single-project analyzer
-      expect(result).toContain('<GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0"');
+      // Single-project analyzer should remain as regular PackageVersion in Project1
+      expect(result).toContain('<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />');
+      expect(result).not.toContain('<GlobalPackageReference Include="Microsoft.SourceLink.GitHub"');
       
       // Should have regular version for non-analyzer
       expect(result).toContain('<PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />');
@@ -1029,6 +1030,51 @@ describe('PackageCentralizerService', () => {
 
       expect(result.directoryPackagesProps).not.toContain('GlobalPackageReference');
       expect(result.directoryPackagesProps).toContain('<PackageVersion Include="Meziantou.Analyzer" Version="2.0.239" />');
+    });
+
+    it('should handle the user example: ProjectA with 2 analyzers, ProjectB with 1 shared analyzer', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', true, true);
+
+      // Should have GlobalPackageReference for Meziantou.Analyzer (used in both projects)
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="Global Packages">');
+      expect(result.directoryPackagesProps).toContain('<GlobalPackageReference Include="Meziantou.Analyzer" Version="2.0.239"');
+      
+      // Should NOT have GlobalPackageReference for Microsoft.SourceLink.GitHub (used in one project)
+      expect(result.directoryPackagesProps).not.toContain('<GlobalPackageReference Include="Microsoft.SourceLink.GitHub"');
+      
+      // Microsoft.SourceLink.GitHub should remain in ProjectA as regular PackageVersion
+      expect(result.directoryPackagesProps).toContain('<ItemGroup Label="ProjectA">');
+      expect(result.directoryPackagesProps).toContain('<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />');
+      
+      // Meziantou.Analyzer should NOT appear in individual project groups
+      const projectASection = result.directoryPackagesProps.match(/<ItemGroup Label="ProjectA">[\s\S]*?<\/ItemGroup>/);
+      if (projectASection) {
+        expect(projectASection[0]).not.toContain('Meziantou.Analyzer');
+      }
     });
   });
 });

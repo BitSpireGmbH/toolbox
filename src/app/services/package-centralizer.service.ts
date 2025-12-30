@@ -359,7 +359,6 @@ export class PackageCentralizerService {
 
     // If using global analyzers, identify multi-project analyzers and single-project analyzers
     const globalAnalyzers = new Set<string>();
-    const singleProjectAnalyzers = new Set<string>();
     if (useGlobalAnalyzers) {
       for (const [packageName, projectPkgs] of packageToProjects) {
         // Check if it's an analyzer
@@ -367,42 +366,23 @@ export class PackageCentralizerService {
         // have consistent analyzer properties (PrivateAssets and IncludeAssets)
         if (this.isAnalyzer(projectPkgs[0].pkg)) {
           if (projectPkgs.length > 1) {
-            // Multi-project analyzer
+            // Multi-project analyzer - only these go to GlobalPackageReference
             globalAnalyzers.add(packageName);
-          } else {
-            // Single-project analyzer
-            singleProjectAnalyzers.add(packageName);
           }
+          // Single-project analyzers remain as regular PackageVersion in their project
         }
       }
 
-      // Add Global Packages ItemGroup if there are any global or single-project analyzers
-      if (globalAnalyzers.size > 0 || singleProjectAnalyzers.size > 0) {
+      // Add Global Packages ItemGroup if there are any global analyzers
+      if (globalAnalyzers.size > 0) {
         content += `  <ItemGroup Label="Global Packages">\n`;
         
-        // Add GlobalPackageReference for multi-project analyzers
+        // Add GlobalPackageReference for multi-project analyzers only
         const sortedGlobalAnalyzers = [...globalAnalyzers].sort((a, b) => 
           a.toLowerCase().localeCompare(b.toLowerCase())
         );
         
         for (const packageName of sortedGlobalAnalyzers) {
-          const projectPkgs = packageToProjects.get(packageName);
-          if (!projectPkgs) continue;
-          const pkg = projectPkgs[0].pkg;
-          const version = packageVersions.get(packageName);
-          const includeAssets = this.formatIncludeAssets(pkg.includeAssets);
-          
-          if (version) {
-            content += `    <GlobalPackageReference Include="${packageName}" Version="${version}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
-          }
-        }
-
-        // Add GlobalPackageReference for single-project analyzers
-        const sortedSingleProjectAnalyzers = [...singleProjectAnalyzers].sort((a, b) => 
-          a.toLowerCase().localeCompare(b.toLowerCase())
-        );
-
-        for (const packageName of sortedSingleProjectAnalyzers) {
           const projectPkgs = packageToProjects.get(packageName);
           if (!projectPkgs) continue;
           const pkg = projectPkgs[0].pkg;
@@ -422,9 +402,9 @@ export class PackageCentralizerService {
       // Group packages by project, using resolved versions
       for (const project of projects) {
         // Get unique package names for this project, sorted alphabetically
-        // Exclude global analyzers and single-project analyzers from individual project groups
+        // Exclude only global analyzers (multi-project) from individual project groups
         const projectPackages = [...new Set(project.packages.map(p => p.name))]
-          .filter(pkgName => !globalAnalyzers.has(pkgName) && !singleProjectAnalyzers.has(pkgName))
+          .filter(pkgName => !globalAnalyzers.has(pkgName))
           .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
         if (projectPackages.length === 0) continue;
@@ -445,9 +425,9 @@ export class PackageCentralizerService {
       }
     } else {
       // Single ItemGroup with all packages sorted alphabetically
-      // Exclude global analyzers and single-project analyzers
+      // Exclude only global analyzers (multi-project)
       const allPackages = [...packageVersions.keys()]
-        .filter(pkgName => !globalAnalyzers.has(pkgName) && !singleProjectAnalyzers.has(pkgName))
+        .filter(pkgName => !globalAnalyzers.has(pkgName))
         .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
       if (allPackages.length > 0) {
