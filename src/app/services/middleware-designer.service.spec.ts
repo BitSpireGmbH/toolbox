@@ -254,63 +254,6 @@ describe('MiddlewareDesignerService', () => {
     });
   });
 
-  describe('JSON Import/Export', () => {
-    it('should export pipeline to JSON', () => {
-      const pipeline: Pipeline = {
-        id: '1',
-        name: 'Test',
-        middlewares: [
-          { id: 'm1', type: 'Routing', order: 0, config: { routes: ['/api/*'] } },
-        ],
-      };
-
-      const json = service.exportToJSON(pipeline);
-      const parsed = JSON.parse(json);
-
-      expect(parsed.id).toBe('1');
-      expect(parsed.name).toBe('Test');
-      expect(parsed.middlewares).toHaveLength(1);
-    });
-
-    it('should import pipeline from JSON', () => {
-      const json = JSON.stringify({
-        id: '1',
-        name: 'Test',
-        middlewares: [
-          { id: 'm1', type: 'Routing', order: 0, config: { routes: ['/api/*'] } },
-        ],
-      });
-
-      const pipeline = service.importFromJSON(json);
-
-      expect(pipeline.id).toBe('1');
-      expect(pipeline.name).toBe('Test');
-      expect(pipeline.middlewares).toHaveLength(1);
-    });
-
-    it('should reject invalid JSON structure', () => {
-      const invalidJson = JSON.stringify({ foo: 'bar' });
-
-      expect(() => service.importFromJSON(invalidJson)).toThrow();
-    });
-
-    it('should round-trip JSON export/import', () => {
-      const original: Pipeline = {
-        id: '1',
-        name: 'Test',
-        middlewares: [
-          { id: 'm1', type: 'Routing', order: 0, config: { routes: ['/api/*'] } },
-          { id: 'm2', type: 'Authentication', order: 1, config: { authScheme: 'JwtBearer' } },
-        ],
-      };
-
-      const json = service.exportToJSON(original);
-      const imported = service.importFromJSON(json);
-
-      expect(imported).toEqual(original);
-    });
-  });
-
   describe('Simulation Engine', () => {
     describe('Authentication', () => {
       it('should return 401 when authentication fails', () => {

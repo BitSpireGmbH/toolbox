@@ -760,34 +760,6 @@ public class ${className} : IExceptionHandler
     return code;
   }
 
-  // ========== JSON Import/Export ==========
-
-  exportToJSON(pipeline: Pipeline): string {
-    return JSON.stringify(pipeline, null, 2);
-  }
-
-  importFromJSON(json: string): Pipeline {
-    try {
-      const pipeline = JSON.parse(json) as Pipeline;
-
-      // Validate structure
-      if (!pipeline.id || !pipeline.name || !Array.isArray(pipeline.middlewares)) {
-        throw new Error('Invalid pipeline structure');
-      }
-
-      // Validate middleware nodes
-      for (const middleware of pipeline.middlewares) {
-        if (!middleware.id || !middleware.type || typeof middleware.order !== 'number') {
-          throw new Error(`Invalid middleware node: ${middleware.id}`);
-        }
-      }
-
-      return pipeline;
-    } catch (error) {
-      throw new Error(`Failed to import pipeline: ${error}`);
-    }
-  }
-
   // ========== Simulation Engine ==========
 
   simulatePipeline(pipeline: Pipeline, request: SimulationRequest, requestCount = 1): SimulationResult {
