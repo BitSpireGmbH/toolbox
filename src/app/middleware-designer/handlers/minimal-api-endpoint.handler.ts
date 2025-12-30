@@ -82,21 +82,6 @@ export class MinimalApiEndpointHandler extends RoutingMiddlewareHandler {
   override validate(config: MiddlewareConfig, pipeline: Pipeline, middlewareId: string): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     
-    // Check for middleware after MinimalAPIEndpoint
-    const sortedMiddlewares = [...pipeline.middlewares].sort((a, b) => a.order - b.order);
-    const endpointIndex = sortedMiddlewares.findIndex(m => m.id === middlewareId);
-    
-    if (endpointIndex !== -1) {
-      const middlewaresAfter = sortedMiddlewares.slice(endpointIndex + 1);
-      if (middlewaresAfter.some(m => m.type !== 'MinimalAPIEndpoint')) {
-        issues.push({
-          type: 'warning',
-          middlewareId,
-          message: 'Middleware placed after MapXxx() in code will actually run BEFORE the endpoint handler. This is because app.MapXxx() only registers endpoints - the endpoint middleware runs at the end of the pipeline.',
-        });
-      }
-    }
-
     return issues;
   }
 

@@ -99,6 +99,23 @@ export class MiddlewareDesignerService {
       }
     }
 
+    // Check for middleware after a MinimalAPIEndpoint
+    const sortedMiddlewares = [...pipeline.middlewares].sort((a, b) => a.order - b.order);
+    const endpointIndex = sortedMiddlewares.findIndex(m => m.type === 'MinimalAPIEndpoint');
+
+    if (endpointIndex > -1) {
+      for (let i = endpointIndex + 1; i < sortedMiddlewares.length; i++) {
+        const middleware = sortedMiddlewares[i];
+        if (middleware.type !== 'MinimalAPIEndpoint') {
+          warnings.push({
+            middlewareId: middleware.id,
+            message:
+              'Code order vs. execution order: Middleware placed after an endpoint in code will still run before the endpoint handler.',
+          });
+        }
+      }
+    }
+
     return {
       valid: errors.length === 0,
       errors,
