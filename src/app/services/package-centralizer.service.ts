@@ -346,6 +346,8 @@ export class PackageCentralizerService {
     if (useGlobalAnalyzers) {
       for (const [packageName, projectPkgs] of packageToProjects) {
         // Check if it's an analyzer
+        // Note: We check only the first occurrence and assume all instances of the same package
+        // have consistent analyzer properties (PrivateAssets and IncludeAssets)
         if (this.isAnalyzer(projectPkgs[0].pkg)) {
           if (projectPkgs.length > 1) {
             // Multi-project analyzer
@@ -367,7 +369,8 @@ export class PackageCentralizerService {
         );
         
         for (const packageName of sortedGlobalAnalyzers) {
-          const projectPkgs = packageToProjects.get(packageName)!;
+          const projectPkgs = packageToProjects.get(packageName);
+          if (!projectPkgs) continue;
           const pkg = projectPkgs[0].pkg;
           
           // Format IncludeAssets (capitalize first letter of each part)
@@ -377,7 +380,7 @@ export class PackageCentralizerService {
               const trimmed = part.trim();
               return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
             })
-            .join(';') || 'Runtime;Build;Native;contentFiles;Analyzers';
+            .join(';') || 'Runtime;Build;Native;Contentfiles;Analyzers';
           
           content += `    <GlobalPackageReference Include="${packageName}" PrivateAssets="All" IncludeAssets="${includeAssets}" />\n`;
         }
