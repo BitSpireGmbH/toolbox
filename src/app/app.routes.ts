@@ -29,5 +29,9 @@ export const routes: Routes = [
   {
     path: 'package-centralizer',
     loadComponent: () => import('./package-centralizer/package-centralizer').then(m => m.PackageCentralizerComponent)
+  },
+  {
+    path: 'task-visualizer',
+    loadComponent: () => import('./task-visualizer/task-visualizer').then(m => m.TaskVisualizerComponent)
   }
 ];
