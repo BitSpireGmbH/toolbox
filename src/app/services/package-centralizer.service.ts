@@ -451,10 +451,30 @@ export class PackageCentralizerService {
 
   /**
    * Update csproj content to remove Version attributes from PackageReference elements
+   * and completely remove PackageReference elements for global packages
    */
-  updateCsprojContent(content: string): string {
-    // Replace PackageReference elements by removing Version attribute
-    return content.replace(
+  updateCsprojContent(content: string, globalPackages: Set<string> = new Set()): string {
+    // First, completely remove PackageReference elements for global packages
+    let updatedContent = content;
+    
+    for (const packageName of globalPackages) {
+      // Remove self-closing PackageReference with any attributes
+      const selfClosingPattern = new RegExp(
+        `<PackageReference\\s+[^>]*Include\\s*=\\s*["']${packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*\\s*/>`,
+        'gi'
+      );
+      updatedContent = updatedContent.replace(selfClosingPattern, '');
+      
+      // Remove PackageReference with closing tag
+      const withClosingTagPattern = new RegExp(
+        `<PackageReference\\s+[^>]*Include\\s*=\\s*["']${packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*>[\\s\\S]*?</PackageReference>`,
+        'gi'
+      );
+      updatedContent = updatedContent.replace(withClosingTagPattern, '');
+    }
+    
+    // Then remove Version attribute from remaining PackageReference elements
+    return updatedContent.replace(
       /<PackageReference\s+([^>]*?)Version\s*=\s*["'][^"']*["']\s*([^>]*?)\s*\/>/gi,
       (match, before, after) => {
         const cleanBefore = before.trim();
@@ -495,9 +515,32 @@ export class PackageCentralizerService {
 
     const { packageVersions, conflicts } = this.resolveVersionConflicts(projects, strategy);
     
+    // Identify global packages (multi-project analyzers when useGlobalAnalyzers is true)
+    const globalPackages = new Set<string>();
+    if (useGlobalAnalyzers) {
+      const packageToProjects = new Map<string, ParsedProject[]>();
+      for (const project of projects) {
+        for (const pkg of project.packages) {
+          const existing = packageToProjects.get(pkg.name) || [];
+          existing.push(project);
+          packageToProjects.set(pkg.name, existing);
+        }
+      }
+      
+      for (const [packageName, projectList] of packageToProjects) {
+        // Check if it's a multi-project analyzer
+        if (projectList.length > 1) {
+          const firstPkg = projectList[0].packages.find(p => p.name === packageName);
+          if (firstPkg && this.isAnalyzer(firstPkg)) {
+            globalPackages.add(packageName);
+          }
+        }
+      }
+    }
+    
     const updatedProjects = projects.map(project => ({
       ...project,
-      content: this.updateCsprojContent(project.content)
+      content: this.updateCsprojContent(project.content, globalPackages)
     }));
 
     const directoryPackagesProps = this.generateDirectoryPackagesProps(

@@ -1075,6 +1075,21 @@ describe('PackageCentralizerService', () => {
       if (projectASection) {
         expect(projectASection[0]).not.toContain('Meziantou.Analyzer');
       }
+      
+      // IMPORTANT: Meziantou.Analyzer should be COMPLETELY REMOVED from transformed .csproj files
+      const projectAContent = result.updatedProjects.find(p => p.name === 'ProjectA.csproj')?.content;
+      const projectBContent = result.updatedProjects.find(p => p.name === 'ProjectB.csproj')?.content;
+      
+      expect(projectAContent).toBeDefined();
+      expect(projectBContent).toBeDefined();
+      
+      // Meziantou.Analyzer should not appear in either project's csproj
+      expect(projectAContent).not.toContain('Meziantou.Analyzer');
+      expect(projectBContent).not.toContain('Meziantou.Analyzer');
+      
+      // Microsoft.SourceLink.GitHub should still be in ProjectA but without Version attribute
+      expect(projectAContent).toContain('Microsoft.SourceLink.GitHub');
+      expect(projectAContent).not.toMatch(/Microsoft\.SourceLink\.GitHub[^>]*Version\s*=/);
     });
 
     it('should not create duplicates when useGlobalAnalyzers is false', () => {
@@ -1129,6 +1144,47 @@ describe('PackageCentralizerService', () => {
         const meziantouCount = (projectBContent.match(/Meziantou\.Analyzer/g) || []).length;
         expect(meziantouCount).toBe(1);
       }
+    });
+
+    it('should remove GlobalPackageReference packages from transformed csproj files - identical projects', () => {
+      const input = `--- ProjectA.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
+
+--- ProjectB.csproj ---
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.239">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>`;
+
+      const result = service.centralize(input, 'highest', true, true);
+
+      // Should have GlobalPackageReference for Meziantou.Analyzer
+      expect(result.directoryPackagesProps).toContain('<GlobalPackageReference Include="Meziantou.Analyzer" Version="2.0.239"');
+      
+      // Transformed .csproj files should NOT contain Meziantou.Analyzer at all
+      const projectAContent = result.updatedProjects.find(p => p.name === 'ProjectA.csproj')?.content;
+      const projectBContent = result.updatedProjects.find(p => p.name === 'ProjectB.csproj')?.content;
+      
+      expect(projectAContent).toBeDefined();
+      expect(projectBContent).toBeDefined();
+      
+      expect(projectAContent).not.toContain('Meziantou.Analyzer');
+      expect(projectBContent).not.toContain('Meziantou.Analyzer');
+      
+      // Projects should still have their structure but with empty or no ItemGroup
+      expect(projectAContent).toContain('<Project Sdk="Microsoft.NET.Sdk">');
+      expect(projectBContent).toContain('<Project Sdk="Microsoft.NET.Sdk">');
     });
   });
 });
