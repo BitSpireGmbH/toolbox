@@ -18,7 +18,7 @@
     }
   </div>
 
-  <nav class="flex-1 flex flex-col py-2 gap-1 overflow-y-auto" aria-label="Main navigation">
+  <nav class="flex-1 flex flex-col py-2 gap-1" [class.overflow-y-auto]="sidebarOpen()" aria-label="Main navigation">
     <a
       routerLink="/home"
       routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
@@ -133,7 +133,7 @@
           <circle cx="12" cy="12" r="10"></circle>
           <path d="M12 6v6l4 2"></path>
         </svg>
-        <span>{{ version() }}</span>
+        <a target="_blank" href="https://github.com/BitSpireGmbH/toolbox"><span>{{ version() }}</span></a>
       </div>
     </div>
   }
@@ -240,7 +240,7 @@
 
     <div class="absolute bottom-0 left-0 right-0 px-4 py-4 border-t border-gray-800 bg-gray-900">
       <div class="flex items-center justify-between text-xs text-gray-500">
-        <span>{{ version() }}</span>
+        <a target="_blank" href="https://github.com/BitSpireGmbH/toolbox"><span>{{ version() }}</span></a>
         <span>© 2025 Bitspire</span>
       </div>
     </div>

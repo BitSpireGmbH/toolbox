@@ -147,7 +147,7 @@ import { RouterLink } from '@angular/router';
 
         <!-- Footer Info -->
         <footer class="mt-16 text-center text-gray-500 text-sm space-y-2">
-          <p class="font-medium">Built with Angular • Privacy-first • Open source</p>
+          <p class="font-medium">Built with Angular • Privacy-first • <a href="https://github.com/BitSpireGmbH/toolbox">Open source</a></p>
           <p class="text-xs">All processing happens in your browser • No data sent to servers</p>
         </footer>
       </div>
