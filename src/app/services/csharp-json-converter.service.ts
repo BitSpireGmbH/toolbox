@@ -105,9 +105,10 @@ export class CsharpJsonConverterService {
 
     if (array.length === 0) {
       // Empty array - default to object array
+      // Note: This generates a type hint, not a full class definition
       const collectionType = this.getCollectionType('object', options.enumerationType);
       lines.push(`// Root is an empty array`);
-      lines.push(`public ${collectionType} ${className} { get; set; }`);
+      lines.push(`// Recommended type: ${collectionType}`);
       return lines.join('\n');
     }
 
@@ -346,7 +347,9 @@ export class CsharpJsonConverterService {
     const result = new Map<string, { isNullable: boolean, isRequired: boolean }>();
     
     if (!contextArray || contextArray.length === 0) {
-      // No array context, analyze single object - don't mark as required
+      // No array context, analyze single object
+      // Note: Single objects don't use 'required' modifier because there's no way to determine
+      // which properties are truly required vs optional from a single example
       for (const [key, value] of Object.entries(obj)) {
         result.set(key, {
           isNullable: value === null || value === undefined,
@@ -388,11 +391,19 @@ export class CsharpJsonConverterService {
     // Determine nullable and required for each property
     for (const [key, stats] of propertyStats.entries()) {
       const isNullable = stats.nullCount > 0;
-      const isRequired = stats.presentCount === totalItems; // Required if present in ALL items
+      const isRequired = this.isPropertyRequired(stats, totalItems);
       result.set(key, { isNullable, isRequired });
     }
 
     return result;
+  }
+
+  /**
+   * Determine if a property should be marked as required based on its presence in array items
+   */
+  private isPropertyRequired(stats: { presentCount: number }, totalItems: number): boolean {
+    // A property is required if it's present in ALL items of the array
+    return stats.presentCount === totalItems;
   }
 
   /**
