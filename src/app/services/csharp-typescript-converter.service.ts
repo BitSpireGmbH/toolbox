@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 export interface CsharpToTypescriptOptions {
   exportType: 'interface' | 'type';
   dateTimeType: 'string' | 'Date';
+  enumMode?: 'numeric' | 'string' | 'union' | 'const';
+  nullableStrategy?: 'strict' | 'optional' | 'lenient';
 }
 
 export interface TypescriptToCsharpOptions {
@@ -12,6 +14,8 @@ export interface TypescriptToCsharpOptions {
   namespace?: string;
   convertSnakeCase?: boolean;
   generateSerializerContext?: boolean;
+  nullableStrategy?: 'strict' | 'optional' | 'lenient';
+  enumMode?: 'numeric' | 'string' | 'union' | 'const';
 }
 
 interface ParsedProperty {
@@ -25,12 +29,25 @@ interface ParsedClass {
   name: string;
   properties: ParsedProperty[];
   modifiers: string[];
+  isEnum?: boolean;
+  enumMembers?: ParsedEnumMember[];
+  baseClass?: string;
 }
 
 interface ParsedTypeScript {
   name: string;
   properties: ParsedProperty[];
   isInterface: boolean;
+  isEnum?: boolean;
+  enumMembers?: ParsedEnumMember[];
+  isUnion?: boolean;
+  unionTypes?: string[];
+  discriminator?: string;
+}
+
+interface ParsedEnumMember {
+  name: string;
+  value?: string | number;
 }
 
 @Injectable({
@@ -43,6 +60,12 @@ export class CsharpTypescriptConverterService {
   csharpToTypescript(csharpCode: string, options: CsharpToTypescriptOptions): string {
     try {
       const parsedClass = this.parseCsharpClass(csharpCode);
+      
+      // Handle enum conversion
+      if (parsedClass.isEnum) {
+        return this.generateTypescriptEnum(parsedClass, options);
+      }
+      
       return this.generateTypescriptDefinition(parsedClass, options);
     } catch (error) {
       throw new Error(`Failed to convert C# to TypeScript: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -55,6 +78,17 @@ export class CsharpTypescriptConverterService {
   typescriptToCsharp(typescriptCode: string, options: TypescriptToCsharpOptions): string {
     try {
       const parsed = this.parseTypescript(typescriptCode);
+      
+      // Handle enum conversion
+      if (parsed.isEnum) {
+        return this.generateCsharpEnum(parsed, options);
+      }
+      
+      // Handle union type conversion
+      if (parsed.isUnion) {
+        return this.generateCsharpFromUnion(parsed, options);
+      }
+      
       let result = this.generateCsharpClass(parsed, options);
 
       // Add JsonSerializerContext if requested
@@ -77,14 +111,21 @@ export class CsharpTypescriptConverterService {
       .replace(/\/\/.*$/gm, '')
       .replace(/\/\*[\s\S]*?\*\//g, '');
 
+    // Check if it's an enum
+    const enumMatch = cleanCode.match(/(?:public|internal|private|protected)?\s*enum\s+(\w+)/);
+    if (enumMatch) {
+      return this.parseCsharpEnum(cleanCode, enumMatch[1]);
+    }
+
     // Extract class declaration
-    const classMatch = cleanCode.match(/(?:public|internal|private|protected)?\s*(sealed|abstract)?\s*(class|record(?:\s+class)?|struct|record\s+struct|readonly\s+record\s+struct)\s+(\w+)/);
+    const classMatch = cleanCode.match(/(?:public|internal|private|protected)?\s*(sealed|abstract)?\s*(class|record(?:\s+class)?|struct|record\s+struct|readonly\s+record\s+struct)\s+(\w+)(?:\s*:\s*(\w+))?/);
     if (!classMatch) {
       throw new Error('Could not find class declaration');
     }
 
     const modifiers = [classMatch[1], classMatch[2]].filter(Boolean);
     const className = classMatch[3];
+    const baseClass = classMatch[4];
 
     const properties: ParsedProperty[] = [];
 
@@ -130,7 +171,7 @@ export class CsharpTypescriptConverterService {
       }
     }
 
-    return { name: className, properties, modifiers };
+    return { name: className, properties, modifiers, baseClass };
   }
 
   /**
@@ -142,6 +183,14 @@ export class CsharpTypescriptConverterService {
       .replace(/\/\/.*$/gm, '')
       .replace(/\/\*[\s\S]*?\*\//g, '');
 
+    // Check for enum
+    const enumMatch = cleanCode.match(/(?:export\s+)?(?:(const)\s+)?enum\s+(\w+)/);
+    if (enumMatch) {
+      const isConst = !!enumMatch[1];
+      const enumName = enumMatch[2];
+      return this.parseTypescriptEnum(cleanCode, enumName, isConst);
+    }
+
     // Extract interface or type declaration
     const interfaceMatch = cleanCode.match(/(?:export\s+)?interface\s+(\w+)/);
     const typeMatch = cleanCode.match(/(?:export\s+)?type\s+(\w+)\s*=/);
@@ -152,6 +201,48 @@ export class CsharpTypescriptConverterService {
 
     const isInterface = !!interfaceMatch;
     const name = (interfaceMatch || typeMatch)![1];
+
+    // Check for union type
+    if (typeMatch) {
+      const unionMatch = cleanCode.match(/type\s+\w+\s*=\s*([^{;]+);/);
+      if (unionMatch) {
+        const unionContent = unionMatch[1].trim();
+        // Check if it's a union type (contains |)
+        if (unionContent.includes('|')) {
+          // Check if it's a string literal union
+          if (unionContent.includes('"') || unionContent.includes("'")) {
+            const unionTypes = unionContent
+              .split('|')
+              .map(t => t.trim())
+              .filter(t => t.startsWith('"') || t.startsWith("'"))
+              .map(t => t.replace(/["']/g, ''));
+            
+            if (unionTypes.length > 0) {
+              return {
+                name,
+                properties: [],
+                isInterface: false,
+                isUnion: true,
+                unionTypes
+              };
+            }
+          } else {
+            // Mixed type union (e.g., string | number)
+            const unionTypes = unionContent
+              .split('|')
+              .map(t => t.trim());
+            
+            return {
+              name,
+              properties: [],
+              isInterface: false,
+              isUnion: true,
+              unionTypes
+            };
+          }
+        }
+      }
+    }
 
     // Extract properties
     const propertyRegex = /(\w+)(\?)?:\s*((?:Record<[^>]+>|Array<[^>]+>|[^;,\n]+))/g;
@@ -196,8 +287,27 @@ export class CsharpTypescriptConverterService {
 
     for (const prop of parsedClass.properties) {
       const tsType = this.csharpTypeToTypescript(prop.type, options);
-      const optional = prop.isNullable ? '?' : '';
-      const nullableType = prop.isNullable ? ` | null` : '';
+      const nullableStrategy = options.nullableStrategy || 'strict';
+      
+      let optional = '';
+      let nullableType = '';
+      
+      if (prop.isNullable) {
+        switch (nullableStrategy) {
+          case 'strict':
+            // Preserve null exactly: name: string | null
+            nullableType = ' | null';
+            break;
+          case 'optional':
+            // Convert to optional: name?: string | null | undefined
+            optional = '?';
+            nullableType = ' | null | undefined';
+            break;
+          case 'lenient':
+            // Ignore nullability: name: string
+            break;
+        }
+      }
 
       lines.push(`  ${this.toCamelCase(prop.name)}${optional}: ${tsType}${nullableType};`);
     }
@@ -237,10 +347,30 @@ export class CsharpTypescriptConverterService {
     lines.push('{');
 
     // Properties
+    const nullableStrategy = options.nullableStrategy || 'strict';
+    
     for (const prop of parsed.properties) {
       const propertyName = this.toPascalCase(prop.name);
       const csharpType = this.typescriptTypeToCsharp(prop.type, options);
-      const nullable = (prop.isNullable || prop.isOptional) ? '?' : '';
+      
+      let nullable = '';
+      const shouldBeNullable = prop.isNullable || prop.isOptional;
+      
+      if (shouldBeNullable) {
+        switch (nullableStrategy) {
+          case 'strict':
+            // Preserve nullability
+            nullable = '?';
+            break;
+          case 'optional':
+            // Treat optional as nullable
+            nullable = '?';
+            break;
+          case 'lenient':
+            // Ignore nullability
+            break;
+        }
+      }
 
       // Add serialization attribute if names differ or snake_case conversion
       const needsAttribute = prop.name !== propertyName || (options.convertSnakeCase && this.isSnakeCase(prop.name));
@@ -432,6 +562,252 @@ export class CsharpTypescriptConverterService {
     lines.push('{');
     lines.push('}');
 
+    return lines.join('\n');
+  }
+
+  /**
+   * Parse C# enum
+   */
+  private parseCsharpEnum(code: string, enumName: string): ParsedClass {
+    const members: ParsedEnumMember[] = [];
+    
+    // Extract enum body
+    const enumBodyMatch = code.match(/enum\s+\w+\s*\{([^}]+)\}/);
+    if (!enumBodyMatch) {
+      throw new Error('Could not parse enum body');
+    }
+    
+    const body = enumBodyMatch[1];
+    const memberLines = body.split(',').map(l => l.trim()).filter(l => l.length > 0);
+    
+    for (let i = 0; i < memberLines.length; i++) {
+      const line = memberLines[i];
+      const assignmentMatch = line.match(/(\w+)\s*=\s*(.+)/);
+      
+      if (assignmentMatch) {
+        const name = assignmentMatch[1];
+        const value = assignmentMatch[2].trim();
+        // Try to parse as number, otherwise keep as string
+        const numValue = parseInt(value, 10);
+        members.push({
+          name,
+          value: isNaN(numValue) ? value.replace(/['"]/g, '') : numValue
+        });
+      } else {
+        // No explicit value, use auto-increment
+        members.push({
+          name: line,
+          value: i
+        });
+      }
+    }
+    
+    return {
+      name: enumName,
+      properties: [],
+      modifiers: [],
+      isEnum: true,
+      enumMembers: members
+    };
+  }
+
+  /**
+   * Parse TypeScript enum
+   */
+  private parseTypescriptEnum(code: string, enumName: string, isConst: boolean): ParsedTypeScript {
+    const members: ParsedEnumMember[] = [];
+    
+    // Extract enum body
+    const enumBodyMatch = code.match(/enum\s+\w+\s*\{([^}]+)\}/);
+    if (!enumBodyMatch) {
+      throw new Error('Could not parse enum body');
+    }
+    
+    const body = enumBodyMatch[1];
+    const memberLines = body.split(',').map(l => l.trim()).filter(l => l.length > 0);
+    
+    for (const line of memberLines) {
+      const assignmentMatch = line.match(/(\w+)\s*=\s*(.+)/);
+      
+      if (assignmentMatch) {
+        const name = assignmentMatch[1];
+        const value = assignmentMatch[2].trim();
+        // Remove quotes if string, otherwise parse as number
+        if (value.startsWith('"') || value.startsWith("'")) {
+          members.push({
+            name,
+            value: value.replace(/['"]/g, '')
+          });
+        } else {
+          const numValue = parseInt(value, 10);
+          members.push({
+            name,
+            value: isNaN(numValue) ? value : numValue
+          });
+        }
+      } else {
+        // No explicit value
+        members.push({ name: line });
+      }
+    }
+    
+    return {
+      name: enumName,
+      properties: [],
+      isInterface: false,
+      isEnum: true,
+      enumMembers: members
+    };
+  }
+
+  /**
+   * Generate TypeScript enum from C# enum
+   */
+  private generateTypescriptEnum(parsedClass: ParsedClass, options: CsharpToTypescriptOptions): string {
+    const enumMode = options.enumMode || 'numeric';
+    const lines: string[] = [];
+    
+    if (!parsedClass.enumMembers || parsedClass.enumMembers.length === 0) {
+      throw new Error('No enum members found');
+    }
+    
+    switch (enumMode) {
+      case 'numeric':
+        lines.push(`export enum ${parsedClass.name} {`);
+        for (const member of parsedClass.enumMembers) {
+          const value = typeof member.value === 'number' ? member.value : parsedClass.enumMembers.indexOf(member);
+          lines.push(`  ${member.name} = ${value},`);
+        }
+        lines.push('}');
+        break;
+        
+      case 'string':
+        lines.push(`export enum ${parsedClass.name} {`);
+        for (const member of parsedClass.enumMembers) {
+          lines.push(`  ${member.name} = "${member.name}",`);
+        }
+        lines.push('}');
+        break;
+        
+      case 'union':
+        const unionMembers = parsedClass.enumMembers.map(m => `"${m.name}"`).join(' | ');
+        lines.push(`export type ${parsedClass.name} = ${unionMembers};`);
+        break;
+        
+      case 'const':
+        lines.push(`export const enum ${parsedClass.name} {`);
+        for (const member of parsedClass.enumMembers) {
+          lines.push(`  ${member.name} = "${member.name}",`);
+        }
+        lines.push('}');
+        break;
+    }
+    
+    return lines.join('\n');
+  }
+
+  /**
+   * Generate C# enum from TypeScript enum or union
+   */
+  private generateCsharpEnum(parsed: ParsedTypeScript, options: TypescriptToCsharpOptions): string {
+    const lines: string[] = [];
+    
+    // Add namespace if provided
+    if (options.namespace) {
+      lines.push(`namespace ${options.namespace};`);
+      lines.push('');
+    }
+    
+    if (!parsed.enumMembers || parsed.enumMembers.length === 0) {
+      throw new Error('No enum members found');
+    }
+    
+    // Determine if it's a string or numeric enum
+    const hasStringValues = parsed.enumMembers.some(m => typeof m.value === 'string');
+    
+    if (hasStringValues) {
+      // String enum - need to use System.Text.Json or Newtonsoft attributes
+      if (options.serializer === 'System.Text.Json') {
+        lines.push('using System.Text.Json.Serialization;');
+        lines.push('');
+        lines.push(`[JsonConverter(typeof(JsonStringEnumConverter))]`);
+      } else {
+        lines.push('using Newtonsoft.Json;');
+        lines.push('using Newtonsoft.Json.Converters;');
+        lines.push('');
+        lines.push(`[JsonConverter(typeof(StringEnumConverter))]`);
+      }
+    }
+    
+    lines.push(`public enum ${parsed.name}`);
+    lines.push('{');
+    
+    for (const member of parsed.enumMembers) {
+      if (member.value !== undefined && typeof member.value === 'number') {
+        lines.push(`    ${member.name} = ${member.value},`);
+      } else {
+        lines.push(`    ${member.name},`);
+      }
+    }
+    
+    lines.push('}');
+    
+    return lines.join('\n');
+  }
+
+  /**
+   * Generate C# from TypeScript union type
+   */
+  private generateCsharpFromUnion(parsed: ParsedTypeScript, options: TypescriptToCsharpOptions): string {
+    if (!parsed.unionTypes || parsed.unionTypes.length === 0) {
+      throw new Error('No union types found');
+    }
+    
+    const lines: string[] = [];
+    
+    // Add namespace if provided
+    if (options.namespace) {
+      lines.push(`namespace ${options.namespace};`);
+      lines.push('');
+    }
+    
+    // Check if all union members are string literals (identifiers without primitives)
+    const primitiveTypes = ['string', 'number', 'boolean', 'any', 'unknown', 'void', 'null', 'undefined', 'object'];
+    const hasPrimitives = parsed.unionTypes.some(t => primitiveTypes.includes(t.toLowerCase()));
+    
+    if (hasPrimitives) {
+      // Mixed types - return object with warning comment
+      lines.push('// WARNING: Lossy conversion - TypeScript union type cannot be fully represented in C#');
+      lines.push('// Consider using a discriminated union pattern or separate types');
+      lines.push(`// Original TypeScript: type ${parsed.name} = ${parsed.unionTypes.join(' | ')}`);
+      lines.push('');
+      lines.push(`public class ${parsed.name}`);
+      lines.push('{');
+      lines.push('    // Union type represented as object - implement custom converter as needed');
+      lines.push('}');
+    } else {
+      // All identifiers - convert to enum
+      if (options.serializer === 'System.Text.Json') {
+        lines.push('using System.Text.Json.Serialization;');
+        lines.push('');
+        lines.push(`[JsonConverter(typeof(JsonStringEnumConverter))]`);
+      } else {
+        lines.push('using Newtonsoft.Json;');
+        lines.push('using Newtonsoft.Json.Converters;');
+        lines.push('');
+        lines.push(`[JsonConverter(typeof(StringEnumConverter))]`);
+      }
+      
+      lines.push(`public enum ${parsed.name}`);
+      lines.push('{');
+      
+      for (const type of parsed.unionTypes) {
+        lines.push(`    ${type},`);
+      }
+      
+      lines.push('}');
+    }
+    
     return lines.join('\n');
   }
 }

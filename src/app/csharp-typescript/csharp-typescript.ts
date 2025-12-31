@@ -48,7 +48,7 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
       @if (showOptions()) {
         <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
           @if (direction() === 'csharp-to-typescript') {
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-4 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Export Type</label>
                 <select 
@@ -70,9 +70,34 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                   <option value="Date">Date</option>
                 </select>
               </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Enum Mode</label>
+                <select 
+                  [value]="enumModeCsToTs()"
+                  (change)="enumModeCsToTs.set($any($event.target).value)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
+                  <option value="numeric">Numeric</option>
+                  <option value="string">String</option>
+                  <option value="union">Union</option>
+                  <option value="const">Const Enum</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Nullable Strategy</label>
+                <select 
+                  [value]="nullableStrategyCsToTs()"
+                  (change)="nullableStrategyCsToTs.set($any($event.target).value)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
+                  <option value="strict">Strict (| null)</option>
+                  <option value="optional">Optional (?:)</option>
+                  <option value="lenient">Lenient (ignore)</option>
+                </select>
+              </div>
             </div>
           } @else {
-            <div class="grid grid-cols-5 gap-4">
+            <div class="grid grid-cols-6 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Type Definition</label>
                 <select 
@@ -107,6 +132,18 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
                   <option value="System.Text.Json">System.Text.Json</option>
                   <option value="Newtonsoft.Json">Newtonsoft.Json</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Nullable Strategy</label>
+                <select 
+                  [value]="nullableStrategyTsToCs()"
+                  (change)="nullableStrategyTsToCs.set($any($event.target).value)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
+                  <option value="strict">Strict (preserve)</option>
+                  <option value="optional">Optional (as ?)</option>
+                  <option value="lenient">Lenient (ignore)</option>
                 </select>
               </div>
 
@@ -210,6 +247,8 @@ export class CsharpTypescriptComponent {
   // C# → TypeScript options
   protected readonly exportType = signal<string>('interface');
   protected readonly dateTimeType = signal<string>('string');
+  protected readonly enumModeCsToTs = signal<string>('numeric');
+  protected readonly nullableStrategyCsToTs = signal<string>('strict');
   
   // TypeScript → C# options
   protected readonly classType = signal<string>('class');
@@ -217,6 +256,7 @@ export class CsharpTypescriptComponent {
   protected readonly serializer = signal<string>('System.Text.Json');
   protected readonly convertSnakeCase = signal<boolean>(false);
   protected readonly generateSerializerContext = signal<boolean>(false);
+  protected readonly nullableStrategyTsToCs = signal<string>('strict');
   
   protected readonly showOptions = signal<boolean>(true);
   protected readonly inputCode = signal<string>('');
@@ -252,7 +292,9 @@ export class CsharpTypescriptComponent {
       if (this.direction() === 'csharp-to-typescript') {
         const options = {
           exportType: this.exportType() as any,
-          dateTimeType: this.dateTimeType() as any
+          dateTimeType: this.dateTimeType() as any,
+          enumMode: this.enumModeCsToTs() as any,
+          nullableStrategy: this.nullableStrategyCsToTs() as any
         };
         const result = this.converterService.csharpToTypescript(this.inputCode(), options);
         this.outputCode.set(result);
@@ -263,7 +305,8 @@ export class CsharpTypescriptComponent {
           serializer: this.serializer() as any,
           namespace: undefined,
           convertSnakeCase: this.convertSnakeCase(),
-          generateSerializerContext: this.generateSerializerContext()
+          generateSerializerContext: this.generateSerializerContext(),
+          nullableStrategy: this.nullableStrategyTsToCs() as any
         };
         const result = this.converterService.typescriptToCsharp(this.inputCode(), options);
         this.outputCode.set(result);
