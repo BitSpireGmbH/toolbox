@@ -28,67 +28,105 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
       <!-- Options Panel -->
       @if (showOptions()) {
         <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
-          <div class="grid grid-cols-5 gap-4">
+          <div class="grid grid-cols-1 gap-4">
+            <!-- First Row: Dropdowns -->
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Type Definition</label>
+                <select 
+                  [value]="classType()"
+                  (change)="classType.set($any($event.target).value)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
+                  <option value="class">Class</option>
+                  <option value="record">Record</option>
+                  <option value="struct">Struct</option>
+                  <option value="record struct">Record Struct</option>
+                  <option value="readonly record struct">Readonly Record Struct</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Collection Type</label>
+                <select 
+                  [value]="enumerationType()"
+                  (change)="enumerationType.set($any($event.target).value)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
+                  <option value="List<T>">List&lt;T&gt;</option>
+                  <option value="IReadOnlyCollection<T>">IReadOnlyCollection&lt;T&gt;</option>
+                  <option value="T[]">T[]</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Serializer</label>
+                <select 
+                  [value]="serializer()"
+                  (change)="serializer.set($any($event.target).value)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
+                  <option value="System.Text.Json">System.Text.Json</option>
+                  <option value="Newtonsoft.Json">Newtonsoft.Json</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Second Row: Root Class Name -->
             <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-2">Type Definition</label>
-              <select 
-                [value]="classType()"
-                (change)="classType.set($any($event.target).value)"
+              <label class="block text-xs font-semibold text-gray-700 mb-2">Root Class Name (optional)</label>
+              <input 
+                type="text"
+                [value]="rootClassName()"
+                (input)="rootClassName.set($any($event.target).value)"
+                placeholder="RootObject / RootArray (auto)"
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
-                <option value="class">Class</option>
-                <option value="record">Record</option>
-                <option value="struct">Struct</option>
-                <option value="record struct">Record Struct</option>
-                <option value="readonly record struct">Readonly Record Struct</option>
-              </select>
             </div>
 
-            <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-2">Collection Type</label>
-              <select 
-                [value]="enumerationType()"
-                (change)="enumerationType.set($any($event.target).value)"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
-                <option value="List<T>">List&lt;T&gt;</option>
-                <option value="IReadOnlyCollection<T>">IReadOnlyCollection&lt;T&gt;</option>
-                <option value="T[]">T[]</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-2">Serializer</label>
-              <select 
-                [value]="serializer()"
-                (change)="serializer.set($any($event.target).value)"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
-                <option value="System.Text.Json">System.Text.Json</option>
-                <option value="Newtonsoft.Json">Newtonsoft.Json</option>
-              </select>
-            </div>
-
-            <div class="flex flex-col justify-end">
-              <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <input 
-                  type="checkbox"
-                  [checked]="convertSnakeCase()"
-                  (change)="convertSnakeCase.set($any($event.target).checked)"
-                  class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
-                <span class="text-xs font-medium text-gray-700">snake_case → PascalCase</span>
-              </label>
-            </div>
-
-            @if (serializer() === 'System.Text.Json') {
-              <div class="flex flex-col justify-end">
+            <!-- Third Row: Checkboxes -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
                 <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
                   <input 
                     type="checkbox"
-                    [checked]="generateSerializerContext()"
-                    (change)="generateSerializerContext.set($any($event.target).checked)"
+                    [checked]="convertSnakeCase()"
+                    (change)="convertSnakeCase.set($any($event.target).checked)"
                     class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
-                  <span class="text-xs font-medium text-gray-700">Generate Context</span>
+                  <span class="text-xs font-medium text-gray-700">Convert snake_case → PascalCase</span>
+                </label>
+
+                <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <input 
+                    type="checkbox"
+                    [checked]="wrapRootArray()"
+                    (change)="wrapRootArray.set($any($event.target).checked)"
+                    class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
+                  <span class="text-xs font-medium text-gray-700">Wrap root array in object</span>
                 </label>
               </div>
-            }
+
+              <div class="space-y-2">
+                @if (serializer() === 'System.Text.Json') {
+                  <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors" title="JsonSerializerOptions.Web uses camelCase naming policy and skips [JsonPropertyName] attributes when property names match camelCase convention">
+                    <input 
+                      type="checkbox"
+                      [checked]="useWebDefaults()"
+                      (change)="useWebDefaults.set($any($event.target).checked)"
+                      class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
+                    <span class="text-xs font-medium text-gray-700">Use JsonSerializerOptions.Web</span>
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                    </svg>
+                  </label>
+
+                  <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <input 
+                      type="checkbox"
+                      [checked]="generateSerializerContext()"
+                      (change)="generateSerializerContext.set($any($event.target).checked)"
+                      class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
+                    <span class="text-xs font-medium text-gray-700">Generate serializer context</span>
+                  </label>
+                }
+              </div>
+            </div>
           </div>
         </div>
       }
@@ -160,6 +198,9 @@ export class CsharpJsonComponent {
   protected readonly convertSnakeCase = signal<boolean>(false);
   protected readonly generateSerializerContext = signal<boolean>(false);
   protected readonly showOptions = signal<boolean>(true);
+  protected readonly wrapRootArray = signal<boolean>(false);
+  protected readonly useWebDefaults = signal<boolean>(true);
+  protected readonly rootClassName = signal<string>('');
   
   protected readonly inputCode = signal<string>('');
   protected readonly outputCode = signal<string>('');
@@ -189,9 +230,12 @@ export class CsharpJsonComponent {
         serializer: this.serializer() as any,
         namespace: undefined,
         convertSnakeCase: this.convertSnakeCase(),
-        generateSerializerContext: this.generateSerializerContext()
+        generateSerializerContext: this.generateSerializerContext(),
+        wrapRootArray: this.wrapRootArray(),
+        useWebDefaults: this.useWebDefaults(),
+        rootClassName: this.rootClassName() || undefined
       };
-      const result = this.converterService.jsonToCsharp(this.inputCode(), options, 'GeneratedClass');
+      const result = this.converterService.jsonToCsharp(this.inputCode(), options);
       this.outputCode.set(result);
     } catch (error) {
       this.errorMessage.set(error instanceof Error ? error.message : 'An error occurred during conversion');
