@@ -335,6 +335,235 @@ describe('CsharpJsonConverterService', () => {
       expect(result).toContain('public struct Point');
       expect(result).toContain('{ get; set; }');
     });
+
+    it('should handle root-level array without wrapping', () => {
+      const json = JSON.stringify([{ test: 'value' }]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public class RootArrayItem');
+      expect(result).toContain('public required string Test { get; set; }');
+      expect(result).toContain('// Root is an array');
+    });
+
+    it('should handle root-level array with wrapping', () => {
+      const json = JSON.stringify([{ test: 'value' }]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: true
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public class RootArray');
+      expect(result).toContain('[JsonPropertyName("items")]');
+      expect(result).toContain('List<');
+    });
+
+    it('should detect nullable properties from array context', () => {
+      const json = JSON.stringify([
+        { test: 'value' },
+        { test: null }
+      ]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public required string? Test { get; set; }');
+    });
+
+    it('should detect required properties', () => {
+      const json = JSON.stringify([
+        { foo: 'test', bar: 'test' },
+        { foo: null }
+      ]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public required string? Foo { get; set; }');
+      expect(result).toContain('public string Bar { get; set; }');
+      expect(result).not.toContain('public required string Bar');
+    });
+
+    it('should skip JsonPropertyName with useWebDefaults for camelCase properties', () => {
+      const json = JSON.stringify({ property: 'foo' });
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        useWebDefaults: true
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).not.toContain('[JsonPropertyName("property")]');
+      expect(result).toContain('public string Property { get; set; }');
+    });
+
+    it('should include JsonPropertyName with useWebDefaults false', () => {
+      const json = JSON.stringify({ property: 'foo' });
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        useWebDefaults: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('[JsonPropertyName("property")]');
+      expect(result).toContain('public string Property { get; set; }');
+    });
+
+    it('should keep required keyword with useWebDefaults', () => {
+      const json = JSON.stringify([
+        { foo: 'test', bar: 'test' },
+        { foo: null }
+      ]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false,
+        useWebDefaults: true
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public required string? Foo { get; set; }');
+      expect(result).not.toContain('[JsonPropertyName("foo")]');
+      expect(result).not.toContain('[JsonPropertyName("bar")]');
+    });
+
+    it('should use custom root class name', () => {
+      const json = JSON.stringify({ name: 'John' });
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        rootClassName: 'CustomRoot'
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public class CustomRoot');
+    });
+
+    it('should use custom root class name for arrays', () => {
+      const json = JSON.stringify([{ test: 'value' }]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false,
+        rootClassName: 'MyArray'
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('MyArrayItem');
+    });
+
+    it('should handle nullable int types', () => {
+      const json = JSON.stringify([
+        { count: 5 },
+        { count: null }
+      ]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public required int? Count { get; set; }');
+    });
+
+    it('should handle nullable bool types', () => {
+      const json = JSON.stringify([
+        { active: true },
+        { active: null }
+      ]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public required bool? Active { get; set; }');
+    });
+
+    it('should handle nullable DateTime types', () => {
+      const json = JSON.stringify([
+        { created: '2025-12-29T10:30:00Z' },
+        { created: null }
+      ]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public required DateTime? Created { get; set; }');
+    });
+
+    it('should handle nullable Guid types', () => {
+      const json = JSON.stringify([
+        { id: '550e8400-e29b-41d4-a716-446655440000' },
+        { id: null }
+      ]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('public required Guid? Id { get; set; }');
+    });
+
+    it('should handle empty root array', () => {
+      const json = JSON.stringify([]);
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'List<T>' as const,
+        serializer: 'System.Text.Json' as const,
+        wrapRootArray: false
+      };
+
+      const result = service.jsonToCsharp(json, options);
+
+      expect(result).toContain('// Root is an empty array');
+    });
   });
 
   describe('error handling', () => {

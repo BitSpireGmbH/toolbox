@@ -11,12 +11,16 @@ export interface JsonToCsharpOptions {
   namespace?: string;
   convertSnakeCase?: boolean;
   generateSerializerContext?: boolean;
+  wrapRootArray?: boolean;
+  useWebDefaults?: boolean;
+  rootClassName?: string;
 }
 
 interface ParsedProperty {
   name: string;
   type: string;
   isNullable: boolean;
+  isRequired?: boolean;
 }
 
 interface ParsedClass {
@@ -47,20 +51,116 @@ export class CsharpJsonConverterService {
   /**
    * Convert JSON to C# class definition
    */
-  jsonToCsharp(json: string, options: JsonToCsharpOptions, className: string = 'RootObject'): string {
+  jsonToCsharp(json: string, options: JsonToCsharpOptions, className?: string): string {
     try {
       const jsonObject = JSON.parse(json);
-      let result = this.generateCsharpClass(jsonObject, className, options);
+      
+      // Determine the class name to use
+      const rootClassName = options.rootClassName || className || (Array.isArray(jsonObject) ? 'RootArray' : 'RootObject');
+      
+      // Handle arrays at root level
+      if (Array.isArray(jsonObject)) {
+        if (options.wrapRootArray) {
+          // Wrap array in a root object with single property
+          const wrappedObject = { items: jsonObject };
+          return this.generateCsharpClass(wrappedObject, rootClassName, options);
+        } else {
+          // Generate just the array type alias or collection
+          return this.generateArrayRootClass(jsonObject, rootClassName, options);
+        }
+      }
+      
+      let result = this.generateCsharpClass(jsonObject, rootClassName, options);
 
       // Add JsonSerializerContext if requested
       if (options.generateSerializerContext && options.serializer === 'System.Text.Json') {
-        result += '\n\n' + this.generateJsonSerializerContext(className, options);
+        result += '\n\n' + this.generateJsonSerializerContext(rootClassName, options);
       }
 
       return result;
     } catch (error) {
       throw new Error(`Failed to convert JSON to C#: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  /**
+   * Generate C# representation for root-level array
+   */
+  private generateArrayRootClass(array: unknown[], className: string, options: JsonToCsharpOptions): string {
+    const lines: string[] = [];
+    
+    // Add namespace if provided
+    if (options.namespace) {
+      lines.push(`namespace ${options.namespace};`);
+      lines.push('');
+    }
+
+    // Add using statements
+    if (options.serializer === 'System.Text.Json') {
+      lines.push('using System.Text.Json.Serialization;');
+    } else {
+      lines.push('using Newtonsoft.Json;');
+    }
+    lines.push('');
+
+    if (array.length === 0) {
+      // Empty array - default to object array
+      // Note: This generates a type hint, not a full class definition
+      const collectionType = this.getCollectionType('object', options.enumerationType);
+      lines.push(`// Root is an empty array`);
+      lines.push(`// Recommended type: ${collectionType}`);
+      return lines.join('\n');
+    }
+
+    // Analyze the array to determine item type and generate item class
+    const mergedObject = this.mergeArrayObjects(array);
+    const itemClassName = `${className}Item`;
+    
+    // Generate the item class
+    const itemClass = this.generateCsharpClass(mergedObject, itemClassName, options, 0, array);
+    
+    lines.push(itemClass);
+    lines.push('');
+    lines.push(`// Root is an array of ${itemClassName}`);
+    lines.push(`// Use: ${this.getCollectionType(itemClassName, options.enumerationType)}`);
+    
+    return lines.join('\n');
+  }
+
+  /**
+   * Merge multiple objects from an array to detect nullable and required properties
+   */
+  private mergeArrayObjects(array: unknown[]): Record<string, unknown> {
+    if (array.length === 0) {
+      return {};
+    }
+
+    // Collect all properties from all objects
+    const allProperties = new Map<string, { values: unknown[], count: number }>();
+    
+    for (const item of array) {
+      if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+        const obj = item as Record<string, unknown>;
+        for (const [key, value] of Object.entries(obj)) {
+          if (!allProperties.has(key)) {
+            allProperties.set(key, { values: [], count: 0 });
+          }
+          const prop = allProperties.get(key)!;
+          prop.values.push(value);
+          prop.count++;
+        }
+      }
+    }
+
+    // Build merged object with representative values
+    const merged: Record<string, unknown> = {};
+    for (const [key, { values }] of allProperties.entries()) {
+      // Use first non-null value if available, otherwise null
+      const nonNullValue = values.find(v => v !== null && v !== undefined);
+      merged[key] = nonNullValue !== undefined ? nonNullValue : null;
+    }
+
+    return merged;
   }
 
   /**
@@ -172,9 +272,9 @@ export class CsharpJsonConverterService {
   /**
    * Generate C# class from JSON object
    */
-  private generateCsharpClass(obj: unknown, className: string, options: JsonToCsharpOptions, indent: number = 0): string {
+  private generateCsharpClass(obj: unknown, className: string, options: JsonToCsharpOptions, indent: number = 0, contextArray?: unknown[]): string {
     if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
-      throw new Error('Root JSON must be an object');
+      throw new Error('Object JSON must be an object for class generation');
     }
 
     const indentStr = '    '.repeat(indent);
@@ -201,34 +301,127 @@ export class CsharpJsonConverterService {
     lines.push(`${indentStr}public ${classKeyword} ${className}`);
     lines.push(`${indentStr}{`);
 
+    // Analyze properties for nullable and required detection
+    const propertyInfo = this.analyzeProperties(obj as Record<string, unknown>, contextArray);
+
     // Properties
     const entries = Object.entries(obj as Record<string, unknown>);
     for (const [key, value] of entries) {
       const propertyName = options.convertSnakeCase && this.isSnakeCase(key)
         ? this.toPascalCase(key)
         : this.toPascalCase(key);
-      const propertyType = this.inferCsharpType(value, propertyName, options);
+      
+      const info = propertyInfo.get(key)!;
+      const propertyType = this.inferCsharpType(value, propertyName, options, info.isNullable);
 
-      // Add serialization attribute if name differs or snake_case conversion
-      const needsAttribute = key !== propertyName || (options.convertSnakeCase && this.isSnakeCase(key));
+      // Determine if we need JsonPropertyName attribute
+      const needsAttribute = this.shouldAddPropertyNameAttribute(key, propertyName, options);
+      
       if (needsAttribute) {
         const attributeName = options.serializer === 'System.Text.Json' ? 'JsonPropertyName' : 'JsonProperty';
         lines.push(`${indentStr}    [${attributeName}("${key}")]`);
       }
 
+      // Build property declaration with required modifier if needed
+      const requiredModifier = info.isRequired ? 'required ' : '';
+      
       // Add property
       if (options.classType === 'class') {
-        lines.push(`${indentStr}    public ${propertyType} ${propertyName} { get; set; }`);
+        lines.push(`${indentStr}    public ${requiredModifier}${propertyType} ${propertyName} { get; set; }`);
       } else if (options.classType === 'record' || options.classType === 'record struct' || options.classType === 'readonly record struct') {
-        lines.push(`${indentStr}    public ${propertyType} ${propertyName} { get; init; }`);
+        lines.push(`${indentStr}    public ${requiredModifier}${propertyType} ${propertyName} { get; init; }`);
       } else {
-        lines.push(`${indentStr}    public ${propertyType} ${propertyName} { get; set; }`);
+        lines.push(`${indentStr}    public ${requiredModifier}${propertyType} ${propertyName} { get; set; }`);
       }
     }
 
     lines.push(`${indentStr}}`);
 
     return lines.join('\n');
+  }
+
+  /**
+   * Analyze properties to determine nullable and required status
+   */
+  private analyzeProperties(obj: Record<string, unknown>, contextArray?: unknown[]): Map<string, { isNullable: boolean, isRequired: boolean }> {
+    const result = new Map<string, { isNullable: boolean, isRequired: boolean }>();
+    
+    if (!contextArray || contextArray.length === 0) {
+      // No array context, analyze single object
+      // Note: Single objects don't use 'required' modifier because there's no way to determine
+      // which properties are truly required vs optional from a single example
+      for (const [key, value] of Object.entries(obj)) {
+        result.set(key, {
+          isNullable: value === null || value === undefined,
+          isRequired: false // Single object, properties are NOT marked as required
+        });
+      }
+      return result;
+    }
+
+    // Analyze across array items
+    const totalItems = contextArray.length;
+    const propertyStats = new Map<string, { nullCount: number, undefinedCount: number, presentCount: number }>();
+    
+    // Initialize stats for all properties in the merged object
+    for (const key of Object.keys(obj)) {
+      propertyStats.set(key, { nullCount: 0, undefinedCount: 0, presentCount: 0 });
+    }
+
+    // Count occurrences across array
+    for (const item of contextArray) {
+      if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+        const itemObj = item as Record<string, unknown>;
+        
+        for (const key of Object.keys(obj)) {
+          const stats = propertyStats.get(key)!;
+          
+          if (key in itemObj) {
+            stats.presentCount++;
+            if (itemObj[key] === null) {
+              stats.nullCount++;
+            }
+          } else {
+            stats.undefinedCount++;
+          }
+        }
+      }
+    }
+
+    // Determine nullable and required for each property
+    for (const [key, stats] of propertyStats.entries()) {
+      const isNullable = stats.nullCount > 0;
+      const isRequired = this.isPropertyRequired(stats, totalItems);
+      result.set(key, { isNullable, isRequired });
+    }
+
+    return result;
+  }
+
+  /**
+   * Determine if a property should be marked as required based on its presence in array items
+   */
+  private isPropertyRequired(stats: { presentCount: number }, totalItems: number): boolean {
+    // A property is required if it's present in ALL items of the array
+    return stats.presentCount === totalItems;
+  }
+
+  /**
+   * Determine if JsonPropertyName attribute should be added
+   */
+  private shouldAddPropertyNameAttribute(originalKey: string, propertyName: string, options: JsonToCsharpOptions): boolean {
+    // If using WebDefaults with System.Text.Json, check if we can skip the attribute
+    if (options.useWebDefaults && options.serializer === 'System.Text.Json') {
+      // WebDefaults uses camelCase naming policy
+      // Skip attribute if the original key matches camelCase of property name
+      const expectedCamelCase = this.toCamelCase(propertyName);
+      if (originalKey === expectedCamelCase) {
+        return false;
+      }
+    }
+
+    // Add attribute if name differs or snake_case conversion
+    return originalKey !== propertyName || (options.convertSnakeCase === true && this.isSnakeCase(originalKey));
   }
 
   /**
@@ -254,7 +447,7 @@ export class CsharpJsonConverterService {
   /**
    * Infer C# type from JSON value
    */
-  private inferCsharpType(value: unknown, propertyName: string, options: JsonToCsharpOptions): string {
+  private inferCsharpType(value: unknown, propertyName: string, options: JsonToCsharpOptions, forceNullable: boolean = false): string {
     if (value === null || value === undefined) {
       return 'object?';
     }
@@ -262,21 +455,22 @@ export class CsharpJsonConverterService {
     if (typeof value === 'string') {
       // Check if it's a date string
       if (this.isIsoDateString(value)) {
-        return 'DateTime';
+        return forceNullable ? 'DateTime?' : 'DateTime';
       }
       // Check if it's a GUID
       if (this.isGuid(value)) {
-        return 'Guid';
+        return forceNullable ? 'Guid?' : 'Guid';
       }
-      return 'string';
+      return forceNullable ? 'string?' : 'string';
     }
 
     if (typeof value === 'number') {
-      return Number.isInteger(value) ? 'int' : 'double';
+      const baseType = Number.isInteger(value) ? 'int' : 'double';
+      return forceNullable ? `${baseType}?` : baseType;
     }
 
     if (typeof value === 'boolean') {
-      return 'bool';
+      return forceNullable ? 'bool?' : 'bool';
     }
 
     if (Array.isArray(value)) {
