@@ -46,91 +46,244 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
 
       <!-- Options Panel -->
       @if (showOptions()) {
-        <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 mb-6 overflow-hidden">
           @if (direction() === 'csharp-to-typescript') {
-            <div class="grid grid-cols-2 gap-4">
+            <!-- C# to TypeScript Options -->
+            <div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-5 py-3">
+              <h3 class="text-sm font-semibold text-gray-800">Conversion Settings</h3>
+              <p class="text-xs text-gray-500 mt-0.5">Configure how C# types are converted to TypeScript</p>
+            </div>
+            
+            <div class="p-5 space-y-5">
+              <!-- Essential Options -->
               <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Export Type</label>
-                <select 
-                  [value]="exportType()"
-                  (change)="exportType.set($any($event.target).value)"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
-                  <option value="interface">Interface</option>
-                  <option value="type">Type Alias</option>
-                </select>
+                <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Essential
+                </h4>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Export Type
+                      <span class="ml-1 text-xs text-gray-500 font-normal">(Recommended: Interface)</span>
+                    </label>
+                    <select 
+                      [value]="exportType()"
+                      (change)="exportType.set($any($event.target).value)"
+                      class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
+                      <option value="interface">Interface</option>
+                      <option value="type">Type Alias</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Nullable Strategy
+                      <span class="ml-1 text-xs text-gray-500 font-normal">(Recommended: Strict)</span>
+                    </label>
+                    <select 
+                      [value]="nullableStrategyCsToTs()"
+                      (change)="nullableStrategyCsToTs.set($any($event.target).value)"
+                      class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
+                      <option value="strict">Strict — Preserve null types (string | null)</option>
+                      <option value="optional">Optional — Use optional syntax (name?: string)</option>
+                      <option value="lenient">Lenient — Ignore nullability</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">DateTime(Offset) as</label>
-                <select 
-                  [value]="dateTimeType()"
-                  (change)="dateTimeType.set($any($event.target).value)"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
-                  <option value="string">string</option>
-                  <option value="Date">Date</option>
-                </select>
+              <!-- Advanced Options Toggle -->
+              <div class="border-t border-gray-200 pt-4">
+                <button
+                  (click)="showAdvancedOptions.set(!showAdvancedOptions())"
+                  class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-brand-secondary transition-colors">
+                  <svg 
+                    class="w-4 h-4 transition-transform"
+                    [class.rotate-90]="showAdvancedOptions()"
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                  Advanced Options
+                  <span class="text-xs text-gray-500 font-normal">(DateTime format, Enum mode)</span>
+                </button>
               </div>
+
+              <!-- Advanced Options Content -->
+              @if (showAdvancedOptions()) {
+                <div class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        DateTime Format
+                      </label>
+                      <select 
+                        [value]="dateTimeType()"
+                        (change)="dateTimeType.set($any($event.target).value)"
+                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
+                        <option value="string">string (ISO 8601)</option>
+                        <option value="Date">Date object</option>
+                      </select>
+                      <p class="mt-1 text-xs text-gray-500">How DateTime/DateTimeOffset is represented</p>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Enum Conversion Mode
+                      </label>
+                      <select 
+                        [value]="enumModeCsToTs()"
+                        (change)="enumModeCsToTs.set($any($event.target).value)"
+                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
+                        <option value="numeric">Numeric — enum {{ '{' }} A = 0, B = 1 {{ '}' }}</option>
+                        <option value="string">String — enum {{ '{' }} A = "A", B = "B" {{ '}' }}</option>
+                        <option value="union">Union — type T = "A" | "B"</option>
+                        <option value="const">Const — const enum {{ '{' }} A = "A" {{ '}' }}</option>
+                      </select>
+                      <p class="mt-1 text-xs text-gray-500">How C# enums are converted to TypeScript</p>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
           } @else {
-            <div class="grid grid-cols-5 gap-4">
+            <!-- TypeScript to C# Options -->
+            <div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-5 py-3">
+              <h3 class="text-sm font-semibold text-gray-800">Conversion Settings</h3>
+              <p class="text-xs text-gray-500 mt-0.5">Configure how TypeScript types are converted to C#</p>
+            </div>
+            
+            <div class="p-5 space-y-5">
+              <!-- Essential Options -->
               <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Type Definition</label>
-                <select 
-                  [value]="classType()"
-                  (change)="classType.set($any($event.target).value)"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
-                  <option value="class">Class</option>
-                  <option value="record">Record</option>
-                  <option value="struct">Struct</option>
-                  <option value="record struct">Record Struct</option>
-                  <option value="readonly record struct">Readonly Record Struct</option>
-                </select>
+                <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Essential
+                </h4>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Type Definition
+                      <span class="ml-1 text-xs text-gray-500 font-normal">(Recommended: Class)</span>
+                    </label>
+                    <select 
+                      [value]="classType()"
+                      (change)="classType.set($any($event.target).value)"
+                      class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
+                      <option value="class">Class — Mutable reference type</option>
+                      <option value="record">Record — Immutable reference type</option>
+                      <option value="struct">Struct — Mutable value type</option>
+                      <option value="record struct">Record Struct — Immutable value type</option>
+                      <option value="readonly record struct">Readonly Record Struct</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Nullable Strategy
+                      <span class="ml-1 text-xs text-gray-500 font-normal">(Recommended: Strict)</span>
+                    </label>
+                    <select 
+                      [value]="nullableStrategyTsToCs()"
+                      (change)="nullableStrategyTsToCs.set($any($event.target).value)"
+                      class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
+                      <option value="strict">Strict — Preserve nullability (string?)</option>
+                      <option value="optional">Optional — Treat optional as nullable</option>
+                      <option value="lenient">Lenient — Ignore nullability</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Collection Type</label>
-                <select 
-                  [value]="enumerationType()"
-                  (change)="enumerationType.set($any($event.target).value)"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
-                  <option value="List<T>">List&lt;T&gt;</option>
-                  <option value="IReadOnlyCollection<T>">IReadOnlyCollection&lt;T&gt;</option>
-                  <option value="T[]">T[]</option>
-                </select>
+              <!-- Advanced Options Toggle -->
+              <div class="border-t border-gray-200 pt-4">
+                <button
+                  (click)="showAdvancedOptions.set(!showAdvancedOptions())"
+                  class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-brand-secondary transition-colors">
+                  <svg 
+                    class="w-4 h-4 transition-transform"
+                    [class.rotate-90]="showAdvancedOptions()"
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                  Advanced Options
+                  <span class="text-xs text-gray-500 font-normal">(Collection types, Serializer, Naming)</span>
+                </button>
               </div>
 
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Serializer</label>
-                <select 
-                  [value]="serializer()"
-                  (change)="serializer.set($any($event.target).value)"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary bg-white shadow-sm">
-                  <option value="System.Text.Json">System.Text.Json</option>
-                  <option value="Newtonsoft.Json">Newtonsoft.Json</option>
-                </select>
-              </div>
+              <!-- Advanced Options Content -->
+              @if (showAdvancedOptions()) {
+                <div class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Collection Type
+                      </label>
+                      <select 
+                        [value]="enumerationType()"
+                        (change)="enumerationType.set($any($event.target).value)"
+                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
+                        <option value="List<T>">List&lt;T&gt; — Mutable list</option>
+                        <option value="IReadOnlyCollection<T>">IReadOnlyCollection&lt;T&gt; — Readonly</option>
+                        <option value="T[]">T[] — Array</option>
+                      </select>
+                      <p class="mt-1 text-xs text-gray-500">How TypeScript arrays are converted</p>
+                    </div>
 
-              <div class="flex flex-col justify-end">
-                <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
-                  <input 
-                    type="checkbox"
-                    [checked]="convertSnakeCase()"
-                    (change)="convertSnakeCase.set($any($event.target).checked)"
-                    class="w-4 h-4 text-brand-secondary border-gray-300 rounded focus:ring-2 focus:ring-brand-secondary">
-                  <span class="text-xs font-medium text-gray-700">snake_case → PascalCase</span>
-                </label>
-              </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        JSON Serializer
+                      </label>
+                      <select 
+                        [value]="serializer()"
+                        (change)="serializer.set($any($event.target).value)"
+                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
+                        <option value="System.Text.Json">System.Text.Json (Modern)</option>
+                        <option value="Newtonsoft.Json">Newtonsoft.Json (Legacy)</option>
+                      </select>
+                      <p class="mt-1 text-xs text-gray-500">Generates appropriate attributes</p>
+                    </div>
+                  </div>
 
-              @if (serializer() === 'System.Text.Json') {
-                <div class="flex flex-col justify-end">
-                  <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <input 
-                      type="checkbox"
-                      [checked]="generateSerializerContext()"
-                      (change)="generateSerializerContext.set($any($event.target).checked)"
-                      class="w-4 h-4 text-brand-secondary border-gray-300 rounded focus:ring-2 focus:ring-brand-secondary">
-                    <span class="text-xs font-medium text-gray-700">Generate Context</span>
-                  </label>
+                  <!-- Additional Options -->
+                  <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+                    <h5 class="text-xs font-semibold text-gray-700 uppercase tracking-wide">Additional Options</h5>
+                    <div class="space-y-2">
+                      <label class="flex items-start gap-3 cursor-pointer group">
+                        <input 
+                          type="checkbox"
+                          [checked]="convertSnakeCase()"
+                          (change)="convertSnakeCase.set($any($event.target).checked)"
+                          class="mt-0.5 w-4 h-4 text-brand-secondary border-gray-300 rounded focus:ring-2 focus:ring-brand-secondary">
+                        <div class="flex-1">
+                          <span class="text-sm font-medium text-gray-700 group-hover:text-brand-secondary transition-colors">Convert snake_case to PascalCase</span>
+                          <p class="text-xs text-gray-500 mt-0.5">Automatically converts naming conventions</p>
+                        </div>
+                      </label>
+
+                      @if (serializer() === 'System.Text.Json') {
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                          <input 
+                            type="checkbox"
+                            [checked]="generateSerializerContext()"
+                            (change)="generateSerializerContext.set($any($event.target).checked)"
+                            class="mt-0.5 w-4 h-4 text-brand-secondary border-gray-300 rounded focus:ring-2 focus:ring-brand-secondary">
+                          <div class="flex-1">
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-brand-secondary transition-colors">Generate JsonSerializerContext</span>
+                            <p class="text-xs text-gray-500 mt-0.5">For source generation and AOT compilation</p>
+                          </div>
+                        </label>
+                      }
+                    </div>
+                  </div>
                 </div>
               }
             </div>
@@ -210,6 +363,8 @@ export class CsharpTypescriptComponent {
   // C# → TypeScript options
   protected readonly exportType = signal<string>('interface');
   protected readonly dateTimeType = signal<string>('string');
+  protected readonly enumModeCsToTs = signal<string>('numeric');
+  protected readonly nullableStrategyCsToTs = signal<string>('strict');
   
   // TypeScript → C# options
   protected readonly classType = signal<string>('class');
@@ -217,8 +372,10 @@ export class CsharpTypescriptComponent {
   protected readonly serializer = signal<string>('System.Text.Json');
   protected readonly convertSnakeCase = signal<boolean>(false);
   protected readonly generateSerializerContext = signal<boolean>(false);
+  protected readonly nullableStrategyTsToCs = signal<string>('strict');
   
   protected readonly showOptions = signal<boolean>(true);
+  protected readonly showAdvancedOptions = signal<boolean>(false);
   protected readonly inputCode = signal<string>('');
   protected readonly outputCode = signal<string>('');
   protected readonly errorMessage = signal<string>('');
@@ -252,7 +409,9 @@ export class CsharpTypescriptComponent {
       if (this.direction() === 'csharp-to-typescript') {
         const options = {
           exportType: this.exportType() as any,
-          dateTimeType: this.dateTimeType() as any
+          dateTimeType: this.dateTimeType() as any,
+          enumMode: this.enumModeCsToTs() as any,
+          nullableStrategy: this.nullableStrategyCsToTs() as any
         };
         const result = this.converterService.csharpToTypescript(this.inputCode(), options);
         this.outputCode.set(result);
@@ -263,7 +422,8 @@ export class CsharpTypescriptComponent {
           serializer: this.serializer() as any,
           namespace: undefined,
           convertSnakeCase: this.convertSnakeCase(),
-          generateSerializerContext: this.generateSerializerContext()
+          generateSerializerContext: this.generateSerializerContext(),
+          nullableStrategy: this.nullableStrategyTsToCs() as any
         };
         const result = this.converterService.typescriptToCsharp(this.inputCode(), options);
         this.outputCode.set(result);

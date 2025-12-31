@@ -53,8 +53,10 @@ describe('CsharpTypescriptConverterService', () => {
 
       const result = service.csharpToTypescript(csharpCode, options);
 
-      expect(result).toContain('name?: string | null');
-      expect(result).toContain('age?: number | null');
+      // Default is strict mode - no optional marker
+      expect(result).toContain('name: string | null');
+      expect(result).toContain('age: number | null');
+      expect(result).not.toContain('name?:');
     });
 
     it('should handle DateTime as string', () => {
@@ -576,6 +578,479 @@ describe('CsharpTypescriptConverterService', () => {
       expect(() => {
         service.typescriptToCsharp('invalid code', options);
       }).toThrow();
+    });
+  });
+
+  describe('enum conversions', () => {
+    describe('C# to TypeScript', () => {
+      it('should convert enum to numeric by default', () => {
+        const csharpCode = `
+          public enum Mode
+          {
+              Light,
+              Dark
+          }
+        `;
+        const options = { exportType: 'interface' as const, dateTimeType: 'string' as const };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('export enum Mode');
+        expect(result).toContain('Light = 0');
+        expect(result).toContain('Dark = 1');
+      });
+
+      it('should convert enum to numeric mode explicitly', () => {
+        const csharpCode = `
+          public enum Mode
+          {
+              Light,
+              Dark
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          enumMode: 'numeric' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('export enum Mode');
+        expect(result).toContain('Light = 0');
+        expect(result).toContain('Dark = 1');
+      });
+
+      it('should convert enum to string mode', () => {
+        const csharpCode = `
+          public enum Mode
+          {
+              Light,
+              Dark
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          enumMode: 'string' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('export enum Mode');
+        expect(result).toContain('Light = "Light"');
+        expect(result).toContain('Dark = "Dark"');
+      });
+
+      it('should convert enum to union mode', () => {
+        const csharpCode = `
+          public enum Mode
+          {
+              Light,
+              Dark
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          enumMode: 'union' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('export type Mode = "Light" | "Dark"');
+      });
+
+      it('should convert enum to const mode', () => {
+        const csharpCode = `
+          public enum Mode
+          {
+              Light,
+              Dark
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          enumMode: 'const' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('export const enum Mode');
+        expect(result).toContain('Light = "Light"');
+        expect(result).toContain('Dark = "Dark"');
+      });
+
+      it('should handle enum with explicit values', () => {
+        const csharpCode = `
+          public enum Status
+          {
+              Active = 1,
+              Inactive = 2,
+              Pending = 5
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          enumMode: 'numeric' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('Active = 1');
+        expect(result).toContain('Inactive = 2');
+        expect(result).toContain('Pending = 5');
+      });
+
+      it('should handle enum with three values', () => {
+        const csharpCode = `
+          public enum Mode
+          {
+              Light,
+              Dark,
+              System
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          enumMode: 'union' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('export type Mode = "Light" | "Dark" | "System"');
+      });
+    });
+
+    describe('TypeScript to C#', () => {
+      it('should convert string enum to C# enum', () => {
+        const tsCode = `
+          export enum Mode {
+            Light = "Light",
+            Dark = "Dark"
+          }
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('public enum Mode');
+        expect(result).toContain('Light,');
+        expect(result).toContain('Dark,');
+        expect(result).toContain('JsonStringEnumConverter');
+      });
+
+      it('should convert numeric enum to C# enum', () => {
+        const tsCode = `
+          export enum Status {
+            Active = 0,
+            Inactive = 1
+          }
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('public enum Status');
+        expect(result).toContain('Active = 0');
+        expect(result).toContain('Inactive = 1');
+      });
+
+      it('should convert const enum to C# enum', () => {
+        const tsCode = `
+          export const enum Mode {
+            Light = "Light",
+            Dark = "Dark"
+          }
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('public enum Mode');
+        expect(result).toContain('JsonStringEnumConverter');
+      });
+
+      it('should convert union type to C# enum', () => {
+        const tsCode = `
+          export type Mode = "Light" | "Dark";
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('public enum Mode');
+        expect(result).toContain('Light,');
+        expect(result).toContain('Dark,');
+        expect(result).toContain('JsonStringEnumConverter');
+      });
+
+      it('should convert union type with three members', () => {
+        const tsCode = `
+          export type Mode = "Light" | "Dark" | "System";
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('public enum Mode');
+        expect(result).toContain('Light,');
+        expect(result).toContain('Dark,');
+        expect(result).toContain('System,');
+      });
+
+      it('should handle union of string and number with warning', () => {
+        const tsCode = `
+          export type Value = string | number;
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('WARNING: Lossy conversion');
+        expect(result).toContain('public class Value');
+      });
+    });
+
+    describe('round trip conversions', () => {
+      it('should handle TS union to C# enum round trip', () => {
+        const tsCode = `
+          export type Status = "ok" | "error";
+        `;
+        const tsOptions = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const
+        };
+
+        const csharpResult = service.typescriptToCsharp(tsCode, tsOptions);
+        
+        expect(csharpResult).toContain('public enum Status');
+        expect(csharpResult).toContain('ok,');
+        expect(csharpResult).toContain('error,');
+      });
+    });
+  });
+
+  describe('nullable strategies', () => {
+    describe('C# to TypeScript', () => {
+      it('should use strict mode by default', () => {
+        const csharpCode = `
+          public class User
+          {
+              public string? Name { get; set; }
+          }
+        `;
+        const options = { exportType: 'interface' as const, dateTimeType: 'string' as const };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('name: string | null');
+        expect(result).not.toContain('name?:');
+        expect(result).not.toContain('undefined');
+      });
+
+      it('should apply strict mode explicitly', () => {
+        const csharpCode = `
+          public class User
+          {
+              public string? Name { get; set; }
+              public int? Age { get; set; }
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          nullableStrategy: 'strict' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('name: string | null');
+        expect(result).toContain('age: number | null');
+        expect(result).not.toContain('undefined');
+      });
+
+      it('should apply optional mode', () => {
+        const csharpCode = `
+          public class User
+          {
+              public string? Name { get; set; }
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          nullableStrategy: 'optional' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('name?: string | null | undefined');
+      });
+
+      it('should apply lenient mode', () => {
+        const csharpCode = `
+          public class User
+          {
+              public string? Name { get; set; }
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          nullableStrategy: 'lenient' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('name: string');
+        expect(result).not.toContain('null');
+        expect(result).not.toContain('undefined');
+        expect(result).not.toContain('name?:');
+      });
+
+      it('should handle nullable List with strict mode', () => {
+        const csharpCode = `
+          public class Container
+          {
+              public List<string>? Items { get; set; }
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          nullableStrategy: 'strict' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('items: string[] | null');
+      });
+
+      it('should handle nullable List with lenient mode', () => {
+        const csharpCode = `
+          public class Container
+          {
+              public List<string>? Items { get; set; }
+          }
+        `;
+        const options = { 
+          exportType: 'interface' as const, 
+          dateTimeType: 'string' as const,
+          nullableStrategy: 'lenient' as const
+        };
+
+        const result = service.csharpToTypescript(csharpCode, options);
+
+        expect(result).toContain('items: string[]');
+        expect(result).not.toContain('null');
+      });
+    });
+
+    describe('TypeScript to C#', () => {
+      it('should use strict mode by default', () => {
+        const tsCode = `
+          interface User {
+            name?: string;
+          }
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('string? Name');
+      });
+
+      it('should apply strict mode explicitly', () => {
+        const tsCode = `
+          interface User {
+            name?: string;
+            age: number | null;
+          }
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const,
+          nullableStrategy: 'strict' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('string? Name');
+        expect(result).toContain('int? Age');
+      });
+
+      it('should apply optional mode', () => {
+        const tsCode = `
+          interface User {
+            name?: string;
+          }
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const,
+          nullableStrategy: 'optional' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('string? Name');
+      });
+
+      it('should apply lenient mode', () => {
+        const tsCode = `
+          interface User {
+            name?: string;
+            age: number | null;
+          }
+        `;
+        const options = {
+          classType: 'class' as const,
+          enumerationType: 'List<T>' as const,
+          serializer: 'System.Text.Json' as const,
+          nullableStrategy: 'lenient' as const
+        };
+
+        const result = service.typescriptToCsharp(tsCode, options);
+
+        expect(result).toContain('string Name');
+        expect(result).toContain('int Age');
+        expect(result).not.toContain('?');
+      });
     });
   });
 });
