@@ -54,6 +54,8 @@ interface ParsedEnumMember {
   providedIn: 'root'
 })
 export class CsharpTypescriptConverterService {
+  private static readonly PRIMITIVE_TYPES = ['string', 'number', 'boolean', 'any', 'unknown', 'void', 'null', 'undefined', 'object'];
+
   /**
    * Convert C# class to TypeScript interface/type
    */
@@ -588,7 +590,7 @@ export class CsharpTypescriptConverterService {
         const name = assignmentMatch[1];
         const value = assignmentMatch[2].trim();
         // Try to parse as number, otherwise keep as string
-        const numValue = parseInt(value, 10);
+        const numValue = Number.parseInt(value, 10);
         members.push({
           name,
           value: isNaN(numValue) ? value.replace(/['"]/g, '') : numValue
@@ -639,7 +641,7 @@ export class CsharpTypescriptConverterService {
             value: value.replace(/['"]/g, '')
           });
         } else {
-          const numValue = parseInt(value, 10);
+          const numValue = Number.parseInt(value, 10);
           members.push({
             name,
             value: isNaN(numValue) ? value : numValue
@@ -772,8 +774,7 @@ export class CsharpTypescriptConverterService {
     }
     
     // Check if all union members are string literals (identifiers without primitives)
-    const primitiveTypes = ['string', 'number', 'boolean', 'any', 'unknown', 'void', 'null', 'undefined', 'object'];
-    const hasPrimitives = parsed.unionTypes.some(t => primitiveTypes.includes(t.toLowerCase()));
+    const hasPrimitives = parsed.unionTypes.some(t => CsharpTypescriptConverterService.PRIMITIVE_TYPES.includes(t.toLowerCase()));
     
     if (hasPrimitives) {
       // Mixed types - return object with warning comment
