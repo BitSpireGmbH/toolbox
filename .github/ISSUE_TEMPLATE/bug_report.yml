@@ -1,0 +1,56 @@
+name: Bug Report
+description: Report a bug or issue with the toolbox
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the sections below to help us understand and fix the issue.
+
+  - type: textarea
+    id: what-is-wrong
+    attributes:
+      label: What is wrong?
+      description: Describe the problem you're experiencing.
+      placeholder: Tell us what's going wrong
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: What is the expected behavior?
+      description: What did you expect to happen?
+      placeholder: Describe what should happen instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: What is the current behavior?
+      description: What actually happens?
+      placeholder: Describe what currently happens
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional information
+      description: |
+        Add any other context about the problem here:
+        - Steps to reproduce
+        - Browser and version
+        - Screenshots
+        - Sample code or data
+      placeholder: |
+        Steps to reproduce:
+        1. Go to...
+        2. Click on...
+        3. See error...
+        
+        Browser: Chrome 120
+    validations:
+      required: false

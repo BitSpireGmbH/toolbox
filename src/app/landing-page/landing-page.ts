@@ -169,8 +169,12 @@ import { RouterLink } from '@angular/router';
 
         <!-- Footer Info -->
         <footer class="mt-16 text-center text-gray-500 text-sm space-y-2">
-          <p class="font-medium">Built with Angular • Privacy-first • <a href="https://github.com/BitSpireGmbH/toolbox">Open source</a></p>
+          <p class="font-medium">Built with Angular • Privacy-first • <a href="https://github.com/BitSpireGmbH/toolbox" class="hover:text-brand-primary transition-colors">Open source</a></p>
           <p class="text-xs">All processing happens in your browser • No data sent to servers</p>
+          <p class="text-xs">
+            Found a bug or have a feature idea? 
+            <a href="https://github.com/BitSpireGmbH/toolbox/issues" class="text-brand-primary hover:text-brand-secondary transition-colors font-medium">Report it here</a>
+          </p>
           <a href="https://bitspire.ch" class="mt-4 inline-flex items-center justify-center gap-2">
             <span class="text-xs">Brought to you by:</span>
             <img src="assets/bitspire-logo.webp" alt="BitSpire Logo" class="w-24" height="auto" />
