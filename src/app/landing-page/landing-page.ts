@@ -169,8 +169,22 @@ import { RouterLink } from '@angular/router';
 
         <!-- Footer Info -->
         <footer class="mt-16 text-center text-gray-500 text-sm space-y-2">
-          <p class="font-medium">Built with Angular • Privacy-first • <a href="https://github.com/BitSpireGmbH/toolbox">Open source</a></p>
+          <p class="font-medium">Built with Angular • Privacy-first • <a href="https://github.com/BitSpireGmbH/toolbox" class="hover:text-brand-primary transition-colors">Open source</a></p>
           <p class="text-xs">All processing happens in your browser • No data sent to servers</p>
+          <p class="text-xs">
+            Found a bug or have a feature idea? 
+            <a 
+              href="https://github.com/BitSpireGmbH/toolbox/issues" 
+              class="text-brand-primary hover:text-brand-secondary transition-colors font-medium inline-flex items-center gap-1"
+              target="_blank"
+              aria-label="Report bugs or request features on GitHub (opens in a new tab)">
+              <span>Report it here</span>
+              <span class="sr-only"> (opens in new tab)</span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 flex-shrink-0" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+          </p>
           <a href="https://bitspire.ch" class="mt-4 inline-flex items-center justify-center gap-2">
             <span class="text-xs">Brought to you by:</span>
             <img src="assets/bitspire-logo.webp" alt="BitSpire Logo" class="w-24" height="auto" />
@@ -181,4 +195,4 @@ import { RouterLink } from '@angular/router';
   `,
   styles: []
 })
-export class LandingPageComponent {}
+export class LandingPageComponent { }
