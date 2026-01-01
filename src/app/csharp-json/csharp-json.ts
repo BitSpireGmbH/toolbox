@@ -30,7 +30,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
         <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
           <div class="grid grid-cols-1 gap-4">
             <!-- First Row: Dropdowns -->
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Type Definition</label>
                 <select 
@@ -81,7 +81,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
             </div>
 
             <!-- Third Row: Checkboxes -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="space-y-2">
                 <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
                   <input 
@@ -144,7 +144,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
           </div>
           <textarea
             [(ngModel)]="inputCode"
-            class="w-full h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-50/50"
+            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-50/50"
             placeholder="Paste your JSON here...
 
 {
@@ -178,7 +178,7 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
           </div>
           <textarea
             [value]="outputCode()"
-            class="w-full h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-900"
+            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-900"
             [class]="errorMessage() ? 'text-red-400' : 'text-green-400'"
             [placeholder]="errorMessage() || 'C# class will appear here automatically...'"
             readonly

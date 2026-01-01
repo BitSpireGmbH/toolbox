@@ -7,7 +7,7 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center p-6">
-      <div class="max-w-400 w-full">
+      <div class="max-w-7xl w-full">
         <!-- Header -->
         <header class="text-center mb-12 animate-fade-in">
           <div class="mb-6 relative inline-block">

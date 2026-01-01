@@ -7,9 +7,9 @@ import { JwtDecoderService, type DecodedJwt, type ClaimExplanation } from '../se
   imports: [FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-400 mx-auto p-6">
+    <div class="max-w-7xl mx-auto p-6">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 mb-1">JWT Decoder</h1>
           <p class="text-sm text-gray-600">Decode and inspect JSON Web Tokens</p>

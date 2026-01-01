@@ -8,13 +8,13 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
   template: `
     <div class="max-w-[1600px] mx-auto p-6">
       <!-- Header with Direction Toggle -->
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 mb-1">C# ↔ TypeScript</h1>
           <p class="text-sm text-gray-600">Real-time bidirectional conversion</p>
         </div>
         
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
           <!-- Options Button -->
           <button
             (click)="showOptions.set(!showOptions())"
@@ -63,7 +63,7 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                   </svg>
                   Essential
                 </h4>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Export Type
@@ -116,7 +116,7 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
               <!-- Advanced Options Content -->
               @if (showAdvancedOptions()) {
                 <div class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div class="grid grid-cols-2 gap-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
                         DateTime Format
@@ -166,7 +166,7 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                   </svg>
                   Essential
                 </h4>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Type Definition
@@ -222,7 +222,7 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
               <!-- Advanced Options Content -->
               @if (showAdvancedOptions()) {
                 <div class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div class="grid grid-cols-2 gap-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
                         Collection Type
@@ -310,7 +310,7 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
           </div>
           <textarea
             [(ngModel)]="inputCode"
-            class="w-full h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-50/50"
+            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-50/50"
             [placeholder]="direction() === 'csharp-to-typescript' ? 'Paste your C# class here...' : 'Paste your TypeScript interface here...'"
           ></textarea>
         </div>
@@ -344,7 +344,7 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
           </div>
           <textarea
             [value]="outputCode()"
-            class="w-full h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-900"
+            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-900"
             [class]="errorMessage() ? 'text-red-400' : 'text-purple-400'"
             [placeholder]="errorMessage() || 'Converted output will appear here automatically...'"
             readonly

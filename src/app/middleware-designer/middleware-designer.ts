@@ -30,15 +30,15 @@ import {
   imports: [FormsModule, DragDropModule, MiddlewareLibraryItemComponent, MiddlewareNodeCardComponent, SimulationStepComponent, ValidationMessagesComponent, MiddlewareEditModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-400 mx-auto p-6">
+    <div class="max-w-[1600px] mx-auto p-6">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 mb-1">Middleware Designer</h1>
           <p class="text-sm text-gray-600">Build ASP.NET Core middleware pipelines visually</p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
           <button
             (click)="showLibrary.set(!showLibrary())"
             [class]="showLibrary() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
@@ -65,7 +65,7 @@ import {
             <button
               (click)="splitRatio.set(50)"
               [class]="splitRatio() > 0 && splitRatio() < 100 ? 'bg-brand-primary text-white' : 'text-gray-700 hover:bg-gray-50'"
-              class="px-3 py-2 rounded-md text-xs font-semibold transition-all"
+              class="hidden md:inline-flex px-3 py-2 rounded-md text-xs font-semibold transition-all"
               title="Split View">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="18" height="18" rx="2"></rect>
@@ -117,7 +117,7 @@ import {
       <div class="gap-5" [class]="gridLayoutClass()">
         <!-- Middleware Library Sidebar -->
         @if (showLibrary()) {
-          <div class="bg-white rounded-xl shadow-md border border-gray-200 p-5 h-fit sticky top-6">
+          <div class="bg-white rounded-xl shadow-md border border-gray-200 p-5 h-fit lg:sticky lg:top-6">
             <h3 class="font-semibold text-sm text-gray-700 mb-3">Middleware Library</h3>
             <div class="space-y-2 max-h-200 overflow-y-auto">
               @for (item of middlewareLibrary; track item.type) {
@@ -133,7 +133,7 @@ import {
         <div class="flex gap-0 relative w-full">
           <!-- Canvas -->
           @if (splitRatio() > 0) {
-          <div class="shrink-0 transition-all" [style]="canvasWidthStyle()">
+          <div class="shrink-0 transition-all w-full lg:w-[var(--canvas-width)]" [style.--canvas-width]="splitRatio() + '%'">
             <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow h-full w-full">
           <div class="bg-linear-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -181,14 +181,14 @@ import {
             <div
               (mousedown)="startResize($event)"
               [class]="isResizing() ? 'bg-brand-primary' : 'bg-gray-300 hover:bg-brand-primary'"
-              class="w-1 cursor-col-resize transition-colors shrink-0 mx-2 relative group">
+              class="hidden lg:block w-1 cursor-col-resize transition-colors shrink-0 mx-2 relative group">
               <div class="absolute inset-y-0 -left-1 -right-1"></div>
             </div>
           }
 
         <!-- Code Output -->
         @if (splitRatio() < 100) {
-        <div class="shrink-0 transition-all" [style]="codeWidthStyle()">
+        <div class="shrink-0 transition-all w-full lg:w-[var(--code-width)]" [style.--code-width]="(100 - splitRatio()) + '%'">
           <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow h-full w-full flex flex-col">
             <div class="bg-linear-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center shrink-0">
               <div class="flex items-center gap-2">
@@ -398,7 +398,7 @@ export class MiddlewareDesignerComponent {
   protected readonly gridLayoutClass = computed(() => {
     const showLib = this.showLibrary();
     if (showLib) {
-      return 'grid grid-cols-[300px_1fr]';
+      return 'grid grid-cols-1 lg:grid-cols-[300px_1fr]';
     }
     return 'grid grid-cols-1';
   });

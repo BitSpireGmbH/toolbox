@@ -18,7 +18,7 @@ interface ProjectTab {
     imports: [FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-    <div class="max-w-400 mx-auto p-6">
+    <div class="max-w-7xl mx-auto p-6">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
