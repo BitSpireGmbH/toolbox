@@ -29,5 +29,9 @@ export const routes: Routes = [
   {
     path: 'package-centralizer',
     loadComponent: () => import('./package-centralizer/package-centralizer').then(m => m.PackageCentralizerComponent)
+  },
+  {
+    path: 'csharp-mindmap',
+    loadComponent: () => import('./csharp-mindmap/csharp-mindmap').then(m => m.CsharpMindmapComponent)
   }
 ];

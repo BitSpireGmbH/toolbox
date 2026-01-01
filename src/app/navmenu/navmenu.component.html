@@ -142,6 +142,31 @@
         </span>
       }
     </a>
+
+    <a
+      routerLink="/csharp-mindmap"
+      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      [class.justify-center]="!sidebarOpen()"
+      [class.px-3]="sidebarOpen()"
+      [class.gap-3]="sidebarOpen()"
+      aria-label="C# Mindmap">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <circle cx="4" cy="6" r="2"></circle>
+        <circle cx="20" cy="6" r="2"></circle>
+        <circle cx="4" cy="18" r="2"></circle>
+        <circle cx="20" cy="18" r="2"></circle>
+        <path d="M9.5 10L5.5 7.5M14.5 10L18.5 7.5M9.5 14L5.5 16.5M14.5 14L18.5 16.5"></path>
+      </svg>
+      @if (sidebarOpen()) {
+        <span class="text-sm whitespace-nowrap overflow-hidden">C# Mindmap</span>
+      } @else {
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          C# Mindmap
+        </span>
+      }
+    </a>
   </nav>
 
   @if (sidebarOpen()) {
@@ -263,6 +288,22 @@
           <line x1="12" y1="22.08" x2="12" y2="12"></line>
         </svg>
         <span class="font-medium">Package Centralizer</span>
+      </a>
+
+      <a
+        routerLink="/csharp-mindmap"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        (click)="onCloseSidebar()"
+        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <circle cx="4" cy="6" r="2"></circle>
+          <circle cx="20" cy="6" r="2"></circle>
+          <circle cx="4" cy="18" r="2"></circle>
+          <circle cx="20" cy="18" r="2"></circle>
+          <path d="M9.5 10L5.5 7.5M14.5 10L18.5 7.5M9.5 14L5.5 16.5M14.5 14L18.5 16.5"></path>
+        </svg>
+        <span class="font-medium">C# Mindmap</span>
       </a>
     </nav>
 
