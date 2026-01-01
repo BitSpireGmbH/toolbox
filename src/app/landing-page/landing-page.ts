@@ -173,7 +173,12 @@ import { RouterLink } from '@angular/router';
           <p class="text-xs">All processing happens in your browser • No data sent to servers</p>
           <p class="text-xs">
             Found a bug or have a feature idea? 
-            <a href="https://github.com/BitSpireGmbH/toolbox/issues" class="text-brand-primary hover:text-brand-secondary transition-colors font-medium">Report it here</a>
+            <a 
+              href="https://github.com/BitSpireGmbH/toolbox/issues" 
+              class="text-brand-primary hover:text-brand-secondary transition-colors font-medium"
+              aria-label="Report bugs or request features on GitHub">
+              Report it here
+            </a>
           </p>
           <a href="https://bitspire.ch" class="mt-4 inline-flex items-center justify-center gap-2">
             <span class="text-xs">Brought to you by:</span>
