@@ -1,12 +1,13 @@
-import { Component, signal, inject, effect } from '@angular/core';
+import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CsharpTypescriptConverterService } from '../services/csharp-typescript-converter.service';
 
 @Component({
   selector: 'app-csharp-typescript',
   imports: [FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-[1600px] mx-auto p-6">
+    <div class="max-w-7xl mx-auto p-6">
       <!-- Header with Direction Toggle -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
@@ -18,7 +19,7 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
           <!-- Options Button -->
           <button
             (click)="showOptions.set(!showOptions())"
-            [class]="showOptions() ? 'bg-brand-secondary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+            [class]="showOptions() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
             class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
@@ -30,13 +31,13 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
           <div class="inline-flex rounded-lg border border-gray-300 bg-white p-0.5 shadow-sm">
             <button
               (click)="switchDirection('csharp-to-typescript')"
-              [class]="direction() === 'csharp-to-typescript' ? 'bg-brand-secondary text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50'"
+              [class]="direction() === 'csharp-to-typescript' ? 'bg-brand-primary text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50'"
               class="px-5 py-2 rounded-md font-semibold text-sm transition-all">
               C# → TS
             </button>
             <button
               (click)="switchDirection('typescript-to-csharp')"
-              [class]="direction() === 'typescript-to-csharp' ? 'bg-brand-secondary text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50'"
+              [class]="direction() === 'typescript-to-csharp' ? 'bg-brand-primary text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50'"
               class="px-5 py-2 rounded-md font-semibold text-sm transition-all">
               TS → C#
             </button>

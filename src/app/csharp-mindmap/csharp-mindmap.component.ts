@@ -11,14 +11,13 @@ type ViewMode = 'mindmap' | 'list';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
-      <div class="w-full max-w-7xl">
-        <!-- Header & Controls -->
-        <div class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">C# Version History</h1>
-            <p class="text-gray-600">Explore the evolution of C# language features</p>
-          </div>
+    <div class="max-w-7xl mx-auto p-6">
+      <!-- Header & Controls -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-1">C# Version History</h1>
+          <p class="text-sm text-gray-600">Explore the evolution of C# language features</p>
+        </div>
           
           <div class="bg-white p-1 rounded-lg shadow-sm border border-gray-200 inline-flex">
             <button 
@@ -42,8 +41,8 @@ type ViewMode = 'mindmap' | 'list';
           </div>
         </div>
 
-        <!-- Content -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[600px] overflow-x-auto">
+      <!-- Content -->
+      <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 min-h-[600px] overflow-x-auto">
           
           <!-- Mindmap / Timeline View -->
           @if (viewMode() === 'mindmap') {
@@ -139,7 +138,6 @@ type ViewMode = 'mindmap' | 'list';
           }
 
         </div>
-      </div>
     </div>
   `,
   styles: [`

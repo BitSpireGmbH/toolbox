@@ -1,14 +1,15 @@
-import { Component, signal, inject, effect } from '@angular/core';
+import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CsharpJsonConverterService } from '../services/csharp-json-converter.service';
 
 @Component({
   selector: 'app-csharp-json',
   imports: [FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-[1600px] mx-auto p-6">
+    <div class="max-w-7xl mx-auto p-6">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 mb-1">JSON → C#</h1>
           <p class="text-sm text-gray-600">Convert JSON to C# classes in real-time</p>
