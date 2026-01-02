@@ -172,8 +172,9 @@ import { RouterLink } from '@angular/router';
               <div class="relative">
                 <div class="flex items-center gap-3 mb-3">
                   <div class="w-10 h-10 bg-linear-to-br from-purple-500 to-indigo-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-purple-500/25 transition-all duration-300" aria-hidden="true">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M9 12h.01M15 12h.01M12 9h.01M12 15h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect x="1.5" y="1.5" width="21" height="21" rx="5" stroke="currentColor" stroke-width="1.5"></rect>
+                      <text x="50%" y="50%" fill="currentColor" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-size="9" font-weight="700" text-anchor="middle" dominant-baseline="central">C#</text>
                     </svg>
                   </div>
                   <div>
