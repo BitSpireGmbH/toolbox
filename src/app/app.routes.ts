@@ -33,5 +33,9 @@ export const routes: Routes = [
   {
     path: 'csharp-mindmap',
     loadComponent: () => import('./csharp-mindmap/csharp-mindmap.component').then(m => m.CsharpMindmapComponent)
+  },
+  {
+    path: 'editorconfig-generator',
+    loadComponent: () => import('./editorconfig-generator/editorconfig-generator').then(m => m.EditorconfigGeneratorComponent)
   }
 ];
