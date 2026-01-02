@@ -84,11 +84,7 @@ export class EditorconfigGeneratorService {
     
     for (const [key, value] of Object.entries(settings)) {
       if (value !== undefined && value !== null && value !== '') {
-        if (typeof value === 'boolean') {
-          block += `${key} = ${value}\n`;
-        } else {
-          block += `${key} = ${value}\n`;
-        }
+        block += `${key} = ${value}\n`;
       }
     }
     
