@@ -201,7 +201,7 @@ import {
                 [class]="generatedCode() ? 'text-green-400 hover:bg-green-400/10' : 'text-gray-500'">
                 <span class="flex items-center gap-1.5">
                   <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <rect x ="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                   </svg>
                   Copy
@@ -222,8 +222,10 @@ import {
 
         <!-- Simulation Panel -->
         @if (showSimulation()) {
-          <app-middleware-simulation-panel
-            [pipeline]="pipeline()" />
+          <div class="mt-6">
+            <app-middleware-simulation-panel
+              [pipeline]="pipeline()" />
+          </div>
         }
 
         <!-- Edit Modal -->

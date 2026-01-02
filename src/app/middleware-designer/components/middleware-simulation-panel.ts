@@ -6,6 +6,9 @@ import { MiddlewareDesignerService, SimulationRequest, Pipeline } from '../../se
 @Component({
   selector: 'app-middleware-simulation-panel',
   standalone: true,
+  styles: `:host {
+      display: block;
+  }`,
   imports: [FormsModule, SimulationStepComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
