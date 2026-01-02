@@ -142,6 +142,26 @@
         </span>
       }
     </a>
+
+    <a
+      routerLink="/csharp-mindmap"
+      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      [class.justify-center]="!sidebarOpen()"
+      [class.px-3]="sidebarOpen()"
+      [class.gap-3]="sidebarOpen()"
+      aria-label="C# Mindmap">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 12h.01M15 12h.01M12 9h.01M12 15h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
+      </svg>
+      @if (sidebarOpen()) {
+        <span class="text-sm whitespace-nowrap overflow-hidden">C# Mindmap</span>
+      } @else {
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          C# Mindmap
+        </span>
+      }
+    </a>
   </nav>
 
   @if (sidebarOpen()) {
@@ -263,6 +283,17 @@
           <line x1="12" y1="22.08" x2="12" y2="12"></line>
         </svg>
         <span class="font-medium">Package Centralizer</span>
+      </a>
+
+      <a
+        routerLink="/csharp-mindmap"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        (click)="onCloseSidebar()"
+        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12h.01M15 12h.01M12 9h.01M12 15h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
+        </svg>
+        <span class="font-medium">C# Mindmap</span>
       </a>
     </nav>
 
