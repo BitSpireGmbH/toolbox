@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
-import { CsharpVersion } from '../models/csharp-version.models';
+import { CsharpVersion, CsharpFeature } from '../models/csharp-version.models';
+
+interface VersionData {
+  year: number;
+  features: CsharpFeature[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CsharpVersionService {
-  private readonly data = {
+  private readonly data: { versions: Record<string, VersionData> } = {
     "versions": {
       "1.0": {
         "year": 2002,
@@ -152,8 +157,8 @@ export class CsharpVersionService {
     return Object.entries(this.data.versions)
       .map(([version, data]) => ({
         version,
-        year: (data as any).year,
-        features: (data as any).features
+        year: data.year,
+        features: data.features
       }))
       .sort((a, b) => {
          return parseFloat(a.version) - parseFloat(b.version);

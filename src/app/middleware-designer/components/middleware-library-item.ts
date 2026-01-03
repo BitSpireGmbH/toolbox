@@ -1,5 +1,5 @@
 import { Component, input, output, inject, computed, ChangeDetectionStrategy } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import type { MiddlewareType, MiddlewareConfig } from '../models';
 
 export interface MiddlewareLibraryItemData {

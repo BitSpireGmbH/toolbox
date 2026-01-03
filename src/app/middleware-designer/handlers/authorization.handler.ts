@@ -13,7 +13,7 @@ export class AuthorizationHandler extends SecurityMiddlewareHandler {
     return `${indent}app.UseAuthorization();\n`;
   }
 
-  override generateServiceRegistration(config: MiddlewareConfig): string {
+  override generateServiceRegistration(_config: MiddlewareConfig): string {
     return `builder.Services.AddAuthorization();\n`;
   }
 
@@ -24,7 +24,7 @@ export class AuthorizationHandler extends SecurityMiddlewareHandler {
   ): MiddlewareSimulationResult {
     const stepBase = this.createStepBase(steps, this.type, this.type);
     const policies = config.policies || [];
-    const hasRequiredClaims = policies.length === 0 || policies.some((policy) => context.claims[policy]);
+    const hasRequiredClaims = policies.length === 0 || policies.some((policy: string) => context.claims[policy]);
 
     if (!hasRequiredClaims) {
       steps.push({

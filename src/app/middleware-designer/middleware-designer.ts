@@ -5,10 +5,10 @@ import {
   MiddlewareDesignerService,
   Pipeline,
   MiddlewareNode,
-  MiddlewareType,
   MiddlewareConfig,
   BranchCondition,
 } from '../services/middleware-designer.service';
+import type { MiddlewareType } from './models';
 import { MiddlewareLibraryItemComponent } from './components/middleware-library-item';
 import { MiddlewareNodeCardComponent } from './components/middleware-node-card';
 import { ValidationMessagesComponent } from './components/validation-messages';
@@ -233,7 +233,7 @@ import {
           [middleware]="selectedMiddleware()"
           [(config)]="editConfig"
           (save)="saveMiddlewareConfig()"
-          (cancel)="closeEditModal()" />
+          (dismiss)="closeEditModal()" />
     </div>
   `,
 })
@@ -286,7 +286,7 @@ export class MiddlewareDesignerComponent {
   });
 
   // Edit config state
-  protected editConfig = signal<EditConfig>({});
+  protected readonly editConfig = signal<EditConfig>({});
 
   // Middleware library
   protected readonly middlewareLibrary = MIDDLEWARE_LIBRARY;

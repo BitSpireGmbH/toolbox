@@ -3,7 +3,6 @@ import { MiddlewareHandlerFactory } from '../middleware-designer/middleware-hand
 import type {
   Pipeline,
   MiddlewareNode,
-  MiddlewareType,
   MiddlewareConfig,
   ValidationResult,
   ValidationError,
@@ -13,13 +12,14 @@ import type {
   SimulationStep,
   SimulationContext,
   MinimalAPIEndpoint,
+  BranchCondition,
+  MiddlewareSimulationResult,
 } from '../middleware-designer/models';
 
 // Re-export types for backward compatibility
 export type {
   Pipeline,
   MiddlewareNode,
-  MiddlewareType,
   MiddlewareConfig,
   BranchConfig,
   BranchCondition,
@@ -166,7 +166,7 @@ export class MiddlewareDesignerService {
     // Handle branches
     if (middleware.branch) {
       if (handler.generateBranchCode) {
-        const branchCode = handler.generateBranchCode(middleware.branch, indent);
+        handler.generateBranchCode(middleware.branch, indent);
         // Replace placeholder comments with actual middleware code
         const onTrueNodes = middleware.branch.onTrue || [];
         const onFalseNodes = middleware.branch.onFalse || [];
@@ -202,7 +202,7 @@ export class MiddlewareDesignerService {
     return code;
   }
 
-  private generateBranchCondition(condition: any): string {
+  private generateBranchCondition(condition: BranchCondition): string {
     // Delegate to base handler for condition generation
     // This is a simplified version for now
     switch (condition.type) {
@@ -358,7 +358,7 @@ export class MiddlewareDesignerService {
     middleware: MiddlewareNode,
     context: SimulationContext,
     steps: SimulationStep[]
-  ): any {
+  ): MiddlewareSimulationResult {
     const handler = this.factory.getHandler(middleware.type);
     const result = handler.simulate(middleware.config as MiddlewareConfig, context, steps);
 
@@ -391,7 +391,7 @@ export class MiddlewareDesignerService {
     return result;
   }
 
-  private evaluateBranchCondition(condition: any, context: SimulationContext): boolean {
+  private evaluateBranchCondition(condition: BranchCondition, context: SimulationContext): boolean {
     switch (condition.type) {
       case 'header': {
         const headerValue = context.headers[condition.key || ''] || '';

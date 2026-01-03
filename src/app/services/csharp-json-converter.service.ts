@@ -145,9 +145,11 @@ export class CsharpJsonConverterService {
           if (!allProperties.has(key)) {
             allProperties.set(key, { values: [], count: 0 });
           }
-          const prop = allProperties.get(key)!;
-          prop.values.push(value);
-          prop.count++;
+          const prop = allProperties.get(key);
+          if (prop) {
+            prop.values.push(value);
+            prop.count++;
+          }
         }
       }
     }
@@ -272,7 +274,7 @@ export class CsharpJsonConverterService {
   /**
    * Generate C# class from JSON object
    */
-  private generateCsharpClass(obj: unknown, className: string, options: JsonToCsharpOptions, indent: number = 0, contextArray?: unknown[]): string {
+  private generateCsharpClass(obj: unknown, className: string, options: JsonToCsharpOptions, indent = 0, contextArray?: unknown[]): string {
     if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
       throw new Error('Object JSON must be an object for class generation');
     }
@@ -311,7 +313,9 @@ export class CsharpJsonConverterService {
         ? this.toPascalCase(key)
         : this.toPascalCase(key);
       
-      const info = propertyInfo.get(key)!;
+      const info = propertyInfo.get(key);
+      if (!info) continue;
+
       const propertyType = this.inferCsharpType(value, propertyName, options, info.isNullable);
 
       // Determine if we need JsonPropertyName attribute
@@ -374,7 +378,8 @@ export class CsharpJsonConverterService {
         const itemObj = item as Record<string, unknown>;
         
         for (const key of Object.keys(obj)) {
-          const stats = propertyStats.get(key)!;
+          const stats = propertyStats.get(key);
+          if (!stats) continue;
           
           if (key in itemObj) {
             stats.presentCount++;
@@ -447,7 +452,7 @@ export class CsharpJsonConverterService {
   /**
    * Infer C# type from JSON value
    */
-  private inferCsharpType(value: unknown, propertyName: string, options: JsonToCsharpOptions, forceNullable: boolean = false): string {
+  private inferCsharpType(value: unknown, propertyName: string, options: JsonToCsharpOptions, forceNullable = false): string {
     if (value === null || value === undefined) {
       return 'object?';
     }
@@ -553,7 +558,7 @@ export class CsharpJsonConverterService {
   /**
    * Generate JsonSerializerContext for System.Text.Json source generators
    */
-  private generateJsonSerializerContext(className: string, options: JsonToCsharpOptions): string {
+  private generateJsonSerializerContext(className: string, _options: JsonToCsharpOptions): string {
     const lines: string[] = [];
     const contextName = `${className}JsonContext`;
 

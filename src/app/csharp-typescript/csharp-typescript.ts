@@ -1,6 +1,6 @@
 import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CsharpTypescriptConverterService } from '../services/csharp-typescript-converter.service';
+import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, TypescriptToCsharpOptions } from '../services/csharp-typescript-converter.service';
 
 @Component({
   selector: 'app-csharp-typescript',
@@ -66,11 +66,12 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                 </h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="cs-ts-export-type" class="block text-sm font-medium text-gray-700 mb-2">
                       Export Type
                       <span class="ml-1 text-xs text-gray-500 font-normal">(Recommended: Interface)</span>
                     </label>
                     <select 
+                      id="cs-ts-export-type"
                       [value]="exportType()"
                       (change)="exportType.set($any($event.target).value)"
                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
@@ -80,11 +81,12 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="cs-ts-nullable-strategy" class="block text-sm font-medium text-gray-700 mb-2">
                       Nullable Strategy
                       <span class="ml-1 text-xs text-gray-500 font-normal">(Recommended: Strict)</span>
                     </label>
                     <select 
+                      id="cs-ts-nullable-strategy"
                       [value]="nullableStrategyCsToTs()"
                       (change)="nullableStrategyCsToTs.set($any($event.target).value)"
                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
@@ -119,10 +121,11 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                 <div class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                      <label for="cs-ts-datetime-format" class="block text-sm font-medium text-gray-700 mb-2">
                         DateTime Format
                       </label>
                       <select 
+                        id="cs-ts-datetime-format"
                         [value]="dateTimeType()"
                         (change)="dateTimeType.set($any($event.target).value)"
                         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
@@ -133,10 +136,11 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                      <label for="cs-ts-enum-mode" class="block text-sm font-medium text-gray-700 mb-2">
                         Enum Conversion Mode
                       </label>
                       <select 
+                        id="cs-ts-enum-mode"
                         [value]="enumModeCsToTs()"
                         (change)="enumModeCsToTs.set($any($event.target).value)"
                         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
@@ -169,11 +173,12 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                 </h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="ts-cs-class-type" class="block text-sm font-medium text-gray-700 mb-2">
                       Type Definition
                       <span class="ml-1 text-xs text-gray-500 font-normal">(Recommended: Class)</span>
                     </label>
                     <select 
+                      id="ts-cs-class-type"
                       [value]="classType()"
                       (change)="classType.set($any($event.target).value)"
                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
@@ -186,11 +191,12 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="ts-cs-nullable-strategy" class="block text-sm font-medium text-gray-700 mb-2">
                       Nullable Strategy
                       <span class="ml-1 text-xs text-gray-500 font-normal">(Recommended: Strict)</span>
                     </label>
                     <select 
+                      id="ts-cs-nullable-strategy"
                       [value]="nullableStrategyTsToCs()"
                       (change)="nullableStrategyTsToCs.set($any($event.target).value)"
                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
@@ -225,10 +231,11 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                 <div class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                      <label for="ts-cs-collection-type" class="block text-sm font-medium text-gray-700 mb-2">
                         Collection Type
                       </label>
                       <select 
+                        id="ts-cs-collection-type"
                         [value]="enumerationType()"
                         (change)="enumerationType.set($any($event.target).value)"
                         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
@@ -240,10 +247,11 @@ import { CsharpTypescriptConverterService } from '../services/csharp-typescript-
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                      <label for="ts-cs-serializer" class="block text-sm font-medium text-gray-700 mb-2">
                         JSON Serializer
                       </label>
                       <select 
+                        id="ts-cs-serializer"
                         [value]="serializer()"
                         (change)="serializer.set($any($event.target).value)"
                         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
@@ -408,23 +416,23 @@ export class CsharpTypescriptComponent {
 
     try {
       if (this.direction() === 'csharp-to-typescript') {
-        const options = {
-          exportType: this.exportType() as any,
-          dateTimeType: this.dateTimeType() as any,
-          enumMode: this.enumModeCsToTs() as any,
-          nullableStrategy: this.nullableStrategyCsToTs() as any
+        const options: CsharpToTypescriptOptions = {
+          exportType: this.exportType() as CsharpToTypescriptOptions['exportType'],
+          dateTimeType: this.dateTimeType() as CsharpToTypescriptOptions['dateTimeType'],
+          enumMode: this.enumModeCsToTs() as CsharpToTypescriptOptions['enumMode'],
+          nullableStrategy: this.nullableStrategyCsToTs() as CsharpToTypescriptOptions['nullableStrategy']
         };
         const result = this.converterService.csharpToTypescript(this.inputCode(), options);
         this.outputCode.set(result);
       } else {
-        const options = {
-          classType: this.classType() as any,
-          enumerationType: this.enumerationType() as any,
-          serializer: this.serializer() as any,
+        const options: TypescriptToCsharpOptions = {
+          classType: this.classType() as TypescriptToCsharpOptions['classType'],
+          enumerationType: this.enumerationType() as TypescriptToCsharpOptions['enumerationType'],
+          serializer: this.serializer() as TypescriptToCsharpOptions['serializer'],
           namespace: undefined,
           convertSnakeCase: this.convertSnakeCase(),
           generateSerializerContext: this.generateSerializerContext(),
-          nullableStrategy: this.nullableStrategyTsToCs() as any
+          nullableStrategy: this.nullableStrategyTsToCs() as TypescriptToCsharpOptions['nullableStrategy']
         };
         const result = this.converterService.typescriptToCsharp(this.inputCode(), options);
         this.outputCode.set(result);

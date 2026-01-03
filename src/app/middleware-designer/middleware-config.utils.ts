@@ -272,7 +272,7 @@ export function getMiddlewareConfigSummary(middleware: MiddlewareNode): string {
   switch (middleware.type) {
     case 'Routing':
       return `Routes: ${config.routes?.join(', ') || 'none'}`;
-    case 'Authentication':
+    case 'Authentication': {
       const scheme = config.authScheme || 'JwtBearer';
       switch (scheme) {
         case 'JwtBearer':
@@ -284,6 +284,7 @@ export function getMiddlewareConfigSummary(middleware: MiddlewareNode): string {
         default:
           return `Scheme: ${scheme}`;
       }
+    }
     case 'Authorization':
       return `Policies: ${config.policies?.join(', ') || 'none'}`;
     case 'CORS':

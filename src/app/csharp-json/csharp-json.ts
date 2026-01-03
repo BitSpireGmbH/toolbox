@@ -1,6 +1,6 @@
 import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CsharpJsonConverterService } from '../services/csharp-json-converter.service';
+import { CsharpJsonConverterService, JsonToCsharpOptions } from '../services/csharp-json-converter.service';
 
 @Component({
   selector: 'app-csharp-json',
@@ -33,8 +33,9 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
             <!-- First Row: Dropdowns -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Type Definition</label>
+                <label for="json-class-type" class="block text-xs font-semibold text-gray-700 mb-2">Type Definition</label>
                 <select 
+                  id="json-class-type"
                   [value]="classType()"
                   (change)="classType.set($any($event.target).value)"
                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
@@ -47,8 +48,9 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Collection Type</label>
+                <label for="json-enumeration-type" class="block text-xs font-semibold text-gray-700 mb-2">Collection Type</label>
                 <select 
+                  id="json-enumeration-type"
                   [value]="enumerationType()"
                   (change)="enumerationType.set($any($event.target).value)"
                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
@@ -59,8 +61,9 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Serializer</label>
+                <label for="json-serializer" class="block text-xs font-semibold text-gray-700 mb-2">Serializer</label>
                 <select 
+                  id="json-serializer"
                   [value]="serializer()"
                   (change)="serializer.set($any($event.target).value)"
                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
@@ -72,8 +75,9 @@ import { CsharpJsonConverterService } from '../services/csharp-json-converter.se
 
             <!-- Second Row: Root Class Name -->
             <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-2">Root Class Name (optional)</label>
+              <label for="json-root-class-name" class="block text-xs font-semibold text-gray-700 mb-2">Root Class Name (optional)</label>
               <input 
+                id="json-root-class-name"
                 type="text"
                 [value]="rootClassName()"
                 (input)="rootClassName.set($any($event.target).value)"
@@ -225,10 +229,10 @@ export class CsharpJsonComponent {
     this.outputCode.set('');
 
     try {
-      const options = {
-        classType: this.classType() as any,
-        enumerationType: this.enumerationType() as any,
-        serializer: this.serializer() as any,
+      const options: JsonToCsharpOptions = {
+        classType: this.classType() as JsonToCsharpOptions['classType'],
+        enumerationType: this.enumerationType() as JsonToCsharpOptions['enumerationType'],
+        serializer: this.serializer() as JsonToCsharpOptions['serializer'],
         namespace: undefined,
         convertSnakeCase: this.convertSnakeCase(),
         generateSerializerContext: this.generateSerializerContext(),

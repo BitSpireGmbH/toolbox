@@ -58,7 +58,7 @@ export class JwtDecoderService {
       let header: JwtHeader;
       try {
         header = JSON.parse(atob(parts[0])) as JwtHeader;
-      } catch (error) {
+      } catch {
         throw new Error('Invalid JWT header: The header is not properly Base64 encoded');
       }
       

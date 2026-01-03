@@ -202,7 +202,11 @@ export class CsharpTypescriptConverterService {
     }
 
     const isInterface = !!interfaceMatch;
-    const name = (interfaceMatch || typeMatch)![1];
+    const nameMatch = interfaceMatch || typeMatch;
+    if (!nameMatch) {
+      throw new Error('Could not find interface or type declaration');
+    }
+    const name = nameMatch[1];
 
     // Check for union type
     if (typeMatch) {
@@ -459,7 +463,7 @@ export class CsharpTypescriptConverterService {
    */
   private typescriptTypeToCsharp(tsType: string, options: TypescriptToCsharpOptions): string {
     // Remove null/undefined from union types
-    let baseType = tsType.replace(/\s*\|\s*null/g, '').replace(/\s*\|\s*undefined/g, '').trim();
+    const baseType = tsType.replace(/\s*\|\s*null/g, '').replace(/\s*\|\s*undefined/g, '').trim();
 
     // Handle arrays
     if (baseType.endsWith('[]')) {
@@ -552,7 +556,7 @@ export class CsharpTypescriptConverterService {
   /**
    * Generate JsonSerializerContext for System.Text.Json source generators
    */
-  private generateJsonSerializerContext(className: string, options: TypescriptToCsharpOptions): string {
+  private generateJsonSerializerContext(className: string, _options: TypescriptToCsharpOptions): string {
     const lines: string[] = [];
     const contextName = `${className}JsonContext`;
 
@@ -616,7 +620,7 @@ export class CsharpTypescriptConverterService {
   /**
    * Parse TypeScript enum
    */
-  private parseTypescriptEnum(code: string, enumName: string, isConst: boolean): ParsedTypeScript {
+  private parseTypescriptEnum(code: string, enumName: string, _isConst: boolean): ParsedTypeScript {
     const members: ParsedEnumMember[] = [];
     
     // Extract enum body
@@ -691,10 +695,11 @@ export class CsharpTypescriptConverterService {
         lines.push('}');
         break;
         
-      case 'union':
+      case 'union': {
         const unionMembers = parsedClass.enumMembers.map(m => `"${m.name}"`).join(' | ');
         lines.push(`export type ${parsedClass.name} = ${unionMembers};`);
         break;
+      }
         
       case 'const':
         lines.push(`export const enum ${parsedClass.name} {`);

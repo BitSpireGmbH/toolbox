@@ -1,7 +1,6 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CsharpVersionService } from './services/csharp-version.service';
-import { CsharpVersion } from './models/csharp-version.models';
 
 type ViewMode = 'mindmap' | 'list';
 
@@ -152,9 +151,9 @@ type ViewMode = 'mindmap' | 'list';
   `]
 })
 export class CsharpMindmapComponent {
-  viewMode = signal<ViewMode>('mindmap');
-  
-  versions = computed(() => this.service.getVersions());
+  private readonly service = inject(CsharpVersionService);
 
-  constructor(private service: CsharpVersionService) {}
+  protected readonly viewMode = signal<ViewMode>('mindmap');
+  
+  protected readonly versions = computed(() => this.service.getVersions());
 }

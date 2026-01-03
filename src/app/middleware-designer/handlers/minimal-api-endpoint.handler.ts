@@ -14,7 +14,6 @@ export class MinimalApiEndpointHandler extends RoutingMiddlewareHandler {
   generateCode(config: MiddlewareConfig, indent = ''): string {
     if (config.httpMethod && config.path && config.handlerCode) {
       let code = '';
-      const method = config.httpMethod.toLowerCase();
       code += `${indent}app.Map${config.httpMethod.charAt(0) + config.httpMethod.slice(1).toLowerCase()}("${config.path}", `;
       
       if (config.handlerCode.includes('=>') || config.handlerCode.includes('async')) {
@@ -79,7 +78,7 @@ export class MinimalApiEndpointHandler extends RoutingMiddlewareHandler {
     };
   }
 
-  override validate(config: MiddlewareConfig, pipeline: Pipeline, middlewareId: string): ValidationIssue[] {
+  override validate(_config: MiddlewareConfig, _pipeline: Pipeline, _middlewareId: string): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     
     return issues;
