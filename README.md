@@ -10,6 +10,7 @@ A client-side developer toolkit with utilities for code conversion and middlewar
 - **JWT Decoder** - Decode and inspect JSON Web Tokens with claim explanations and validity checks.
 - **Package Centralizer** - Convert .NET projects to Central Package Management with Directory.Packages.props.
 - **C# Mind Map** - A list of all C# versions with their features, including links to the official documentation
+- **List<T> Visualizer** - Visualize the internal structure of C# List<T>
 
 ## Development
 
