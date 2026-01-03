@@ -291,7 +291,14 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
              <div class="bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden flex flex-col h-100">
                 <div class="bg-gray-800 px-4 py-2 border-b border-gray-700 flex justify-between items-center">
                    <h3 class="font-mono text-xs text-gray-300 font-semibold uppercase">Operation Log</h3>
-                   <button (click)="clearLogs()" class="text-[10px] text-gray-400 hover:text-white uppercase">Clear</button>
+                   <button
+                     type="button"
+                     aria-label="Clear operation log"
+                     (click)="clearLogs()"
+                     class="text-[10px] text-gray-400 hover:text-white uppercase"
+                   >
+                     Clear
+                   </button>
                 </div>
                 <div class="p-4 overflow-y-auto font-mono text-xs space-y-2 flex-1 scroll-smooth">
                    @for (log of logs(); track $index) {
