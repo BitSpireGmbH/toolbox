@@ -511,6 +511,12 @@ export class ListVisualizerComponent {
      const initCap = this.initialCapacity();
      this.count.set(0);
      this.capacity.set(initCap);
+     this.newArray.set(null);
+     this.logs.set([]);
+     this.state.set('steady');
+     this.copyIndex.set(null);
+     this.inputValue.set('');
+     
      if (initCap > 0) {
        this.internalArray.set(new Array(initCap).fill(null));
        this.baseAddress.set(0x5000);
@@ -520,11 +526,6 @@ export class ListVisualizerComponent {
        this.baseAddress.set(0x5000);
        this.addLog('Reset complete. No internal array (Capacity = 0).', 'info');
      }
-     this.newArray.set(null);
-     this.logs.set([]);
-     this.state.set('steady');
-     this.copyIndex.set(null);
-     this.inputValue.set('');
   }
 
   protected clearLogs(): void {
