@@ -79,8 +79,8 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
              <label class="block text-xs font-semibold text-gray-700 mb-2">Initial Capacity</label>
              <input
                 type="number"
-                [(ngModel)]="initialCapacity"
-                (change)="onInitialCapacityChange()"
+                [ngModel]="initialCapacity()"
+                (ngModelChange)="onInitialCapacityChange($event)"
                 [disabled]="count() > 0 || state() !== 'steady'"
                 min="0"
                 max="1000"
@@ -319,7 +319,7 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
 })
 export class ListVisualizerComponent {
   protected readonly inputValue = signal<string>('');
-  protected initialCapacity = signal<number>(0);
+  protected readonly initialCapacity = signal<number>(0);
   protected readonly count = signal<number>(0);
   protected readonly capacity = signal<number>(0);
   protected readonly isInfoExpanded = signal<boolean>(false);
@@ -340,7 +340,8 @@ export class ListVisualizerComponent {
      this.addLog('List<T> initialized with no internal array (Capacity = 0).', 'info');
   }
 
-  protected onInitialCapacityChange(): void {
+  protected onInitialCapacityChange(value: number): void {
+    this.initialCapacity.set(value);
     const cap = this.initialCapacity();
     if (this.count() === 0 && cap >= 0) {
       this.capacity.set(cap);
