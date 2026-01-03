@@ -18,13 +18,13 @@ export class AuthorizationHandler extends SecurityMiddlewareHandler {
   }
 
   simulate(
-    _config: MiddlewareConfig,
+    config: MiddlewareConfig,
     context: SimulationContext,
     steps: SimulationStep[]
   ): MiddlewareSimulationResult {
     const stepBase = this.createStepBase(steps, this.type, this.type);
     const policies = config.policies || [];
-    const hasRequiredClaims = policies.length === 0 || policies.some((policy) => context.claims[policy]);
+    const hasRequiredClaims = policies.length === 0 || policies.some((policy: string) => context.claims[policy]);
 
     if (!hasRequiredClaims) {
       steps.push({

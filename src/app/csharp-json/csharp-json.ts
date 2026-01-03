@@ -1,6 +1,6 @@
 import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CsharpJsonConverterService } from '../services/csharp-json-converter.service';
+import { CsharpJsonConverterService, JsonToCsharpOptions } from '../services/csharp-json-converter.service';
 
 @Component({
   selector: 'app-csharp-json',
@@ -225,10 +225,10 @@ export class CsharpJsonComponent {
     this.outputCode.set('');
 
     try {
-      const options = {
-        classType: this.classType() as any,
-        enumerationType: this.enumerationType() as any,
-        serializer: this.serializer() as any,
+      const options: JsonToCsharpOptions = {
+        classType: this.classType() as JsonToCsharpOptions['classType'],
+        enumerationType: this.enumerationType() as JsonToCsharpOptions['enumerationType'],
+        serializer: this.serializer() as JsonToCsharpOptions['serializer'],
         namespace: undefined,
         convertSnakeCase: this.convertSnakeCase(),
         generateSerializerContext: this.generateSerializerContext(),

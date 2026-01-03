@@ -5,10 +5,10 @@ import {
   MiddlewareDesignerService,
   Pipeline,
   MiddlewareNode,
-  MiddlewareType,
   MiddlewareConfig,
   BranchCondition,
 } from '../services/middleware-designer.service';
+import type { MiddlewareType } from './models';
 import { MiddlewareLibraryItemComponent } from './components/middleware-library-item';
 import { MiddlewareNodeCardComponent } from './components/middleware-node-card';
 import { ValidationMessagesComponent } from './components/validation-messages';

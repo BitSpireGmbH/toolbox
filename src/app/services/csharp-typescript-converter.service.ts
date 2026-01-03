@@ -202,11 +202,11 @@ export class CsharpTypescriptConverterService {
     }
 
     const isInterface = !!interfaceMatch;
-    const match = interfaceMatch || typeMatch;
-    if (!match) {
+    const nameMatch = interfaceMatch || typeMatch;
+    if (!nameMatch) {
       throw new Error('Could not find interface or type declaration');
     }
-    const name = match[1];
+    const name = nameMatch[1];
 
     // Check for union type
     if (typeMatch) {

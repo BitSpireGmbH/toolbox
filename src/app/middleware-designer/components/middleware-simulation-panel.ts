@@ -1,7 +1,7 @@
 import { Component, input, output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SimulationStepComponent } from './simulation-step';
-import { MiddlewareDesignerService, SimulationRequest, Pipeline } from '../../services/middleware-designer.service';
+import { MiddlewareDesignerService, SimulationRequest, SimulationResult, Pipeline } from '../../services/middleware-designer.service';
 
 @Component({
   selector: 'app-middleware-simulation-panel',

@@ -1,6 +1,6 @@
 import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CsharpTypescriptConverterService } from '../services/csharp-typescript-converter.service';
+import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, TypescriptToCsharpOptions } from '../services/csharp-typescript-converter.service';
 
 @Component({
   selector: 'app-csharp-typescript',
@@ -408,23 +408,23 @@ export class CsharpTypescriptComponent {
 
     try {
       if (this.direction() === 'csharp-to-typescript') {
-        const options = {
-          exportType: this.exportType() as any,
-          dateTimeType: this.dateTimeType() as any,
-          enumMode: this.enumModeCsToTs() as any,
-          nullableStrategy: this.nullableStrategyCsToTs() as any
+        const options: CsharpToTypescriptOptions = {
+          exportType: this.exportType() as CsharpToTypescriptOptions['exportType'],
+          dateTimeType: this.dateTimeType() as CsharpToTypescriptOptions['dateTimeType'],
+          enumMode: this.enumModeCsToTs() as CsharpToTypescriptOptions['enumMode'],
+          nullableStrategy: this.nullableStrategyCsToTs() as CsharpToTypescriptOptions['nullableStrategy']
         };
         const result = this.converterService.csharpToTypescript(this.inputCode(), options);
         this.outputCode.set(result);
       } else {
-        const options = {
-          classType: this.classType() as any,
-          enumerationType: this.enumerationType() as any,
-          serializer: this.serializer() as any,
+        const options: TypescriptToCsharpOptions = {
+          classType: this.classType() as TypescriptToCsharpOptions['classType'],
+          enumerationType: this.enumerationType() as TypescriptToCsharpOptions['enumerationType'],
+          serializer: this.serializer() as TypescriptToCsharpOptions['serializer'],
           namespace: undefined,
           convertSnakeCase: this.convertSnakeCase(),
           generateSerializerContext: this.generateSerializerContext(),
-          nullableStrategy: this.nullableStrategyTsToCs() as any
+          nullableStrategy: this.nullableStrategyTsToCs() as TypescriptToCsharpOptions['nullableStrategy']
         };
         const result = this.converterService.typescriptToCsharp(this.inputCode(), options);
         this.outputCode.set(result);

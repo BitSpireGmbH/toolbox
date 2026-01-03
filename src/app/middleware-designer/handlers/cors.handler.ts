@@ -45,7 +45,7 @@ export class CorsHandler extends SecurityMiddlewareHandler {
   }
 
   simulate(
-    _config: MiddlewareConfig,
+    config: MiddlewareConfig,
     context: SimulationContext,
     steps: SimulationStep[]
   ): MiddlewareSimulationResult {
