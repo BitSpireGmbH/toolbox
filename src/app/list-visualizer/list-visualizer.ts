@@ -33,9 +33,10 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
       <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg mb-6 shadow-sm overflow-hidden">
         <button 
           (click)="isInfoExpanded.set(!isInfoExpanded())"
+          [attr.aria-expanded]="isInfoExpanded()"
           class="w-full px-4 py-3 flex items-center justify-between hover:bg-blue-100 transition-colors">
           <div class="flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-600 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-600 shrink-0" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
             </svg>
             <h3 class="font-semibold text-blue-900">How List&lt;T&gt; Works Internally</h3>
@@ -47,7 +48,8 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
             stroke-width="2" 
             stroke="currentColor" 
             class="w-5 h-5 text-blue-600 transition-transform duration-200"
-            [class.rotate-180]="isInfoExpanded()">
+            [class.rotate-180]="isInfoExpanded()"
+            aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
         </button>
@@ -101,7 +103,8 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
                 <input
                   id="elementValueInput"
                   type="text"
-                  [(ngModel)]="inputValue"
+                  [ngModel]="inputValue()"
+                  (ngModelChange)="inputValue.set($event)"
                   (keyup.enter)="addItem()"
                   [disabled]="state() !== 'steady'"
                   placeholder="Enter a value..."
@@ -143,7 +146,13 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
                   [class.scale-95]="state() === 'discarding'">
                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
                   <h3 class="font-semibold text-sm text-gray-700 flex items-center gap-2">
-                     <div class="w-2 h-2 rounded-full" [class.bg-blue-500]="state() !== 'discarding' && capacity() > 0" [class.bg-gray-400]="state() === 'discarding' || capacity() === 0"></div>
+                     <div 
+                       class="w-2 h-2 rounded-full"
+                       role="status"
+                       aria-live="polite"
+                       [attr.aria-label]="capacity() === 0 ? 'No internal array allocated' : (state() === 'discarding' ? 'Array being discarded' : 'Array active')"
+                       [class.bg-blue-500]="state() !== 'discarding' && capacity() > 0"
+                       [class.bg-gray-400]="state() === 'discarding' || capacity() === 0"></div>
                      @if (capacity() === 0) {
                         No Internal Array Yet
                      } @else {
@@ -188,7 +197,7 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
 
                             <!-- Memory Address -->
                             <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 font-mono whitespace-nowrap">
-                                0x{{ (baseAddress() + ($index * Float64Array.BYTES_PER_ELEMENT)).toString(16).toUpperCase() }}
+                                0x{{ (baseAddress() + ($index * 8)).toString(16).toUpperCase() }}
                             </div>
                         </div>
                      }
@@ -268,9 +277,12 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
             <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
                <h3 class="font-bold text-gray-900 mb-2">Internal State</h3>
                <div class="flex items-center gap-3 mb-4">
-                  <div class="w-3 h-3 rounded-full"
-                     [class.bg-green-500]="state() === 'steady'"
-                     [class.bg-amber-500]="state() !== 'steady'"></div>
+                  <div 
+                    class="w-3 h-3 rounded-full"
+                    role="img"
+                    [attr.aria-label]="'Status: ' + state()"
+                    [class.bg-green-500]="state() === 'steady'"
+                    [class.bg-amber-500]="state() !== 'steady'"></div>
                   <span class="font-mono text-sm font-medium uppercase">{{ state() }}</span>
                </div>
                
@@ -300,7 +312,7 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
                      Clear
                    </button>
                 </div>
-                <div class="p-4 overflow-y-auto font-mono text-xs space-y-2 flex-1 scroll-smooth">
+                <div class="p-4 overflow-y-auto font-mono text-xs space-y-2 flex-1 scroll-smooth" role="log" aria-live="polite">
                    @for (log of logs(); track $index) {
                       <div [class]="getLogColor(log.type)" class="border-b border-gray-800/50 pb-1 last:border-0">
                          <span class="opacity-50 text-[10px] block mb-0.5">[{{ log.time }}]</span>
