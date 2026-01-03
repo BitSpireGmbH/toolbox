@@ -197,7 +197,7 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
 
                             <!-- Memory Address -->
                             <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 font-mono whitespace-nowrap">
-                                0x{{ (baseAddress() + ($index * 8)).toString(16).toUpperCase() }}
+                                0x{{ (baseAddress() + ($index * BYTES_PER_ELEMENT)).toString(16).toUpperCase() }}
                             </div>
                         </div>
                      }
@@ -251,7 +251,7 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
 
                                   <!-- Memory Address -->
                                   <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[10px] text-blue-300 font-mono whitespace-nowrap">
-                                      0x{{ (newBaseAddress() + ($index * 8)).toString(16).toUpperCase() }}
+                                      0x{{ (newBaseAddress() + ($index * BYTES_PER_ELEMENT)).toString(16).toUpperCase() }}
                                   </div>
                               </div>
                            }
@@ -354,6 +354,7 @@ export class ListVisualizerComponent {
   // Memory
   protected readonly baseAddress = signal<number>(0x5000);
   protected readonly newBaseAddress = signal<number>(0x0000);
+  protected readonly BYTES_PER_ELEMENT = 8; // Size of each element in memory (simulating 64-bit pointers)
   
   protected readonly logs = signal<{time: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}[]>([]);
 
