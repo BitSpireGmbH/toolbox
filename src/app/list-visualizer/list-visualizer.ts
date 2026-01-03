@@ -291,7 +291,7 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
                    <h3 class="font-mono text-xs text-gray-300 font-semibold uppercase">Operation Log</h3>
                    <button (click)="clearLogs()" class="text-[10px] text-gray-400 hover:text-white uppercase">Clear</button>
                 </div>
-                <div class="p-4 overflow-y-auto font-mono text-xs space-y-2 flex-1 scroll-smooth" #logContainer>
+                <div class="p-4 overflow-y-auto font-mono text-xs space-y-2 flex-1 scroll-smooth">
                    @for (log of logs(); track $index) {
                       <div [class]="getLogColor(log.type)" class="border-b border-gray-800/50 pb-1 last:border-0">
                          <span class="opacity-50 text-[10px] block mb-0.5">[{{ log.time }}]</span>
