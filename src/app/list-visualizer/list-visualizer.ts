@@ -188,7 +188,7 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
 
                             <!-- Memory Address -->
                             <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 font-mono whitespace-nowrap">
-                                0x{{ (baseAddress() + ($index * 8)).toString(16).toUpperCase() }}
+                                0x{{ (baseAddress() + ($index * Float64Array.BYTES_PER_ELEMENT)).toString(16).toUpperCase() }}
                             </div>
                         </div>
                      }
