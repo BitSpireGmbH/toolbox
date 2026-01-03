@@ -17,7 +17,7 @@ import { EditConfig } from '../middleware-config.utils';
                 Edit {{ mw.type }}
               </h2>
               <button
-                (click)="cancel.emit()"
+                (click)="dismiss.emit()"
                 class="text-gray-500 hover:text-gray-700 text-2xl leading-none">
                 ×
               </button>
@@ -28,10 +28,11 @@ import { EditConfig } from '../middleware-config.utils';
               @switch (mw.type) {
                 @case ('Routing') {
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="routing-patterns" class="block text-sm font-medium text-gray-700 mb-1">
                       Route Patterns (one per line)
                     </label>
                     <textarea
+                      id="routing-patterns"
                       [(ngModel)]="config().routesText"
                       class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none font-mono text-sm"
                       placeholder="/api/*&#10;/users/:id"></textarea>
@@ -40,8 +41,9 @@ import { EditConfig } from '../middleware-config.utils';
                 @case ('Authentication') {
                   <div class="space-y-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Authentication Scheme</label>
+                      <label for="auth-scheme" class="block text-sm font-medium text-gray-700 mb-1">Authentication Scheme</label>
                       <select
+                        id="auth-scheme"
                         [(ngModel)]="config().authScheme"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
                         <option value="JwtBearer">JWT Bearer (API)</option>
@@ -74,8 +76,9 @@ import { EditConfig } from '../middleware-config.utils';
                         <h4 class="font-semibold text-sm text-blue-800">JWT Bearer Settings</h4>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Authority (Issuer URL)</label>
+                          <label for="jwt-authority" class="block text-sm font-medium text-gray-700 mb-1">Authority (Issuer URL)</label>
                           <input
+                            id="jwt-authority"
                             type="text"
                             [(ngModel)]="config().jwtAuthority"
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -84,8 +87,9 @@ import { EditConfig } from '../middleware-config.utils';
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
+                          <label for="jwt-audience" class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
                           <input
+                            id="jwt-audience"
                             type="text"
                             [(ngModel)]="config().jwtAudience"
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -132,8 +136,11 @@ import { EditConfig } from '../middleware-config.utils';
                         <h4 class="font-semibold text-sm text-purple-800">OpenID Connect Settings</h4>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Authority</label>
-                          <input
+                          <label class="block text-sm font-medium text-gray-700 mb-1" for="authority">
+              Authority
+            </label>
+            <input
+              id="authority"
                             type="text"
                             [(ngModel)]="config().oidcAuthority"
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -143,16 +150,22 @@ import { EditConfig } from '../middleware-config.utils';
 
                         <div class="grid grid-cols-2 gap-3">
                           <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
-                            <input
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="client-id">
+              Client ID
+            </label>
+            <input
+              id="client-id"
                               type="text"
                               [(ngModel)]="config().oidcClientId"
                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                               placeholder="your-client-id">
                           </div>
                           <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Client Secret</label>
-                            <input
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="client-secret">
+              Client Secret
+            </label>
+            <input
+              id="client-secret"
                               type="password"
                               [(ngModel)]="config().oidcClientSecret"
                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -161,8 +174,11 @@ import { EditConfig } from '../middleware-config.utils';
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Response Type</label>
-                          <select
+                          <label class="block text-sm font-medium text-gray-700 mb-1" for="response-type">
+              Response Type
+            </label>
+            <select
+              id="response-type"
                             [(ngModel)]="config().oidcResponseType"
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
                             <option value="code">Authorization Code (code)</option>
@@ -172,8 +188,11 @@ import { EditConfig } from '../middleware-config.utils';
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Scopes (comma-separated)</label>
-                          <input
+                          <label class="block text-sm font-medium text-gray-700 mb-1" for="scopes--comma-separated">
+              Scopes (comma-separated)
+            </label>
+            <input
+              id="scopes--comma-separated"
                             type="text"
                             [(ngModel)]="config().oidcScopesText"
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -205,8 +224,11 @@ import { EditConfig } from '../middleware-config.utils';
                         <h4 class="font-semibold text-sm text-green-800">Cookie Authentication Settings</h4>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Cookie Name</label>
-                          <input
+                          <label class="block text-sm font-medium text-gray-700 mb-1" for="cookie-name">
+              Cookie Name
+            </label>
+            <input
+              id="cookie-name"
                             type="text"
                             [(ngModel)]="config().cookieName"
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -215,16 +237,22 @@ import { EditConfig } from '../middleware-config.utils';
 
                         <div class="grid grid-cols-2 gap-3">
                           <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Login Path</label>
-                            <input
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="login-path">
+              Login Path
+            </label>
+            <input
+              id="login-path"
                               type="text"
                               [(ngModel)]="config().cookieLoginPath"
                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                               placeholder="/Account/Login">
                           </div>
                           <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Logout Path</label>
-                            <input
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="logout-path">
+              Logout Path
+            </label>
+            <input
+              id="logout-path"
                               type="text"
                               [(ngModel)]="config().cookieLogoutPath"
                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -233,8 +261,11 @@ import { EditConfig } from '../middleware-config.utils';
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Access Denied Path</label>
-                          <input
+                          <label class="block text-sm font-medium text-gray-700 mb-1" for="access-denied-path">
+              Access Denied Path
+            </label>
+            <input
+              id="access-denied-path"
                             type="text"
                             [(ngModel)]="config().cookieAccessDeniedPath"
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -243,8 +274,11 @@ import { EditConfig } from '../middleware-config.utils';
 
                         <div class="grid grid-cols-2 gap-3">
                           <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Expire (minutes)</label>
-                            <input
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="expire--minutes">
+              Expire (minutes)
+            </label>
+            <input
+              id="expire--minutes"
                               type="number"
                               [(ngModel)]="config().cookieExpireMinutes"
                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -266,10 +300,11 @@ import { EditConfig } from '../middleware-config.utils';
                 }
                 @case ('Authorization') {
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                      Required Policies (comma-separated)
-                    </label>
-                    <input
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="required-policies--comma-separ">
+              Required Policies (comma-separated)
+            </label>
+            <input
+              id="required-policies--comma-separ"
                       type="text"
                       [(ngModel)]="config().policiesText"
                       class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -279,20 +314,22 @@ import { EditConfig } from '../middleware-config.utils';
                 @case ('CORS') {
                   <div class="space-y-3">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Allowed Origins (comma-separated)
-                      </label>
-                      <input
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="allowed-origins--comma-separat">
+              Allowed Origins (comma-separated)
+            </label>
+            <input
+              id="allowed-origins--comma-separat"
                         type="text"
                         [(ngModel)]="config().allowedOriginsText"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                         placeholder="https://example.com, https://app.example.com">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Allowed Methods (comma-separated)
-                      </label>
-                      <input
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="allowed-methods--comma-separat">
+              Allowed Methods (comma-separated)
+            </label>
+            <input
+              id="allowed-methods--comma-separat"
                         type="text"
                         [(ngModel)]="config().allowedMethodsText"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -313,8 +350,11 @@ import { EditConfig } from '../middleware-config.utils';
                 @case ('StaticFiles') {
                   <div class="space-y-3">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Directory</label>
-                      <input
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="directory">
+              Directory
+            </label>
+            <input
+              id="directory"
                         type="text"
                         [(ngModel)]="config().directory"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -350,8 +390,11 @@ import { EditConfig } from '../middleware-config.utils';
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Handler Class Name</label>
-                          <input
+                          <label class="block text-sm font-medium text-gray-700 mb-1" for="handler-class-name">
+              Handler Class Name
+            </label>
+            <input
+              id="handler-class-name"
                             type="text"
                             [(ngModel)]="config().exceptionHandlerClass"
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -359,12 +402,13 @@ import { EditConfig } from '../middleware-config.utils';
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-2">TryHandleAsync Return Value</label>
-                          <div class="space-y-2">
-                            <label class="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                [value]="true"
+                          <fieldset>
+                            <legend class="block text-sm font-medium text-gray-700 mb-2">TryHandleAsync Return Value</legend>
+                            <div class="space-y-2">
+                              <label class="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  [value]="true"
                                 [(ngModel)]="config().returnHandled"
                                 name="returnHandled"
                                 class="w-4 h-4 text-brand-primary border-gray-300 focus:ring-brand-primary">
@@ -384,15 +428,17 @@ import { EditConfig } from '../middleware-config.utils';
                               </span>
                             </label>
                           </div>
+                          </fieldset>
                         </div>
                       </div>
                     } @else {
                       <!-- Standard Error Handler Route -->
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                          Error Handler Route
-                        </label>
-                        <input
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="error-handler-route">
+              Error Handler Route
+            </label>
+            <input
+              id="error-handler-route"
                           type="text"
                           [(ngModel)]="config().errorHandlerRoute"
                           class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -404,12 +450,13 @@ import { EditConfig } from '../middleware-config.utils';
                 @case ('Compression') {
                   <div class="space-y-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Algorithms</label>
-                      <div class="space-y-2">
-                        <label class="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            [(ngModel)]="config().gzip"
+                      <fieldset>
+                        <legend class="block text-sm font-medium text-gray-700 mb-2">Algorithms</legend>
+                        <div class="space-y-2">
+                          <label class="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              [(ngModel)]="config().gzip"
                             class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
                           <span class="text-sm text-gray-700">gzip</span>
                         </label>
@@ -428,6 +475,7 @@ import { EditConfig } from '../middleware-config.utils';
                           <span class="text-sm text-gray-700">deflate</span>
                         </label>
                       </div>
+                      </fieldset>
                     </div>
 
                     <div>
@@ -450,8 +498,11 @@ import { EditConfig } from '../middleware-config.utils';
                 @case ('RateLimiting') {
                   <div class="space-y-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Policy Name</label>
-                      <input
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="policy-name">
+              Policy Name
+            </label>
+            <input
+              id="policy-name"
                         type="text"
                         [(ngModel)]="config().policyName"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -459,8 +510,11 @@ import { EditConfig } from '../middleware-config.utils';
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Limiter Type</label>
-                      <select
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="limiter-type">
+              Limiter Type
+            </label>
+            <select
+              id="limiter-type"
                         [(ngModel)]="config().limiterType"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
                         <option value="FixedWindow">Fixed Window</option>
@@ -494,10 +548,11 @@ import { EditConfig } from '../middleware-config.utils';
 
                     @if (config().limiterType !== 'Concurrency') {
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                          {{ config().limiterType === 'TokenBucket' ? 'Token Limit' : 'Permit Limit' }}
-                        </label>
-                        <input
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="config---limitertype------t">
+              {{ config().limiterType === 'TokenBucket' ? 'Token Limit' : 'Permit Limit' }}
+            </label>
+            <input
+              id="config---limitertype------t"
                           type="number"
                           [(ngModel)]="config().permitLimit"
                           class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -505,8 +560,11 @@ import { EditConfig } from '../middleware-config.utils';
                       </div>
                     } @else {
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Max Concurrent Requests</label>
-                        <input
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="max-concurrent-requests">
+              Max Concurrent Requests
+            </label>
+            <input
+              id="max-concurrent-requests"
                           type="number"
                           [(ngModel)]="config().permitLimit"
                           class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -516,8 +574,11 @@ import { EditConfig } from '../middleware-config.utils';
 
                     @if (config().limiterType === 'FixedWindow' || config().limiterType === 'SlidingWindow') {
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Window (seconds)</label>
-                        <input
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="window--seconds">
+              Window (seconds)
+            </label>
+            <input
+              id="window--seconds"
                           type="number"
                           [(ngModel)]="config().window"
                           class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -527,16 +588,22 @@ import { EditConfig } from '../middleware-config.utils';
 
                     @if (config().limiterType === 'TokenBucket') {
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tokens Per Period</label>
-                        <input
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="tokens-per-period">
+              Tokens Per Period
+            </label>
+            <input
+              id="tokens-per-period"
                           type="number"
                           [(ngModel)]="config().tokensPerPeriod"
                           class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                           placeholder="10">
                       </div>
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Replenishment Period (seconds)</label>
-                        <input
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="replenishment-period--seconds">
+              Replenishment Period (seconds)
+            </label>
+            <input
+              id="replenishment-period--seconds"
                           type="number"
                           [(ngModel)]="config().replenishmentPeriod"
                           class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -545,8 +612,11 @@ import { EditConfig } from '../middleware-config.utils';
                     }
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Queue Limit</label>
-                      <input
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="queue-limit">
+              Queue Limit
+            </label>
+            <input
+              id="queue-limit"
                         type="number"
                         [(ngModel)]="config().queueLimit"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -558,16 +628,22 @@ import { EditConfig } from '../middleware-config.utils';
                 @case ('Custom') {
                   <div class="space-y-3">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Class Name</label>
-                      <input
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="class-name">
+              Class Name
+            </label>
+            <input
+              id="class-name"
                         type="text"
                         [(ngModel)]="config().className"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                         placeholder="MyCustomMiddleware">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Custom Code</label>
-                      <textarea
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="custom-code">
+              Custom Code
+            </label>
+            <textarea
+              id="custom-code"
                         [(ngModel)]="config().customCode"
                         class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none font-mono text-sm"
                         placeholder="// Custom middleware logic"></textarea>
@@ -577,8 +653,11 @@ import { EditConfig } from '../middleware-config.utils';
                 @case ('MinimalAPIEndpoint') {
                   <div class="space-y-3">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">HTTP Method</label>
-                      <select
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="http-method">
+              HTTP Method
+            </label>
+            <select
+              id="http-method"
                         [(ngModel)]="config().httpMethod"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
                         <option value="GET">GET</option>
@@ -589,16 +668,22 @@ import { EditConfig } from '../middleware-config.utils';
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Path</label>
-                      <input
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="path">
+              Path
+            </label>
+            <input
+              id="path"
                         type="text"
                         [(ngModel)]="config().path"
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
                         placeholder="/api/users">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Handler Code</label>
-                      <textarea
+                      <label class="block text-sm font-medium text-gray-700 mb-1" for="handler-code">
+              Handler Code
+            </label>
+            <textarea
+              id="handler-code"
                         [(ngModel)]="config().handlerCode"
                         class="w-full h-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none font-mono text-sm"
                         placeholder="() => Results.Ok(new { message = &quot;Hello&quot; })"></textarea>
@@ -610,8 +695,11 @@ import { EditConfig } from '../middleware-config.utils';
               <!-- Branch Configuration -->
               <div class="pt-4 border-t-2 border-gray-200">
                 <div class="flex items-center justify-between mb-3">
-                  <label class="text-sm font-medium text-gray-700">Add Conditional Branch</label>
-                  <input
+                  <label class="text-sm font-medium text-gray-700" for="add-conditional-branch">
+              Add Conditional Branch
+            </label>
+            <input
+              id="add-conditional-branch"
                     type="checkbox"
                     [(ngModel)]="config().hasBranch"
                     class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary">
@@ -621,8 +709,11 @@ import { EditConfig } from '../middleware-config.utils';
                   <div class="space-y-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                     <div class="grid grid-cols-2 gap-3">
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Condition Type</label>
-                        <select
+                        <label class="block text-xs font-medium text-gray-700 mb-1" for="condition-type">
+              Condition Type
+            </label>
+            <select
+              id="condition-type"
                           [(ngModel)]="config().branchConditionType"
                           class="w-full px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
                           <option value="header">Header</option>
@@ -633,8 +724,11 @@ import { EditConfig } from '../middleware-config.utils';
                         </select>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Operator</label>
-                        <select
+                        <label class="block text-xs font-medium text-gray-700 mb-1" for="operator">
+              Operator
+            </label>
+            <select
+              id="operator"
                           [(ngModel)]="config().branchOperator"
                           class="w-full px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
                           <option value="==">Equals (==)</option>
@@ -650,8 +744,11 @@ import { EditConfig } from '../middleware-config.utils';
                       <div class="grid grid-cols-2 gap-3">
                         @if (config().branchConditionType === 'header' || config().branchConditionType === 'claim') {
                           <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Key</label>
-                            <input
+                            <label class="block text-xs font-medium text-gray-700 mb-1" for="key">
+              Key
+            </label>
+            <input
+              id="key"
                               type="text"
                               [(ngModel)]="config().branchKey"
                               class="w-full px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
@@ -659,8 +756,11 @@ import { EditConfig } from '../middleware-config.utils';
                           </div>
                         }
                         <div [class.col-span-2]="config().branchConditionType !== 'header' && config().branchConditionType !== 'claim'">
-                          <label class="block text-xs font-medium text-gray-700 mb-1">Value</label>
-                          <input
+                          <label class="block text-xs font-medium text-gray-700 mb-1" for="value">
+              Value
+            </label>
+            <input
+              id="value"
                             type="text"
                             [(ngModel)]="config().branchValue"
                             class="w-full px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
@@ -680,7 +780,7 @@ import { EditConfig } from '../middleware-config.utils';
                 Save Changes
               </button>
               <button
-                (click)="cancel.emit()"
+                (click)="dismiss.emit()"
                 class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-medium">
                 Cancel
               </button>
@@ -696,5 +796,5 @@ export class MiddlewareEditModalComponent {
   readonly config = model.required<EditConfig>();
 
   readonly save = output<void>();
-  readonly cancel = output<void>();
+  readonly dismiss = output<void>();
 }

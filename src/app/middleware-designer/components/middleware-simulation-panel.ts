@@ -21,8 +21,11 @@ import { MiddlewareDesignerService, SimulationRequest, SimulationResult, Pipelin
           <h3 class="font-semibold text-gray-700 mb-3">Request Configuration</h3>
           <div class="space-y-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">HTTP Method</label>
-              <select
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="http-method">
+              HTTP Method
+            </label>
+            <select
+              id="http-method"
                 [(ngModel)]="request.method"
                 class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500">
                 <option value="GET">GET</option>
@@ -34,8 +37,11 @@ import { MiddlewareDesignerService, SimulationRequest, SimulationResult, Pipelin
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Path</label>
-              <input
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="path">
+              Path
+            </label>
+            <input
+              id="path"
                 type="text"
                 [(ngModel)]="request.path"
                 class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500"
@@ -43,16 +49,22 @@ import { MiddlewareDesignerService, SimulationRequest, SimulationResult, Pipelin
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Headers (JSON)</label>
-              <textarea
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="headers--json">
+              Headers (JSON)
+            </label>
+            <textarea
+              id="headers--json"
                 [(ngModel)]="headersText"
                 class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
                 placeholder='{"Authorization": "Bearer token123"}'></textarea>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Body</label>
-              <textarea
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="body">
+              Body
+            </label>
+            <textarea
+              id="body"
                 [(ngModel)]="request.body"
                 class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
                 placeholder='{"name": "John Doe"}'></textarea>
@@ -68,16 +80,22 @@ import { MiddlewareDesignerService, SimulationRequest, SimulationResult, Pipelin
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Claims (JSON)</label>
-              <textarea
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="claims--json">
+              Claims (JSON)
+            </label>
+            <textarea
+              id="claims--json"
                 [(ngModel)]="claimsText"
                 class="w-full h-20 px-3 py-2 font-mono text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-brand-primary-500 resize-none"
                 placeholder='{"role": "admin", "userId": "123"}'></textarea>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Request Count (for Rate Limiting)</label>
-              <input
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="request-count--for-rate-limiti">
+              Request Count (for Rate Limiting)
+            </label>
+            <input
+              id="request-count--for-rate-limiti"
                 type="number"
                 [(ngModel)]="requestCount"
                 min="1"

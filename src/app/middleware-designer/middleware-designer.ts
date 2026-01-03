@@ -233,7 +233,7 @@ import {
           [middleware]="selectedMiddleware()"
           [(config)]="editConfig"
           (save)="saveMiddlewareConfig()"
-          (cancel)="closeEditModal()" />
+          (dismiss)="closeEditModal()" />
     </div>
   `,
 })
