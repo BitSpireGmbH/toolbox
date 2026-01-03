@@ -470,11 +470,15 @@ export class ListVisualizerComponent {
      await this.delay(1500);
 
      // Apply the swap
-     this.internalArray.set(this.newArray()!);
+     const newArr = this.newArray();
+     if (newArr == null) {
+       throw new Error('Unexpected null newArray during resizeAndAdd swap.');
+     }
+     this.internalArray.set(newArr);
      this.capacity.set(newCapacity);
      this.count.update(c => c + 1);
      this.baseAddress.set(nextAddr);
-     
+      
      // Cleanup
      this.newArray.set(null);
      this.state.set('steady');
