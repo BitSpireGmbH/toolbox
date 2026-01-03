@@ -57,7 +57,7 @@ import { EditConfig } from '../middleware-config.utils';
                       @switch (config().authScheme) {
                         @case ('JwtBearer') {
                           <p class="font-semibold mb-1">🔑 JWT Bearer Authentication</p>
-                          <p>Use this to secure an <strong>API</strong>. The client sends JWT tokens in the Authorization header. There is no human interaction—tokens are obtained out-of-band (e.g., from another identity service).</p>
+                          <p>Use this to secure an <strong>API</strong>. The client sends JWT tokens in the Authorization header. There is no human interaction-tokens are obtained out-of-band (e.g., from another identity service).</p>
                         }
                         @case ('OpenIdConnect') {
                           <p class="font-semibold mb-1">🌐 OpenID Connect Authentication</p>
@@ -413,7 +413,7 @@ import { EditConfig } from '../middleware-config.utils';
                                 name="returnHandled"
                                 class="w-4 h-4 text-brand-primary border-gray-300 focus:ring-brand-primary">
                               <span class="text-sm text-gray-700">
-                                <strong class="text-green-700">Return true</strong> — Exception is handled, stop calling other handlers
+                                <strong class="text-green-700">Return true</strong> - Exception is handled, stop calling other handlers
                               </span>
                             </label>
                             <label class="flex items-center gap-2">
@@ -424,7 +424,7 @@ import { EditConfig } from '../middleware-config.utils';
                                 name="returnHandled"
                                 class="w-4 h-4 text-brand-primary border-gray-300 focus:ring-brand-primary">
                               <span class="text-sm text-gray-700">
-                                <strong class="text-yellow-700">Return false</strong> — Pass to next handler in registration order
+                                <strong class="text-yellow-700">Return false</strong> - Pass to next handler in registration order
                               </span>
                             </label>
                           </div>

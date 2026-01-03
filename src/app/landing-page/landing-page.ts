@@ -21,7 +21,7 @@ import { RouterLink } from '@angular/router';
             Your go-to collection of tools for everyday web development
           </p>
           <p class="text-base text-gray-500 max-w-3xl mx-auto leading-relaxed">
-            Whether you're converting data formats, debugging tokens, or designing middleware pipelines —
+            Whether you're converting data formats, debugging tokens, or designing middleware pipelines -
             we've got you covered. All tools run entirely in your browser with no data stored on servers.
           </p>
         </header>

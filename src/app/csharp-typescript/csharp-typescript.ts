@@ -90,9 +90,9 @@ import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, Typescript
                       [value]="nullableStrategyCsToTs()"
                       (change)="nullableStrategyCsToTs.set($any($event.target).value)"
                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
-                      <option value="strict">Strict — Preserve null types (string | null)</option>
-                      <option value="optional">Optional — Use optional syntax (name?: string)</option>
-                      <option value="lenient">Lenient — Ignore nullability</option>
+                      <option value="strict">Strict - Preserve null types (string | null)</option>
+                      <option value="optional">Optional - Use optional syntax (name?: string)</option>
+                      <option value="lenient">Lenient - Ignore nullability</option>
                     </select>
                   </div>
                 </div>
@@ -144,10 +144,10 @@ import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, Typescript
                         [value]="enumModeCsToTs()"
                         (change)="enumModeCsToTs.set($any($event.target).value)"
                         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
-                        <option value="numeric">Numeric — enum {{ '{' }} A = 0, B = 1 {{ '}' }}</option>
-                        <option value="string">String — enum {{ '{' }} A = "A", B = "B" {{ '}' }}</option>
-                        <option value="union">Union — type T = "A" | "B"</option>
-                        <option value="const">Const — const enum {{ '{' }} A = "A" {{ '}' }}</option>
+                        <option value="numeric">Numeric - enum {{ '{' }} A = 0, B = 1 {{ '}' }}</option>
+                        <option value="string">String - enum {{ '{' }} A = "A", B = "B" {{ '}' }}</option>
+                        <option value="union">Union - type T = "A" | "B"</option>
+                        <option value="const">Const - const enum {{ '{' }} A = "A" {{ '}' }}</option>
                       </select>
                       <p class="mt-1 text-xs text-gray-500">How C# enums are converted to TypeScript</p>
                     </div>
@@ -182,10 +182,10 @@ import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, Typescript
                       [value]="classType()"
                       (change)="classType.set($any($event.target).value)"
                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
-                      <option value="class">Class — Mutable reference type</option>
-                      <option value="record">Record — Immutable reference type</option>
-                      <option value="struct">Struct — Mutable value type</option>
-                      <option value="record struct">Record Struct — Immutable value type</option>
+                      <option value="class">Class - Mutable reference type</option>
+                      <option value="record">Record - Immutable reference type</option>
+                      <option value="struct">Struct - Mutable value type</option>
+                      <option value="record struct">Record Struct - Immutable value type</option>
                       <option value="readonly record struct">Readonly Record Struct</option>
                     </select>
                   </div>
@@ -200,9 +200,9 @@ import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, Typescript
                       [value]="nullableStrategyTsToCs()"
                       (change)="nullableStrategyTsToCs.set($any($event.target).value)"
                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
-                      <option value="strict">Strict — Preserve nullability (string?)</option>
-                      <option value="optional">Optional — Treat optional as nullable</option>
-                      <option value="lenient">Lenient — Ignore nullability</option>
+                      <option value="strict">Strict - Preserve nullability (string?)</option>
+                      <option value="optional">Optional - Treat optional as nullable</option>
+                      <option value="lenient">Lenient - Ignore nullability</option>
                     </select>
                   </div>
                 </div>
@@ -239,9 +239,9 @@ import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, Typescript
                         [value]="enumerationType()"
                         (change)="enumerationType.set($any($event.target).value)"
                         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent bg-white shadow-sm hover:border-gray-400 transition-colors">
-                        <option value="List<T>">List&lt;T&gt; — Mutable list</option>
-                        <option value="IReadOnlyCollection<T>">IReadOnlyCollection&lt;T&gt; — Readonly</option>
-                        <option value="T[]">T[] — Array</option>
+                        <option value="List<T>">List&lt;T&gt; - Mutable list</option>
+                        <option value="IReadOnlyCollection<T>">IReadOnlyCollection&lt;T&gt; - Readonly</option>
+                        <option value="T[]">T[] - Array</option>
                       </select>
                       <p class="mt-1 text-xs text-gray-500">How TypeScript arrays are converted</p>
                     </div>
