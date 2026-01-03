@@ -33,5 +33,9 @@ export const routes: Routes = [
   {
     path: 'csharp-mindmap',
     loadComponent: () => import('./csharp-mindmap/csharp-mindmap.component').then(m => m.CsharpMindmapComponent)
+  },
+  {
+    path: 'list-visualizer',
+    loadComponent: () => import('./list-visualizer/list-visualizer').then(m => m.ListVisualizerComponent)
   }
 ];

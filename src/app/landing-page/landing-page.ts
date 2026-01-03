@@ -191,6 +191,32 @@ import { RouterLink } from '@angular/router';
                 </div>
               </div>
             </a>
+
+            <!-- List Visualizer Card -->
+            <a routerLink="/list-visualizer"
+               class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-sky-500 overflow-hidden focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+              <div class="absolute inset-0 bg-linear-to-br from-sky-500/0 via-sky-500/0 to-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 bg-linear-to-br from-sky-500 to-cyan-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-sky-500/25 transition-all duration-300" aria-hidden="true">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-gray-900 group-hover:text-sky-500 transition-colors duration-300">List&lt;T&gt; Visualizer</h3>
+                    <span class="text-xs text-gray-500 font-medium">Memory & Resizing</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed mb-3">Visualize memory addresses and dynamic resizing behavior of C#'s List&lt;T&gt;.</p>
+                <div class="flex items-center gap-1.5 text-sky-500 font-semibold text-xs">
+                  <span>Open Visualizer</span>
+                  <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </a>
           </div>
         </main>
 
