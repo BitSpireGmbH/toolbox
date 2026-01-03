@@ -24,11 +24,11 @@ export abstract class BaseMiddlewareHandler implements IMiddlewareHandler {
   abstract getDefaultConfig(): MiddlewareConfig;
 
   // Default implementations
-  generateServiceRegistration(config: MiddlewareConfig): string {
+  generateServiceRegistration(_config: MiddlewareConfig): string {
     return '';
   }
 
-  validate(config: MiddlewareConfig, pipeline: Pipeline, middlewareId: string): ValidationIssue[] {
+  validate(_config: MiddlewareConfig, _pipeline: Pipeline, _middlewareId: string): ValidationIssue[] {
     return [];
   }
 

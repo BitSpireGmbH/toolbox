@@ -380,7 +380,7 @@ export class PackageCentralizerService {
   generateDirectoryPackagesProps(
     packageVersions: Map<string, string>,
     projects: ParsedProject[],
-    groupByProject: boolean = true
+    groupByProject = true
   ): string {
     let content = `<Project>
   <PropertyGroup>
@@ -520,7 +520,7 @@ export class PackageCentralizerService {
    * @param globalPackages - Set of package names that should be completely removed (default: empty set)
    * @returns Updated csproj content with modifications applied
    */
-  updateCsprojContent(content: string, globalPackages: Set<string> = new Set()): string {
+  updateCsprojContent(content: string, globalPackages = new Set<string>()): string {
     // First, remove entire PackageReference elements for global packages
     for (const packageName of globalPackages) {
       // Match both self-closing and regular closing tags
@@ -575,7 +575,7 @@ export class PackageCentralizerService {
   centralize(
     input: string,
     strategy: VersionResolutionStrategy = 'highest',
-    groupByProject: boolean = true
+    groupByProject = true
   ): CentralizeResult {
     const projects = this.parseProjects(input);
     

@@ -39,13 +39,13 @@ export class CorsHandler extends SecurityMiddlewareHandler {
     return code;
   }
 
-  override generateServiceRegistration(config: MiddlewareConfig): string {
+  override generateServiceRegistration(_config: MiddlewareConfig): string {
     // No separate service registration needed when policy is inline
     return '';
   }
 
   simulate(
-    config: MiddlewareConfig,
+    _config: MiddlewareConfig,
     context: SimulationContext,
     steps: SimulationStep[]
   ): MiddlewareSimulationResult {

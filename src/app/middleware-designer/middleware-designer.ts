@@ -286,7 +286,7 @@ export class MiddlewareDesignerComponent {
   });
 
   // Edit config state
-  protected editConfig = signal<EditConfig>({});
+  protected readonly editConfig = signal<EditConfig>({});
 
   // Middleware library
   protected readonly middlewareLibrary = MIDDLEWARE_LIBRARY;

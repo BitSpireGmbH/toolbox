@@ -5,7 +5,6 @@ import {
   Pipeline,
   MiddlewareNode,
   SimulationRequest,
-  BranchCondition,
 } from './middleware-designer.service';
 import { MiddlewareHandlerFactory } from '../middleware-designer/middleware-handler.factory';
 

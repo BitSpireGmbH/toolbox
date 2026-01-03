@@ -166,13 +166,13 @@ export class MiddlewareSimulationPanelComponent {
   protected headersText = '{}';
   protected claimsText = '{}';
   protected requestCount = 1;
-  protected result = signal(null as any);
+  protected readonly result = signal<SimulationResult | null>(null);
 
   protected onRunSimulation(): void {
     try {
       this.request.headers = JSON.parse(this.headersText || '{}');
       this.request.claims = JSON.parse(this.claimsText || '{}');
-    } catch (error) {
+    } catch {
       console.error('Invalid JSON in headers or claims');
       return;
     }

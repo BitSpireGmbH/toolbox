@@ -13,12 +13,12 @@ export class AuthorizationHandler extends SecurityMiddlewareHandler {
     return `${indent}app.UseAuthorization();\n`;
   }
 
-  override generateServiceRegistration(config: MiddlewareConfig): string {
+  override generateServiceRegistration(_config: MiddlewareConfig): string {
     return `builder.Services.AddAuthorization();\n`;
   }
 
   simulate(
-    config: MiddlewareConfig,
+    _config: MiddlewareConfig,
     context: SimulationContext,
     steps: SimulationStep[]
   ): MiddlewareSimulationResult {
