@@ -58,9 +58,10 @@ export class SrpAnalyzerService {
       .filter(m => m.dependencies.length > 1)
       .map(m => m.methodName);
     
-    const hasMultipleResponsibilities = 
-      dependencies.length > 1 && 
-      methodUsages.some(m => m.dependencies.length === 1);
+    const hasMultipleResponsibilities = this.detectMultipleResponsibilities(
+      dependencies,
+      methodUsages
+    );
 
     return {
       dependencies,
@@ -68,6 +69,41 @@ export class SrpAnalyzerService {
       hasMultipleResponsibilities,
       mixedResponsibilityMethods
     };
+  }
+
+  private detectMultipleResponsibilities(
+    dependencies: DependencyInfo[],
+    methodUsages: MethodUsage[]
+  ): boolean {
+    if (dependencies.length < 2) {
+      return false;
+    }
+
+    const dependencyUsageMap = new Map<string, Set<string>>();
+    for (const dep of dependencies) {
+      dependencyUsageMap.set(dep.type, new Set());
+    }
+
+    for (const method of methodUsages) {
+      for (const dep of method.dependencies) {
+        dependencyUsageMap.get(dep)?.add(method.methodName);
+      }
+    }
+
+    const dependenciesWithExclusiveMethods: string[] = [];
+    for (const [dep, methods] of dependencyUsageMap.entries()) {
+      if (methods.size > 0) {
+        const hasExclusiveUsage = Array.from(methods).some(method => {
+          const methodUsage = methodUsages.find(m => m.methodName === method);
+          return methodUsage && methodUsage.dependencies.length === 1;
+        });
+        if (hasExclusiveUsage) {
+          dependenciesWithExclusiveMethods.push(dep);
+        }
+      }
+    }
+
+    return dependenciesWithExclusiveMethods.length >= 2;
   }
 
   private extractDependencies(code: string, filterFrameworkServices: boolean): DependencyInfo[] {
