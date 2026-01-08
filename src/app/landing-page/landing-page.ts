@@ -217,6 +217,32 @@ import { RouterLink } from '@angular/router';
                 </div>
               </div>
             </a>
+
+            <!-- SRP Analyzer Card -->
+            <a routerLink="/srp-analyzer"
+               class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-rose-500 overflow-hidden focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">
+              <div class="absolute inset-0 bg-linear-to-br from-rose-500/0 via-rose-500/0 to-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 bg-linear-to-br from-rose-500 to-pink-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-rose-500/25 transition-all duration-300" aria-hidden="true">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 16a9.065 9.065 0 0 1-6.23-.693L5 15.3m14.8 0a9.016 9.016 0 0 1-4.424 4.424m-5.952-12.214a2.25 2.25 0 0 0-.659-1.591L5 7.5m14.8 7.8a9.016 9.016 0 0 0 4.424-4.424m-19.8 0a9.083 9.083 0 0 0 1.424.124m3.1 9.75H12m4.875 0a9 9 0 1 1-9.75 0" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-gray-900 group-hover:text-rose-600 transition-colors duration-300">SRP Analyzer</h3>
+                    <span class="text-xs text-gray-500 font-medium">Code Quality Tool</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed mb-3">Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies.</p>
+                <div class="flex items-center gap-1.5 text-rose-600 font-semibold text-xs">
+                  <span>Start Analyzing</span>
+                  <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </a>
           </div>
         </main>
 

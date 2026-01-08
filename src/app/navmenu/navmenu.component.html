@@ -183,6 +183,26 @@
         </span>
       }
     </a>
+
+    <a
+      routerLink="/srp-analyzer"
+      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      [class.justify-center]="!sidebarOpen()"
+      [class.px-3]="sidebarOpen()"
+      [class.gap-3]="sidebarOpen()"
+      aria-label="SRP Analyzer">
+      <svg class="w-5 h-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 16a9.065 9.065 0 0 1-6.23-.693L5 15.3m14.8 0a9.016 9.016 0 0 1-4.424 4.424m-5.952-12.214a2.25 2.25 0 0 0-.659-1.591L5 7.5m14.8 7.8a9.016 9.016 0 0 0 4.424-4.424m-19.8 0a9.083 9.083 0 0 0 1.424.124m3.1 9.75H12m4.875 0a9 9 0 1 1-9.75 0" />
+      </svg>
+      @if (sidebarOpen()) {
+        <span class="text-sm whitespace-nowrap overflow-hidden">SRP Analyzer</span>
+      } @else {
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          SRP Analyzer
+        </span>
+      }
+    </a>
   </nav>
 
   @if (sidebarOpen()) {
@@ -329,6 +349,17 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
         </svg>
         <span class="font-medium">List&lt;T&gt; Visualizer</span>
+      </a>
+
+      <a
+        routerLink="/srp-analyzer"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        (click)="onCloseSidebar()"
+        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 16a9.065 9.065 0 0 1-6.23-.693L5 15.3m14.8 0a9.016 9.016 0 0 1-4.424 4.424m-5.952-12.214a2.25 2.25 0 0 0-.659-1.591L5 7.5m14.8 7.8a9.016 9.016 0 0 0 4.424-4.424m-19.8 0a9.083 9.083 0 0 0 1.424.124m3.1 9.75H12m4.875 0a9 9 0 1 1-9.75 0" />
+        </svg>
+        <span class="font-medium">SRP Analyzer</span>
       </a>
     </nav>
 
