@@ -170,8 +170,8 @@ export class SrpAnalyzerService {
     return dependencies;
   }
 
-  private parseParameters(paramsString: string): Array<{ type: string; name: string }> {
-    const params: Array<{ type: string; name: string }> = [];
+  private parseParameters(paramsString: string): { type: string; name: string }[] {
+    const params: { type: string; name: string }[] = [];
     const paramParts = paramsString.split(',').map(p => p.trim()).filter(p => p);
     
     for (const part of paramParts) {
@@ -211,7 +211,7 @@ export class SrpAnalyzerService {
       
       const startIndex = methodMatch.index;
       
-      let endIndex = this.findMethodEnd(code, startIndex);
+      const endIndex = this.findMethodEnd(code, startIndex);
       const methodBody = code.substring(startIndex, endIndex);
       
       const usedDependencies = this.findUsedDependencies(methodBody, dependencies);
@@ -231,8 +231,8 @@ export class SrpAnalyzerService {
 
   private findMethodEnd(code: string, startIndex: number): number {
     const lambdaMatch = code.substring(startIndex).match(/=>\s*([^;]+);/);
-    if (lambdaMatch) {
-      return startIndex + lambdaMatch.index! + lambdaMatch[0].length;
+    if (lambdaMatch && lambdaMatch.index !== undefined) {
+      return startIndex + lambdaMatch.index + lambdaMatch[0].length;
     }
     
     let braceCount = 0;
