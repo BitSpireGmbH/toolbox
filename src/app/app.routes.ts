@@ -37,5 +37,9 @@ export const routes: Routes = [
   {
     path: 'list-visualizer',
     loadComponent: () => import('./list-visualizer/list-visualizer').then(m => m.ListVisualizerComponent)
+  },
+  {
+    path: 'srp-analyzer',
+    loadComponent: () => import('./srp-analyzer/srp-analyzer').then(m => m.SrpAnalyzerComponent)
   }
 ];
