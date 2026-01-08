@@ -196,11 +196,19 @@ export class SrpAnalyzerService {
   private extractMethodUsages(code: string, dependencies: DependencyInfo[]): MethodUsage[] {
     const methodUsages: MethodUsage[] = [];
     
+    const classNameMatch = code.match(/class\s+(\w+)/);
+    const className = classNameMatch ? classNameMatch[1] : '';
+    
     const methodPattern = /(?:public|private|protected|internal|static)?\s*(?:async\s+)?(?:virtual\s+)?(?:override\s+)?(\w+(?:<[^>]+>)?|\w+)\s+(\w+)\s*\([^)]*\)\s*(?:=>|{)/g;
     
     let methodMatch;
     while ((methodMatch = methodPattern.exec(code)) !== null) {
       const methodName = methodMatch[2];
+      
+      if (methodName === className) {
+        continue;
+      }
+      
       const startIndex = methodMatch.index;
       
       let endIndex = this.findMethodEnd(code, startIndex);
