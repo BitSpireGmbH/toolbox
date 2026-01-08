@@ -260,10 +260,11 @@ export class SrpAnalyzerService {
       const patterns = [
         dep.parameterName,
         dep.fieldName,
-      ].filter(Boolean);
+      ].filter((p): p is string => Boolean(p));
       
       for (const pattern of patterns) {
-        const regex = new RegExp(`\\b${pattern}\\b`, 'g');
+        const escapedPattern = this.escapeRegex(pattern);
+        const regex = new RegExp(`\\b${escapedPattern}\\b`, 'g');
         if (regex.test(methodBody)) {
           used.add(dep.type);
           break;
@@ -289,7 +290,8 @@ export class SrpAnalyzerService {
       
       for (const { pattern } of patterns) {
         if (pattern) {
-          const regex = new RegExp(`\\b(${pattern})\\b`, 'g');
+          const escapedPattern = this.escapeRegex(pattern);
+          const regex = new RegExp(`\\b(${escapedPattern})\\b`, 'g');
           highlighted = highlighted.replace(regex, (match) => {
             const opacity = selectedDependency ? '1' : '0.7';
             return `<span class="srp-highlight" style="background-color: ${dep.color}40; border-bottom: 2px solid ${dep.color}; opacity: ${opacity};">${match}</span>`;
@@ -297,7 +299,8 @@ export class SrpAnalyzerService {
         }
       }
       
-      const typeRegex = new RegExp(`\\b(${dep.type})\\b`, 'g');
+      const escapedType = this.escapeRegex(dep.type);
+      const typeRegex = new RegExp(`\\b(${escapedType})\\b`, 'g');
       highlighted = highlighted.replace(typeRegex, (match) => {
         const opacity = selectedDependency ? '1' : '0.7';
         return `<span class="srp-highlight" style="background-color: ${dep.color}40; border-bottom: 2px solid ${dep.color}; opacity: ${opacity}; font-weight: 600;">${match}</span>`;
@@ -306,7 +309,8 @@ export class SrpAnalyzerService {
     
     for (const method of result.methodUsages) {
       if (method.dependencies.length > 1) {
-        const methodNameRegex = new RegExp(`\\b(${method.methodName})\\b`);
+        const escapedMethodName = this.escapeRegex(method.methodName);
+        const methodNameRegex = new RegExp(`\\b(${escapedMethodName})\\b`);
         highlighted = highlighted.replace(methodNameRegex, (match) => {
           return `<span class="srp-mixed" style="background-color: #fbbf2440; border-bottom: 2px solid #fbbf24; font-weight: 600;" title="This method uses multiple dependencies">${match}</span>`;
         });
@@ -325,5 +329,9 @@ export class SrpAnalyzerService {
       "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, m => map[m]);
+  }
+
+  private escapeRegex(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 }
