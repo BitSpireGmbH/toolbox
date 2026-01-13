@@ -249,27 +249,173 @@ export class SrpAnalyzerService {
   }
 
   private findMethodEnd(code: string, startIndex: number): number {
-    const lambdaMatch = code.substring(startIndex).match(/=>\s*([^;]+);/);
-    if (lambdaMatch && lambdaMatch.index !== undefined) {
-      return startIndex + lambdaMatch.index + lambdaMatch[0].length;
-    }
-    
-    let braceCount = 0;
-    let inMethod = false;
-    
-    for (let i = startIndex; i < code.length; i++) {
-      if (code[i] === '{') {
-        braceCount++;
-        inMethod = true;
-      } else if (code[i] === '}') {
-        braceCount--;
-        if (inMethod && braceCount === 0) {
-          return i + 1;
+    let index = startIndex;
+    const len = code.length;
+
+    const skipString = (quote: string) => {
+      index++;
+      while (index < len) {
+        if (code[index] === '\\') {
+          index += 2;
+        } else if (code[index] === quote) {
+          index++;
+          return;
+        } else {
+          index++;
         }
       }
+    };
+
+    const skipComment = () => {
+      if (code[index] === '/' && code[index + 1] === '/') {
+        index += 2;
+        while (index < len && code[index] !== '\n') index++;
+        return true;
+      }
+      if (code[index] === '/' && code[index + 1] === '*') {
+        index += 2;
+        while (index < len && !(code[index] === '*' && code[index + 1] === '/')) index++;
+        index += 2;
+        return true;
+      }
+      return false;
+    };
+
+    // 1. Find the start of parameters '('
+    while (index < len && code[index] !== '(') index++;
+    if (index >= len) return len;
+
+    // 2. Skip parameters
+    let parenCount = 1;
+    index++; // Skip first '('
+
+    while (index < len && parenCount > 0) {
+      if (skipComment()) continue;
+
+      const char = code[index];
+      if (char === '"' || char === "'") {
+        skipString(char);
+        continue;
+      }
+
+      if (char === '(') parenCount++;
+      else if (char === ')') parenCount--;
+
+      if (parenCount > 0) index++;
     }
-    
-    return code.length;
+
+    if (index >= len) return len;
+    index++; // Skip the closing ')'
+
+    // 3. Search for body start ({ or =>)
+    while (index < len) {
+      if (skipComment()) continue;
+
+      const char = code[index];
+
+      if (/\s/.test(char)) {
+        index++;
+        continue;
+      }
+
+      if (char === '"' || char === "'") {
+        skipString(char);
+        continue;
+      }
+
+      if (char === '{') {
+        // Block body
+        let braceCount = 1;
+        index++;
+        while (index < len && braceCount > 0) {
+          if (skipComment()) continue;
+
+          const c = code[index];
+          if (c === '"' || c === "'") {
+            skipString(c);
+            continue;
+          }
+
+          if (c === '{') braceCount++;
+          else if (c === '}') braceCount--;
+
+          if (braceCount > 0) index++;
+        }
+        if (index < len) index++; // Skip closing '}'
+        return index;
+      }
+
+      if (char === '=' && code[index + 1] === '>') {
+        // Expression body
+        index += 2;
+        while (index < len) {
+          if (skipComment()) continue;
+
+          const c = code[index];
+          if (c === ';') {
+            break;
+          }
+
+          if (c === '"' || c === "'") {
+            skipString(c);
+            continue;
+          }
+
+          if (c === '{' || c === '(' || c === '[') {
+            const startChar = c;
+            const endChar = c === '{' ? '}' : c === '(' ? ')' : ']';
+            let count = 1;
+            index++;
+            while (index < len && count > 0) {
+              if (skipComment()) continue;
+              const cc = code[index];
+              if (cc === '"' || cc === "'") {
+                skipString(cc);
+                continue;
+              }
+              if (cc === startChar) count++;
+              else if (cc === endChar) count--;
+              if (count > 0) index++;
+            }
+            if (index < len) index++;
+            continue;
+          }
+
+          index++;
+        }
+        if (index < len) index++; // Skip semicolon
+        return index;
+      }
+
+      if (char === ';') {
+        // Abstract method
+        return index + 1;
+      }
+
+      if (char === '(' || char === '[' || char === '<') {
+        const startChar = char;
+        const endChar = char === '(' ? ')' : char === '[' ? ']' : '>';
+        let count = 1;
+        index++;
+        while (index < len && count > 0) {
+          if (skipComment()) continue;
+          const cc = code[index];
+          if (cc === '"' || cc === "'") {
+            skipString(cc);
+            continue;
+          }
+          if (cc === startChar) count++;
+          else if (cc === endChar) count--;
+          if (count > 0) index++;
+        }
+        if (index < len) index++;
+        continue;
+      }
+
+      index++;
+    }
+
+    return len;
   }
 
   private findUsedDependencies(methodBody: string, dependencies: DependencyInfo[]): string[] {
