@@ -13,6 +13,14 @@ A client-side developer toolkit with utilities for code conversion and middlewar
 - **List<T> Visualizer** - Visualize the internal structure of C# List<T>
 - **SRP Analyzer** - Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies
 
+## Support & Contributing
+
+Thanks to all [contributors](https://github.com/BitSpireGmbH/toolbox/graphs/contributors) and people that are creating bug-reports and valuable input:
+
+<a href="https://github.com/BitSpireGmbH/toolbox/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=BitSpireGmbH/toolbox" alt="Supporters" />
+</a>
+
 ## Development
 
 Start the development server:
