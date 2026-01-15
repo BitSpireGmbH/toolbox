@@ -42,7 +42,7 @@ public class ProcessController : ControllerBase
 }`;
 
     const result = service.analyzeCode(code, true);
-    
+
     const dependencyTypes = result.dependencies.map(d => d.type);
     expect(dependencyTypes).not.toContain('public');
     expect(dependencyTypes).not.toContain('class');
@@ -75,7 +75,7 @@ public class Processor
 }`;
     const result = service.analyzeCode(code, true);
     const highlighted = service.highlightCode(code, result, null);
-    
+
     // Check for method wrapper
     expect(highlighted).toContain('class="srp-method"');
     // Check for dependency highlight
@@ -102,9 +102,10 @@ public class Test
     // Method1 should be found
     const method1 = result.methodUsages.find(m => m.methodName === 'Method1');
     expect(method1).toBeDefined();
+    if (!method1) return; // Type guard for TypeScript
 
     // Method1 body should NOT contain Method2
-    const method1Body = code.substring(method1!.startIndex, method1!.endIndex);
+    const method1Body = code.substring(method1.startIndex, method1.endIndex);
     expect(method1Body).not.toContain('Method2');
     expect(method1Body).not.toContain('=> 42');
   });
