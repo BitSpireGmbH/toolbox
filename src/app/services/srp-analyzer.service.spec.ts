@@ -81,4 +81,31 @@ public class Processor
     // Check for dependency highlight
     expect(highlighted).toContain('class="srp-highlight"');
   });
+
+  it('should correctly scope method bodies (no incorrect nesting with expression bodies)', () => {
+    const code = `
+public class Test
+{
+    private readonly IDep _dep;
+    public Test(IDep dep) { _dep = dep; }
+
+    public void Method1()
+    {
+        _dep.Do();
+    }
+
+    public int Method2() => 42;
+}
+`;
+    const result = service.analyzeCode(code, true);
+
+    // Method1 should be found
+    const method1 = result.methodUsages.find(m => m.methodName === 'Method1');
+    expect(method1).toBeDefined();
+
+    // Method1 body should NOT contain Method2
+    const method1Body = code.substring(method1!.startIndex, method1!.endIndex);
+    expect(method1Body).not.toContain('Method2');
+    expect(method1Body).not.toContain('=> 42');
+  });
 });
