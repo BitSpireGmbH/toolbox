@@ -13,7 +13,7 @@ export interface ConfigNode {
   isSelected: boolean;
   isRequired: boolean;
   isObject: boolean;
-  value: any;
+  value: unknown;
   children: ConfigNode[];
 }
 
@@ -21,7 +21,7 @@ export interface ConfigNode {
   providedIn: 'root'
 })
 export class StrongTyperConverterService {
-  private generatedClasses: Map<string, string> = new Map();
+  private generatedClasses = new Map<string, string>();
 
   discoverNodes(json: string): ConfigNode[] {
     try {
@@ -32,13 +32,13 @@ export class StrongTyperConverterService {
     }
   }
 
-  private parseNodes(obj: any, key: string, parentPath: string): ConfigNode[] {
+  private parseNodes(obj: unknown, key: string, parentPath: string): ConfigNode[] {
     if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
       return [];
     }
 
     const nodes: ConfigNode[] = [];
-    for (const [k, v] of Object.entries(obj)) {
+    for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
       const currentPath = parentPath ? `${parentPath}:${k}` : k;
       const isObject = typeof v === 'object' && v !== null && !Array.isArray(v);
       
@@ -102,7 +102,7 @@ export class StrongTyperConverterService {
     lines.push(`    public const string SectionName = "${node.fullPath}";`);
     lines.push(``);
 
-    for (const [key, value] of Object.entries(node.value)) {
+    for (const [key, value] of Object.entries(node.value as Record<string, unknown>)) {
       const propertyName = this.toPascalCase(key);
       const propertyType = this.inferType(value, key);
 
@@ -121,7 +121,7 @@ export class StrongTyperConverterService {
     this.generatedClasses.set(node.className, lines.join('\n'));
   }
 
-  private inferType(value: any, key: string): string {
+  private inferType(value: unknown, key: string): string {
     if (value === null) return 'object?';
     if (Array.isArray(value)) {
       if (value.length === 0) return 'List<object>';
@@ -166,7 +166,7 @@ public class MyService
 
     public void DoSomething()
     {
-        // Access properties via _options.${this.toPascalCase(Object.keys(node.value)[0] || 'Property')}
+        // Access properties via _options.${this.toPascalCase(Object.keys(node.value as Record<string, unknown>)[0] || 'Property')}
     }
 }`;
   }

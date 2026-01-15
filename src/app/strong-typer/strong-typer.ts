@@ -1,7 +1,7 @@
 import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
-import { StrongTyperConverterService, StrongTyperOptions, ConfigNode } from '../services/strong-typer-converter.service';
+import { StrongTyperConverterService, ConfigNode } from '../services/strong-typer-converter.service';
 
 @Component({
   selector: 'app-strong-typer',
@@ -191,16 +191,16 @@ import { StrongTyperConverterService, StrongTyperOptions, ConfigNode } from '../
 export class StrongTyperComponent {
   private converter = inject(StrongTyperConverterService);
 
-  showOptions = signal(true);
-  copied = signal(false);
+  readonly showOptions = signal(true);
+  readonly copied = signal(false);
   
   inputJson = '';
   useAddOptions = true;
   validateDataAnnotations = true;
   validateOnStart = true;
   
-  nodes = signal<ConfigNode[]>([]);
-  outputCode = signal('');
+  readonly nodes = signal<ConfigNode[]>([]);
+  readonly outputCode = signal('');
 
   onInputChange() {
     if (!this.inputJson.trim()) {
@@ -220,8 +220,9 @@ export class StrongTyperComponent {
         validateOnStart: this.validateOnStart
       });
       this.outputCode.set(result);
-    } catch (e: any) {
-      this.outputCode.set(`Error: ${e.message}`);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      this.outputCode.set(`Error: ${message}`);
     }
   }
 
