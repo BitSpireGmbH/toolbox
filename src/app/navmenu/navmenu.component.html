@@ -38,6 +38,13 @@
       }
     </a>
 
+    <!-- Converters Section -->
+    @if (sidebarOpen()) {
+      <div class="px-3 mb-1 mt-4">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Converters</span>
+      </div>
+    }
+
     <a
       routerLink="/csharp-json"
       routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
@@ -55,26 +62,6 @@
       } @else {
         <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
           JSON → C#
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/strong-typer"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="Strong-Typer (Options Generator)">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">Strong-Typer</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          Strong-Typer
         </span>
       }
     </a>
@@ -101,24 +88,31 @@
     </a>
 
     <a
-      routerLink="/jwt-decoder"
+      routerLink="/strong-typer"
       routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
       class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
-      aria-label="JWT Decoder">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
+      aria-label="Strong-Typer (Options Generator)">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
       </svg>
       @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">JWT Decoder</span>
+        <span class="text-sm whitespace-nowrap overflow-hidden">Strong-Typer</span>
       } @else {
         <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          JWT Decoder
+          Strong-Typer
         </span>
       }
     </a>
+
+    <!-- ASP.NET Core Section -->
+    @if (sidebarOpen()) {
+      <div class="px-3 mb-1 mt-4">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">ASP.NET Core</span>
+      </div>
+    }
 
     <a
       routerLink="/middleware-designer"
@@ -142,23 +136,48 @@
     </a>
 
     <a
-      routerLink="/package-centralizer"
+      routerLink="/typed-di-helper"
       routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
       class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
-      aria-label="Package Centralizer">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      aria-label="Typed DI Helper">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
       </svg>
       @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">Package Centralizer</span>
+        <span class="text-sm whitespace-nowrap overflow-hidden">Typed DI Helper</span>
       } @else {
         <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          Package Centralizer
+          Typed DI Helper
+        </span>
+      }
+    </a>
+
+    <!-- Architecture & Analysis Section -->
+    @if (sidebarOpen()) {
+      <div class="px-3 mb-1 mt-4">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Analysis</span>
+      </div>
+    }
+
+    <a
+      routerLink="/srp-analyzer"
+      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      [class.justify-center]="!sidebarOpen()"
+      [class.px-3]="sidebarOpen()"
+      [class.gap-3]="sidebarOpen()"
+      aria-label="SRP Analyzer">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9" />
+      </svg>
+      @if (sidebarOpen()) {
+        <span class="text-sm whitespace-nowrap overflow-hidden">SRP Analyzer</span>
+      } @else {
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          SRP Analyzer
         </span>
       }
     </a>
@@ -204,22 +223,52 @@
       }
     </a>
 
+    <!-- Utilities Section -->
+    @if (sidebarOpen()) {
+      <div class="px-3 mb-1 mt-4">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Utilities</span>
+      </div>
+    }
+
     <a
-      routerLink="/srp-analyzer"
+      routerLink="/jwt-decoder"
       routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
       class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
       [class.gap-3]="sidebarOpen()"
-      aria-label="SRP Analyzer">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9" />
+      aria-label="JWT Decoder">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
       </svg>
       @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">SRP Analyzer</span>
+        <span class="text-sm whitespace-nowrap overflow-hidden">JWT Decoder</span>
       } @else {
         <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          SRP Analyzer
+          JWT Decoder
+        </span>
+      }
+    </a>
+
+    <a
+      routerLink="/package-centralizer"
+      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      [class.justify-center]="!sidebarOpen()"
+      [class.px-3]="sidebarOpen()"
+      [class.gap-3]="sidebarOpen()"
+      aria-label="Package Centralizer">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+      @if (sidebarOpen()) {
+        <span class="text-sm whitespace-nowrap overflow-hidden">Package Centralizer</span>
+      } @else {
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          Package Centralizer
         </span>
       }
     </a>
@@ -285,6 +334,11 @@
         <span class="font-medium">Home</span>
       </a>
 
+      <!-- Converters -->
+      <div class="px-4 mb-1 mt-4">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Converters</span>
+      </div>
+
       <a
         routerLink="/csharp-json"
         routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
@@ -295,17 +349,6 @@
           <path d="M10 5H8C6.89543 5 6 5.89543 6 7V9.43845C6 10.3562 5.37541 11.1561 4.48507 11.3787L2.97014 11.7575C2.71765 11.8206 2.71765 12.1794 2.97014 12.2425L4.48507 12.6213C5.37541 12.8439 6 13.6438 6 14.5616V19H10"/>
         </svg>
         <span class="font-medium">JSON → C#</span>
-      </a>
-
-      <a
-        routerLink="/strong-typer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-        </svg>
-        <span class="font-medium">Strong-Typer</span>
       </a>
 
       <a
@@ -321,16 +364,20 @@
       </a>
 
       <a
-        routerLink="/jwt-decoder"
+        routerLink="/strong-typer"
         routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
         </svg>
-        <span class="font-medium">JWT Decoder</span>
+        <span class="font-medium">Strong-Typer</span>
       </a>
+
+      <!-- ASP.NET Core -->
+      <div class="px-4 mb-1 mt-4">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">ASP.NET Core</span>
+      </div>
 
       <a
         routerLink="/middleware-designer"
@@ -340,23 +387,34 @@
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
         </svg>
-
         <span class="font-medium">Middleware Designer</span>
       </a>
 
-
-
       <a
-        routerLink="/package-centralizer"
+        routerLink="/typed-di-helper"
         routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
         </svg>
-        <span class="font-medium">Package Centralizer</span>
+        <span class="font-medium">Typed DI Helper</span>
+      </a>
+
+      <!-- Analysis -->
+      <div class="px-4 mb-1 mt-4">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Analysis</span>
+      </div>
+
+      <a
+        routerLink="/srp-analyzer"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        (click)="onCloseSidebar()"
+        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9" />
+        </svg>
+        <span class="font-medium">SRP Analyzer</span>
       </a>
 
       <a
@@ -373,7 +431,7 @@
 
       <a
         routerLink="/list-visualizer"
-        routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
@@ -382,15 +440,34 @@
         <span class="font-medium">List&lt;T&gt; Visualizer</span>
       </a>
 
+      <!-- Utilities -->
+      <div class="px-4 mb-1 mt-4">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Utilities</span>
+      </div>
+
       <a
-        routerLink="/srp-analyzer"
+        routerLink="/jwt-decoder"
         routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9" />
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
-        <span class="font-medium">SRP Analyzer</span>
+        <span class="font-medium">JWT Decoder</span>
+      </a>
+
+      <a
+        routerLink="/package-centralizer"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        (click)="onCloseSidebar()"
+        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        <span class="font-medium">Package Centralizer</span>
       </a>
     </nav>
 

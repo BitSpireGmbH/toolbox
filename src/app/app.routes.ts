@@ -45,5 +45,9 @@ export const routes: Routes = [
   {
     path: 'strong-typer',
     loadComponent: () => import('./strong-typer/strong-typer').then(m => m.StrongTyperComponent)
+  },
+  {
+    path: 'typed-di-helper',
+    loadComponent: () => import('./typed-di-helper/typed-di-helper').then(m => m.TypedDiHelperComponent)
   }
 ];
