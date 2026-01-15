@@ -45,8 +45,9 @@ type HelperType = 'http' | 'signalr';
               </h2>
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
+                  <label for="httpServiceName" class="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
                   <input
+                    id="httpServiceName"
                     type="text"
                     [ngModel]="httpServiceName()"
                     (ngModelChange)="httpServiceName.set($event)"
@@ -54,8 +55,9 @@ type HelperType = 'http' | 'signalr';
                     placeholder="e.g. GitHubService">
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Interface Name</label>
+                  <label for="httpInterfaceName" class="block text-sm font-medium text-gray-700 mb-1">Interface Name</label>
                   <input
+                    id="httpInterfaceName"
                     type="text"
                     [ngModel]="httpInterfaceName()"
                     (ngModelChange)="httpInterfaceName.set($event)"
@@ -63,8 +65,9 @@ type HelperType = 'http' | 'signalr';
                     placeholder="e.g. IGitHubService">
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Base URL</label>
+                  <label for="httpBaseUrl" class="block text-sm font-medium text-gray-700 mb-1">Base URL</label>
                   <input
+                    id="httpBaseUrl"
                     type="text"
                     [ngModel]="httpBaseUrl()"
                     (ngModelChange)="httpBaseUrl.set($event)"
@@ -74,8 +77,9 @@ type HelperType = 'http' | 'signalr';
 
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Timeout (seconds)</label>
+                    <label for="httpTimeout" class="block text-sm font-medium text-gray-700 mb-1">Timeout (seconds)</label>
                     <input
+                      id="httpTimeout"
                       type="number"
                       [ngModel]="httpTimeout()"
                       (ngModelChange)="httpTimeout.set($event)"
@@ -112,8 +116,9 @@ type HelperType = 'http' | 'signalr';
               </h2>
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Hub Name</label>
+                  <label for="signalRHubName" class="block text-sm font-medium text-gray-700 mb-1">Hub Name</label>
                   <input
+                    id="signalRHubName"
                     type="text"
                     [ngModel]="signalRHubName()"
                     (ngModelChange)="signalRHubName.set($event)"
@@ -121,8 +126,9 @@ type HelperType = 'http' | 'signalr';
                     placeholder="e.g. NotificationHub">
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Client Interface</label>
+                  <label for="signalRInterfaceName" class="block text-sm font-medium text-gray-700 mb-1">Client Interface</label>
                   <input
+                    id="signalRInterfaceName"
                     type="text"
                     [ngModel]="signalRInterfaceName()"
                     (ngModelChange)="signalRInterfaceName.set($event)"
@@ -130,8 +136,9 @@ type HelperType = 'http' | 'signalr';
                     placeholder="e.g. INotificationClient">
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Route Path</label>
+                  <label for="signalRRoute" class="block text-sm font-medium text-gray-700 mb-1">Route Path</label>
                   <input
+                    id="signalRRoute"
                     type="text"
                     [ngModel]="signalRRoute()"
                     (ngModelChange)="signalRRoute.set($event)"
@@ -211,24 +218,24 @@ type HelperType = 'http' | 'signalr';
 })
 export class TypedDiHelperComponent {
   private service = inject(TypedDiHelperService);
-  activeTab = signal<HelperType>('http');
+  readonly activeTab = signal<HelperType>('http');
   readonly copied = signal(false);
 
   // Http Signals
-  httpServiceName = signal('MyApiService');
-  httpInterfaceName = signal('IMyApiService');
-  httpBaseUrl = signal('https://api.example.com');
-  httpTimeout = signal(30);
-  httpUseResilience = signal(true);
+  readonly httpServiceName = signal('MyApiService');
+  readonly httpInterfaceName = signal('IMyApiService');
+  readonly httpBaseUrl = signal('https://api.example.com');
+  readonly httpTimeout = signal(30);
+  readonly httpUseResilience = signal(true);
 
   // SignalR Signals
-  signalRHubName = signal('ChatHub');
-  signalRInterfaceName = signal('IChatClient');
-  signalRRoute = signal('/chat');
-  signalREnableDetailedErrors = signal(false);
-  signalRUseMessagePack = signal(false);
+  readonly signalRHubName = signal('ChatHub');
+  readonly signalRInterfaceName = signal('IChatClient');
+  readonly signalRRoute = signal('/chat');
+  readonly signalREnableDetailedErrors = signal(false);
+  readonly signalRUseMessagePack = signal(false);
 
-  generatedCode = computed(() => {
+  readonly generatedCode = computed(() => {
     if (this.activeTab() === 'http') {
       return this.service.generateHttpCode({
         serviceName: this.httpServiceName(),
