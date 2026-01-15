@@ -12,6 +12,7 @@ A client-side developer toolkit with utilities for code conversion and middlewar
 - **C# Mind Map** - A list of all C# versions with their features, including links to the official documentation
 - **List<T> Visualizer** - Visualize the internal structure of C# List<T>
 - **SRP Analyzer** - Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies
+- **Strong Typer** - Generate C# Options classes from JSON configuration
 
 ## Support & Contributing
 
