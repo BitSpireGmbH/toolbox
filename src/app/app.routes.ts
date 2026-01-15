@@ -41,5 +41,9 @@ export const routes: Routes = [
   {
     path: 'srp-analyzer',
     loadComponent: () => import('./srp-analyzer/srp-analyzer').then(m => m.SrpAnalyzerComponent)
+  },
+  {
+    path: 'strong-typer',
+    loadComponent: () => import('./strong-typer/strong-typer').then(m => m.StrongTyperComponent)
   }
 ];

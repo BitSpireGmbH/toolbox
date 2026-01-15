@@ -60,6 +60,26 @@
     </a>
 
     <a
+      routerLink="/strong-typer"
+      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      [class.justify-center]="!sidebarOpen()"
+      [class.px-3]="sidebarOpen()"
+      [class.gap-3]="sidebarOpen()"
+      aria-label="Strong-Typer (Options Generator)">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+      </svg>
+      @if (sidebarOpen()) {
+        <span class="text-sm whitespace-nowrap overflow-hidden">Strong-Typer</span>
+      } @else {
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          Strong-Typer
+        </span>
+      }
+    </a>
+
+    <a
       routerLink="/csharp-typescript"
       routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
       class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
@@ -275,6 +295,17 @@
           <path d="M10 5H8C6.89543 5 6 5.89543 6 7V9.43845C6 10.3562 5.37541 11.1561 4.48507 11.3787L2.97014 11.7575C2.71765 11.8206 2.71765 12.1794 2.97014 12.2425L4.48507 12.6213C5.37541 12.8439 6 13.6438 6 14.5616V19H10"/>
         </svg>
         <span class="font-medium">JSON → C#</span>
+      </a>
+
+      <a
+        routerLink="/strong-typer"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        (click)="onCloseSidebar()"
+        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+        <span class="font-medium">Strong-Typer</span>
       </a>
 
       <a

@@ -57,6 +57,32 @@ import { RouterLink } from '@angular/router';
               </div>
             </a>
 
+            <!-- Strong-Typer Card -->
+            <a routerLink="/strong-typer"
+               class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-indigo-500 overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+              <div class="absolute inset-0 bg-linear-to-br from-indigo-500/0 via-indigo-500/0 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 bg-linear-to-br from-indigo-500 to-blue-700 rounded-md flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:shadow-indigo-500/25 transition-all duration-300" aria-hidden="true">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-gray-900 group-hover:text-indigo-600 transition-colors duration-300">Strong-Typer</h3>
+                    <span class="text-xs text-gray-500 font-medium">Options Generator</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed mb-3">Create strongly-typed C# Options from JSON with validation and registration code.</p>
+                <div class="flex items-center gap-1.5 text-indigo-600 font-semibold text-xs">
+                  <span>Start Generating</span>
+                  <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </a>
+
             <!-- C# <-> TypeScript Card -->
             <a routerLink="/csharp-typescript"
                class="group relative block bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-200 hover:border-brand-secondary overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:ring-offset-2">
