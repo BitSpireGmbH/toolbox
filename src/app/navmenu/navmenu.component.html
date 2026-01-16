@@ -315,15 +315,30 @@
     class="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
     aria-hidden="true"></div>
 
-  <aside class="md:hidden fixed top-14 left-0 bottom-0 w-72 bg-gray-900 z-50 border-r border-gray-800 overflow-y-auto animate-slide-in">
-    <nav class="py-4" aria-label="Mobile navigation">
+  <aside class="md:hidden fixed top-0 right-0 bottom-0 w-80 bg-gray-950 z-50 border-l border-gray-800 flex flex-col shadow-2xl animate-slide-in-right">
+    <div class="h-14 flex items-center justify-between px-4 border-b border-gray-800 shrink-0">
+      <div class="flex items-center gap-2">
+        <img class="w-5 h-5" alt="Logo" src="assets/logo_small.webp" />
+        <span class="font-semibold text-white">.NET Toolbox</span>
+      </div>
+      <button
+        (click)="onCloseSidebar()"
+        class="p-2 text-gray-400 hover:text-white transition-colors"
+        aria-label="Close menu">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4" aria-label="Mobile navigation">
       <div class="px-4 mb-3">
         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Navigation</span>
       </div>
 
       <a
         routerLink="/home"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         [routerLinkActiveOptions]="{exact: false}"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
@@ -335,13 +350,13 @@
       </a>
 
       <!-- Converters -->
-      <div class="px-4 mb-1 mt-4">
+      <div class="px-4 mb-2 mt-6">
         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Converters</span>
       </div>
 
       <a
         routerLink="/csharp-json"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
@@ -353,7 +368,7 @@
 
       <a
         routerLink="/csharp-typescript"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -365,7 +380,7 @@
 
       <a
         routerLink="/strong-typer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
@@ -375,13 +390,13 @@
       </a>
 
       <!-- ASP.NET Core -->
-      <div class="px-4 mb-1 mt-4">
+      <div class="px-4 mb-2 mt-6">
         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">ASP.NET Core</span>
       </div>
 
       <a
         routerLink="/middleware-designer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -392,7 +407,7 @@
 
       <a
         routerLink="/typed-di-helper"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -402,13 +417,13 @@
       </a>
 
       <!-- Analysis -->
-      <div class="px-4 mb-1 mt-4">
+      <div class="px-4 mb-2 mt-6">
         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Analysis</span>
       </div>
 
       <a
         routerLink="/srp-analyzer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -419,7 +434,7 @@
 
       <a
         routerLink="/csharp-mindmap"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -431,7 +446,7 @@
 
       <a
         routerLink="/list-visualizer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
@@ -441,13 +456,13 @@
       </a>
 
       <!-- Utilities -->
-      <div class="px-4 mb-1 mt-4">
+      <div class="px-4 mb-2 mt-6">
         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Utilities</span>
       </div>
 
       <a
         routerLink="/jwt-decoder"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -459,7 +474,7 @@
 
       <a
         routerLink="/package-centralizer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-r-2 border-brand-primary"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -471,10 +486,15 @@
       </a>
     </nav>
 
-    <div class="absolute bottom-0 left-0 right-0 px-4 py-4 border-t border-gray-800 bg-gray-900">
-      <div class="flex items-center justify-between text-xs text-gray-500">
-        <a target="_blank" href="https://github.com/BitSpireGmbH/toolbox"><span>{{ version() }}</span></a>
-        <span>© 2025 Bitspire</span>
+    <div class="shrink-0 px-4 py-6 border-t border-gray-800 bg-gray-950">
+      <div class="flex items-center justify-between text-xs text-gray-500 font-medium">
+        <a target="_blank" href="https://github.com/BitSpireGmbH/toolbox" class="hover:text-white transition-colors flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+          </svg>
+          <span>{{ version() }}</span>
+        </a>
+        <span>© 2026 Bitspire</span>
       </div>
     </div>
   </aside>
