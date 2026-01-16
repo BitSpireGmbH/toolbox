@@ -35,7 +35,8 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "crossOrigin": "anonymous"
           },
           "configurations": {
             "production": {
