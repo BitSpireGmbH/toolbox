@@ -194,13 +194,42 @@ export class StrongTyperComponent {
   readonly showOptions = signal(true);
   readonly copied = signal(false);
   
-  inputJson = '';
+  inputJson = `{
+  "Database": {
+    "ConnectionString": "Server=localhost;Database=myapp;",
+    "Timeout": 30,
+    "MaxPoolSize": 50,
+    "RetryPolicy": {
+      "Count": 3,
+      "Interval": 5
+    }
+  },
+  "Authentication": {
+    "Jwt": {
+      "Issuer": "myapp",
+      "Audience": "users",
+      "SecretKey": "your-secret-key-here",
+      "ExpiryMinutes": 60
+    },
+    "AllowedOrigins": ["http://localhost:4200", "https://myapp.com"]
+  },
+  "Logging": {
+    "LogLevel": "Information",
+    "EnableConsole": true,
+    "EnableFile": true
+  }
+}`;
   useAddOptions = true;
   validateDataAnnotations = true;
   validateOnStart = true;
   
   readonly nodes = signal<ConfigNode[]>([]);
   readonly outputCode = signal('');
+
+  constructor() {
+    // Initialize with example data
+    this.onInputChange();
+  }
 
   onInputChange() {
     if (!this.inputJson.trim()) {

@@ -385,7 +385,25 @@ export class CsharpTypescriptComponent {
   
   protected readonly showOptions = signal<boolean>(true);
   protected readonly showAdvancedOptions = signal<boolean>(false);
-  protected readonly inputCode = signal<string>('');
+  protected readonly inputCode = signal<string>(`public class UserProfile
+{
+    public int Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public int Age { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public List<string> Tags { get; set; }
+    public Address Address { get; set; }
+}
+
+public class Address
+{
+    public string Street { get; set; }
+    public string City { get; set; }
+    public string ZipCode { get; set; }
+}`);
   protected readonly outputCode = signal<string>('');
   protected readonly errorMessage = signal<string>('');
 

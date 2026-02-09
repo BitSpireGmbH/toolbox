@@ -207,7 +207,21 @@ export class CsharpJsonComponent {
   protected readonly useWebDefaults = signal<boolean>(true);
   protected readonly rootClassName = signal<string>('');
   
-  protected readonly inputCode = signal<string>('');
+  protected readonly inputCode = signal<string>(`{
+  "id": 1,
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "age": 30,
+  "isActive": true,
+  "createdAt": "2024-01-15T10:30:00Z",
+  "tags": ["developer", "senior", "team-lead"],
+  "address": {
+    "street": "123 Main St",
+    "city": "San Francisco",
+    "zipCode": "94105"
+  }
+}`);
   protected readonly outputCode = signal<string>('');
   protected readonly errorMessage = signal<string>('');
 
