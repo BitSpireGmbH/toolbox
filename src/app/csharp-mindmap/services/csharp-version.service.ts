@@ -147,7 +147,8 @@ export class CsharpVersionService {
           { "name": "Implicit span conversions", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14#implicit-span-conversions" },
           { "name": "nameof with unbound generic types", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14#unbound-generic-types-and-nameof" },
           { "name": "Null conditional assignment", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14#null-conditional-assignment" },
-          { "name": "partial events and constructors", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14#more-partial-members" }
+          { "name": "partial events and constructors", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14#more-partial-members" },
+          { "name": "Extension members", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14#extension-members" }
         ]
       }
     }
