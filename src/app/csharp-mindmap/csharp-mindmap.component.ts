@@ -18,24 +18,39 @@ type ViewMode = 'mindmap' | 'list';
           <p class="text-sm text-gray-600">Explore the evolution of C# language features</p>
         </div>
           
-          <div class="bg-white p-1 rounded-lg shadow-sm border border-gray-200 inline-flex">
+          <div class="flex gap-3">
+            <div class="bg-white p-1 rounded-lg shadow-sm border border-gray-200 inline-flex">
+              <button 
+                (click)="viewMode.set('mindmap')"
+                [class.bg-brand-primary]="viewMode() === 'mindmap'"
+                [class.text-white]="viewMode() === 'mindmap'"
+                [class.text-gray-600]="viewMode() !== 'mindmap'"
+                class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Timeline
+              </button>
+              <button 
+                (click)="viewMode.set('list')"
+                [class.bg-brand-primary]="viewMode() === 'list'"
+                [class.text-white]="viewMode() === 'list'"
+                [class.text-gray-600]="viewMode() !== 'list'"
+                class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                List
+              </button>
+            </div>
+
             <button 
-              (click)="viewMode.set('mindmap')"
-              [class.bg-brand-primary]="viewMode() === 'mindmap'"
-              [class.text-white]="viewMode() === 'mindmap'"
-              [class.text-gray-600]="viewMode() !== 'mindmap'"
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              Timeline
-            </button>
-            <button 
-              (click)="viewMode.set('list')"
-              [class.bg-brand-primary]="viewMode() === 'list'"
-              [class.text-white]="viewMode() === 'list'"
-              [class.text-gray-600]="viewMode() !== 'list'"
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-              List
+              (click)="toggleOrder()"
+              class="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2"
+              [title]="isReversed() ? 'Sort oldest first' : 'Sort newest first'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300" [class.rotate-180]="!isReversed()">
+                <path d="m3 16 4 4 4-4"></path>
+                <path d="M7 20V4"></path>
+                <path d="m21 8-4-4-4 4"></path>
+                <path d="M17 4v16"></path>
+              </svg>
+              {{isReversed() ? 'Newest First' : 'Oldest First'}}
             </button>
           </div>
         </div>
@@ -154,6 +169,14 @@ export class CsharpMindmapComponent {
   private readonly service = inject(CsharpVersionService);
 
   protected readonly viewMode = signal<ViewMode>('mindmap');
+  protected readonly isReversed = signal(true);
   
-  protected readonly versions = computed(() => this.service.getVersions());
+  protected readonly versions = computed(() => {
+    const versions = this.service.getVersions();
+    return this.isReversed() ? [...versions].reverse() : versions;
+  });
+
+  protected toggleOrder(): void {
+    this.isReversed.update(v => !v);
+  }
 }
