@@ -4,6 +4,9 @@ export interface StrongTyperOptions {
   useAddOptions: boolean;
   validateDataAnnotations: boolean;
   validateOnStart: boolean;
+  propertyInitialization: 'set' | 'init';
+  visibility: 'public' | 'internal';
+  sealed: boolean;
 }
 
 export interface ConfigNode {
@@ -95,7 +98,8 @@ export class StrongTyperConverterService {
 
   private generateClassForNode(node: ConfigNode, options: StrongTyperOptions): void {
     const lines: string[] = [];
-    lines.push(`public class ${node.className}`);
+    const sealedModifier = options.sealed ? 'sealed ' : '';
+    lines.push(`${options.visibility} ${sealedModifier}class ${node.className}`);
     lines.push(`{`);
     // Section name is the key or the full path? Usually the section name is used in Bind.
     // If it's a nested section, Bind(config.GetSection("Outer:Inner")) is common.
@@ -114,7 +118,8 @@ export class StrongTyperConverterService {
         }
       }
 
-      lines.push(`    public ${propertyType} ${propertyName} { get; set; } = default!;`);
+      const accessor = options.propertyInitialization === 'init' ? 'get; init;' : 'get; set;';
+      lines.push(`    public ${propertyType} ${propertyName} { ${accessor} } = default!;`);
     }
 
     lines.push(`}`);

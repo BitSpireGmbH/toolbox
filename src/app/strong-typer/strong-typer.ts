@@ -28,7 +28,7 @@ import { StrongTyperConverterService, ConfigNode } from '../services/strong-type
 
       @if (showOptions()) {
         <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="space-y-4">
               <div class="space-y-2">
                 <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
@@ -57,20 +57,55 @@ import { StrongTyperConverterService, ConfigNode } from '../services/strong-type
                     class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
                   <span class="text-xs font-medium text-gray-700">Validate on Start</span>
                 </label>
+
+                <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <input 
+                    type="checkbox"
+                    [(ngModel)]="sealed"
+                    (change)="convert()"
+                    class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary">
+                  <span class="text-xs font-medium text-gray-700">Sealed Classes</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="space-y-2">
+                <label for="property-init" class="text-xs font-medium text-gray-700 block">Property Initialization</label>
+                <select 
+                  id="property-init"
+                  [(ngModel)]="propertyInitialization"
+                  (change)="convert()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs bg-white text-gray-700 focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                  <option value="init">init (Immutable)</option>
+                  <option value="set">set (Mutable)</option>
+                </select>
+              </div>
+
+              <div class="space-y-2">
+                <label for="visibility" class="text-xs font-medium text-gray-700 block">Class Visibility</label>
+                <select 
+                  id="visibility"
+                  [(ngModel)]="visibility"
+                  (change)="convert()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs bg-white text-gray-700 focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                  <option value="public">public</option>
+                  <option value="internal">internal</option>
+                </select>
               </div>
             </div>
             
-            <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
-               <h3 class="text-sm font-semibold text-blue-800 mb-2">Information</h3>
-               <p class="text-xs text-blue-700 leading-relaxed">
-                 Select the sections you want to generate as Options classes by checking the box next to them. You can also define if a field is required for validation.
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+               <h3 class="text-xs font-semibold text-blue-800 mb-1">💡 Tip</h3>
+               <p class="text-[11px] text-blue-700 leading-snug">
+                 Select objects to generate. Use init for immutable properties.
                </p>
             </div>
           </div>
         </div>
       }
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Input Section -->
         <div class="flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-[600px]">
           <div class="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
@@ -222,6 +257,9 @@ export class StrongTyperComponent {
   useAddOptions = true;
   validateDataAnnotations = true;
   validateOnStart = true;
+  propertyInitialization: 'set' | 'init' = 'init';
+  visibility: 'public' | 'internal' = 'public';
+  sealed = false;
   
   readonly nodes = signal<ConfigNode[]>([]);
   readonly outputCode = signal('');
@@ -246,7 +284,10 @@ export class StrongTyperComponent {
       const result = this.converter.generate(this.nodes(), {
         useAddOptions: this.useAddOptions,
         validateDataAnnotations: this.validateDataAnnotations,
-        validateOnStart: this.validateOnStart
+        validateOnStart: this.validateOnStart,
+        propertyInitialization: this.propertyInitialization,
+        visibility: this.visibility,
+        sealed: this.sealed
       });
       this.outputCode.set(result);
     } catch (e: unknown) {
