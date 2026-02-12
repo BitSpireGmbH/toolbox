@@ -7,4 +7,5 @@ export interface CsharpVersion {
   version: string;
   year: number;
   features: CsharpFeature[];
+  isPreview?: boolean;
 }

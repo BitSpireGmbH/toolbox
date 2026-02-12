@@ -4,6 +4,7 @@ import { CsharpVersion, CsharpFeature } from '../models/csharp-version.models';
 interface VersionData {
   year: number;
   features: CsharpFeature[];
+  isPreview?: boolean;
 }
 
 @Injectable({
@@ -150,6 +151,13 @@ export class CsharpVersionService {
           { "name": "partial events and constructors", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14#more-partial-members" },
           { "name": "Extension members", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14#extension-members" }
         ]
+      },
+      "15": {
+        "year": 2026,
+        "isPreview": true,
+        "features": [
+          { "name": "Collection expression arguments", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15#collection-expression-arguments" }
+        ]
       }
     }
   };
@@ -159,7 +167,8 @@ export class CsharpVersionService {
       .map(([version, data]) => ({
         version,
         year: data.year,
-        features: data.features
+        features: data.features,
+        isPreview: data.isPreview
       }))
       .sort((a, b) => {
          return parseFloat(a.version) - parseFloat(b.version);

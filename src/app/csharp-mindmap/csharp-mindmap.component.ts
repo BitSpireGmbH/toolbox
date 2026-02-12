@@ -90,6 +90,9 @@ type ViewMode = 'mindmap' | 'list';
                               <div class="flex items-center gap-3">
                                 <h2 class="text-2xl font-bold text-gray-800">v{{v.version}}</h2>
                                 <span class="text-sm font-medium text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100">{{v.year}}</span>
+                                @if (v.isPreview) {
+                                  <span class="text-sm font-medium text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100">Preview</span>
+                                }
                               </div>
                            </div>
                            
@@ -127,6 +130,9 @@ type ViewMode = 'mindmap' | 'list';
                   <div class="flex items-baseline gap-4 mb-4">
                     <h2 class="text-2xl font-bold text-gray-900">{{v.version}}</h2>
                     <span class="text-sm text-gray-500 font-mono">({{v.year}})</span>
+                    @if (v.isPreview) {
+                      <span class="text-sm font-medium text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100">Preview</span>
+                    }
                     <div class="h-px bg-gray-200 flex-grow"></div>
                   </div>
                   <div class="grid md:grid-cols-2 gap-3">
