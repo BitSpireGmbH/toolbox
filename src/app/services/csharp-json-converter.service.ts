@@ -6,7 +6,7 @@ export interface CsharpToJsonOptions {
 
 export interface JsonToCsharpOptions {
   classType: 'class' | 'record' | 'struct' | 'record struct' | 'readonly record struct';
-  enumerationType: 'List<T>' | 'IReadOnlyCollection<T>' | 'T[]';
+  enumerationType: 'List<T>' | 'IReadOnlyCollection<T>' | 'IReadOnlyList<T>' | 'T[]';
   serializer: 'System.Text.Json' | 'Newtonsoft.Json';
   namespace?: string;
   convertSnakeCase?: boolean;
@@ -506,6 +506,8 @@ export class CsharpJsonConverterService {
         return `List<${itemType}>`;
       case 'IReadOnlyCollection<T>':
         return `IReadOnlyCollection<${itemType}>`;
+      case 'IReadOnlyList<T>':
+        return `IReadOnlyList<${itemType}>`;
       case 'T[]':
         return `${itemType}[]`;
       default:

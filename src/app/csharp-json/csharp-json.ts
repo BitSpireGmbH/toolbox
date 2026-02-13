@@ -56,8 +56,25 @@ import { CsharpJsonConverterService, JsonToCsharpOptions } from '../services/csh
                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm">
                   <option value="List<T>">List&lt;T&gt;</option>
                   <option value="IReadOnlyCollection<T>">IReadOnlyCollection&lt;T&gt;</option>
+                  <option value="IReadOnlyList<T>">IReadOnlyList&lt;T&gt;</option>
                   <option value="T[]">T[]</option>
                 </select>
+                <p class="mt-1.5 text-[10px] leading-snug">
+                  @switch (enumerationType()) {
+                    @case ('List<T>') {
+                      <span class="text-amber-700">Flexible but <span class="font-semibold">mutable</span>. Avoid exposing in public APIs.</span>
+                    }
+                    @case ('IReadOnlyCollection<T>') {
+                      <span class="text-green-700 font-medium">Recommended for boundaries. Flexible (wraps List, Set, or Array).</span>
+                    }
+                    @case ('IReadOnlyList<T>') {
+                      <span class="text-green-700 font-medium">Recommended for boundaries when index/order matters.</span>
+                    }
+                    @case ('T[]') {
+                      <span class="text-red-700"><span class="font-semibold">Leaky abstraction & mutable</span>. Performance gains are often micro-optimizations that require profiling and can hurt DX.</span>
+                    }
+                  }
+                </p>
               </div>
 
               <div>

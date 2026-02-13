@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { CsharpJsonConverterService } from './csharp-json-converter.service';
 
 describe('CsharpJsonConverterService', () => {
@@ -228,6 +228,19 @@ describe('CsharpJsonConverterService', () => {
       const result = service.jsonToCsharp(json, options, 'Container');
 
       expect(result).toContain('IReadOnlyCollection<int>');
+    });
+
+    it('should handle arrays with IReadOnlyList<T>', () => {
+      const json = JSON.stringify({ items: [1, 2, 3] });
+      const options = {
+        classType: 'class' as const,
+        enumerationType: 'IReadOnlyList<T>' as const,
+        serializer: 'System.Text.Json' as const
+      };
+
+      const result = service.jsonToCsharp(json, options, 'Container');
+
+      expect(result).toContain('IReadOnlyList<int>');
     });
 
     it('should handle arrays with T[]', () => {
