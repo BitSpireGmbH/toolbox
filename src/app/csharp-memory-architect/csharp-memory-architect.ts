@@ -279,7 +279,7 @@ interface HeapObject {
   `]
 })
 export class CsharpMemoryArchitectComponent {
-  code = signal<string>(`struct Point 
+  readonly code = signal<string>(`struct Point 
 { 
     public int X; 
     public int Y; 
@@ -312,8 +312,8 @@ void Process(out int val)
     val = 42;
 }`);
 
-  stack = signal<StackFrame[]>([]);
-  heap = signal<HeapObject[]>([]);
+  readonly stack = signal<StackFrame[]>([]);
+  readonly heap = signal<HeapObject[]>([]);
 
   private nextAddress = 0x1000;
 
