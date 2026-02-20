@@ -21,6 +21,15 @@ jobs:
           node-version: '22.x'
           cache: 'npm'
 
+      - name: Cache Angular Build Cache
+        uses: actions/cache@v4
+        with:
+          path: .angular/cache
+          key: ${{ runner.os }}-angular-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-angular-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-angular-
+
       - name: Inject Version
         run: |
           COMMIT_SHA=$(git rev-parse --short HEAD)
