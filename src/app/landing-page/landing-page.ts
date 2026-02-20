@@ -1,10 +1,15 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
+import { SearchDialogComponent } from '../shared/search-dialog/search-dialog.component';
 
 @Component({
   selector: 'app-landing-page',
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:keydown)': 'onKeyDown($event)'
+  },
   template: `
     <div class="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center p-6">
       <div class="max-w-7xl w-full">
@@ -23,6 +28,11 @@ import { RouterLink } from '@angular/router';
           <p class="text-base text-gray-500 max-w-3xl mx-auto leading-relaxed">
             Whether you're converting data formats, debugging tokens, or designing middleware pipelines -
             we've got you covered. All tools run entirely in your browser with no data stored on servers.
+          </p>
+          <p class="text-sm text-gray-400 max-w-3xl mx-auto mt-4 flex items-center justify-center gap-2">
+            <span>💡 Tip: Press</span>
+            <kbd class="px-2 py-1 rounded border border-gray-300 bg-gray-100 font-mono text-xs font-semibold text-gray-700">{{ keyboardShortcut() }}</kbd>
+            <span>to search</span>
           </p>
         </header>
 
@@ -395,4 +405,35 @@ import { RouterLink } from '@angular/router';
   `,
   styles: []
 })
-export class LandingPageComponent { }
+export class LandingPageComponent {
+  private dialog = inject(Dialog);
+  
+  protected readonly keyboardShortcut = signal(this.getKeyboardShortcut());
+
+  constructor() {
+    this.keyboardShortcut.set(this.getKeyboardShortcut());
+  }
+
+  private getKeyboardShortcut(): string {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    return isMac ? '⌘ K' : 'Ctrl + K';
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    const isSearchKey = isMac ? event.metaKey && event.key === 'k' : event.ctrlKey && event.key === 'k';
+
+    if (isSearchKey) {
+      event.preventDefault();
+      this.openSearch();
+    }
+  }
+
+  private openSearch(): void {
+    this.dialog.open(SearchDialogComponent, {
+      width: '100%',
+      maxWidth: '800px',
+      backdropClass: 'cdk-overlay-dark-backdrop'
+    });
+  }
+}
