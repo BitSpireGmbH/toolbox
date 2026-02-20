@@ -49,5 +49,9 @@ export const routes: Routes = [
   {
     path: 'typed-di-helper',
     loadComponent: () => import('./typed-di-helper/typed-di-helper').then(m => m.TypedDiHelperComponent)
+  },
+  {
+    path: 'span-visualizer',
+    loadComponent: () => import('./span-visualizer/span-visualizer').then(m => m.SpanVisualizerComponent)
   }
 ];
