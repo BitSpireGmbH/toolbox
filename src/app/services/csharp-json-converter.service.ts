@@ -44,7 +44,7 @@ export class CsharpJsonConverterService {
       const jsonObject = this.createJsonFromClass(parsedClass);
       return JSON.stringify(jsonObject, null, indentation);
     } catch (error) {
-      throw new Error(`Failed to convert C# to JSON: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to convert C# to JSON: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
     }
   }
 
@@ -79,7 +79,7 @@ export class CsharpJsonConverterService {
 
       return result;
     } catch (error) {
-      throw new Error(`Failed to convert JSON to C#: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to convert JSON to C#: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
     }
   }
 

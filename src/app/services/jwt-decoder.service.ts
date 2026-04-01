@@ -89,9 +89,9 @@ export class JwtDecoderService {
       };
     } catch (error) {
       if (error instanceof Error) {
-        throw new Error(`Failed to decode JWT: ${error.message}`);
+        throw new Error(`Failed to decode JWT: ${error.message}`, { cause: error });
       }
-      throw new Error('Failed to decode JWT: Unknown error');
+      throw new Error('Failed to decode JWT: Unknown error', { cause: error });
     }
   }
 

@@ -70,7 +70,7 @@ export class CsharpTypescriptConverterService {
       
       return this.generateTypescriptDefinition(parsedClass, options);
     } catch (error) {
-      throw new Error(`Failed to convert C# to TypeScript: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to convert C# to TypeScript: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
     }
   }
 
@@ -100,7 +100,7 @@ export class CsharpTypescriptConverterService {
 
       return result;
     } catch (error) {
-      throw new Error(`Failed to convert TypeScript to C#: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to convert TypeScript to C#: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
     }
   }
 

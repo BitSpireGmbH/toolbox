@@ -123,10 +123,9 @@ export class SrpAnalyzerService {
     const classNameMatch = code.match(/class\s+(\w+)/);
     const className = classNameMatch ? classNameMatch[1] : null;
 
-    let primaryConstructorMatch = null;
     if (className) {
       const primaryConstructorRegex = new RegExp(`class\\s+${className}\\s*\\((.*?)\\)`, 's');
-      primaryConstructorMatch = code.match(primaryConstructorRegex);
+      const primaryConstructorMatch = code.match(primaryConstructorRegex);
       
       if (primaryConstructorMatch) {
         const params = this.parseParameters(primaryConstructorMatch[1]);
