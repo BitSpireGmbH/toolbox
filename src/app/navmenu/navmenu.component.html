@@ -19,6 +19,31 @@
   </div>
 
   <nav class="flex-1 flex flex-col py-2 gap-1" [class.overflow-y-auto]="sidebarOpen()" aria-label="Main navigation">
+    @if (sidebarOpen()) {
+      <div class="px-3 pb-2">
+        <input
+          type="text"
+          [value]="filterQuery()"
+          (input)="onFilterInput($any($event.target).value)"
+          placeholder="Filter tools…"
+          aria-label="Filter tools"
+          class="w-full text-xs bg-gray-800/60 text-gray-200 placeholder-gray-500 rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-brand-primary" />
+      </div>
+    } @else {
+      <button
+        (click)="openSearch()"
+        class="w-full flex items-center justify-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+        aria-label="Search tools">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="10" cy="10" r="7"></circle>
+          <line x1="21" y1="21" x2="15" y2="15" stroke-linecap="round"></line>
+        </svg>
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          Search tools
+        </span>
+      </button>
+    }
+
     <a
       routerLink="/home"
       routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
@@ -38,313 +63,50 @@
       }
     </a>
 
-    <!-- Converters Section -->
-    @if (sidebarOpen()) {
-      <div class="px-3 mb-1 mt-4">
-        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Converters</span>
-      </div>
+    @for (group of groups(); track group.category) {
+      @if (sidebarOpen()) {
+        <div class="px-3 mb-1 mt-4">
+          <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ group.category }}</span>
+        </div>
+      }
+      @for (tool of group.tools; track tool.path) {
+        <a
+          [routerLink]="'/' + tool.path"
+          routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+          class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+          [class.justify-center]="!sidebarOpen()"
+          [class.px-3]="sidebarOpen()"
+          [class.gap-3]="sidebarOpen()"
+          [attr.aria-label]="tool.title">
+          <app-tool-icon [name]="tool.icon" svgClass="w-5 h-5 shrink-0" />
+          @if (sidebarOpen()) {
+            <span class="text-sm whitespace-nowrap overflow-hidden">{{ tool.title }}</span>
+          } @else {
+            <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+              {{ tool.title }}
+            </span>
+          }
+        </a>
+      }
+    } @empty {
+      @if (sidebarOpen()) {
+        <p class="px-3 mt-4 text-xs text-gray-500">No tools match &quot;{{ filterQuery() }}&quot;</p>
+      }
     }
-
-    <a
-      routerLink="/csharp-json"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="JSON to C# Converter">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14 19H16C17.1046 19 18 18.1046 18 17V14.5616C18 13.6438 18.6246 12.8439 19.5149 12.6213L21.0299 12.2425C21.2823 12.1794 21.2823 11.8206 21.0299 11.7575L19.5149 11.3787C18.6246 11.1561 18 10.3562 18 9.43845V5H14"/>
-        <path d="M10 5H8C6.89543 5 6 5.89543 6 7V9.43845C6 10.3562 5.37541 11.1561 4.48507 11.3787L2.97014 11.7575C2.71765 11.8206 2.71765 12.1794 2.97014 12.2425L4.48507 12.6213C5.37541 12.8439 6 13.6438 6 14.5616V19H10"/>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">JSON → C#</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          JSON → C#
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/csharp-typescript"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="C# to TypeScript Converter">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="16 18 22 12 16 6"></polyline>
-        <polyline points="8 6 2 12 8 18"></polyline>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">C# ↔ TypeScript</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          C# ↔ TypeScript
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/strong-typer"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="Strong-Typer (Options Generator)">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">Strong-Typer</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          Strong-Typer
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/curl-to-httpclient"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="cURL to HttpClient Converter">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <polyline points="4 17 10 11 4 5" stroke-linecap="round" stroke-linejoin="round"></polyline>
-        <line x1="12" y1="19" x2="20" y2="19" stroke-linecap="round"></line>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">cURL → HttpClient</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          cURL → HttpClient
-        </span>
-      }
-    </a>
-
-    <!-- ASP.NET Core Section -->
-    @if (sidebarOpen()) {
-      <div class="px-3 mb-1 mt-4">
-        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">ASP.NET Core</span>
-      </div>
-    }
-
-    <a
-      routerLink="/middleware-designer"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="Middleware Designer">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">Middleware Designer</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          Middleware Designer
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/typed-di-helper"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="Typed DI Helper">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">Typed DI Helper</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          Typed DI Helper
-        </span>
-      }
-    </a>
-
-    <!-- Architecture & Analysis Section -->
-    @if (sidebarOpen()) {
-      <div class="px-3 mb-1 mt-4">
-        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Analysis</span>
-      </div>
-    }
-
-    <a
-      routerLink="/srp-analyzer"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="SRP Analyzer">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9" />
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">SRP Analyzer</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          SRP Analyzer
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/csharp-mindmap"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="C# Mindmap">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <rect x="2" y="2" width="20" height="20" rx="4" stroke="currentColor" stroke-width="2"></rect>
-        <text x="50%" y="50%" fill="currentColor" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-size="10" font-weight="700" text-anchor="middle" dominant-baseline="central">C#</text>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">C# Mindmap</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          C# Mindmap
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/list-visualizer"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="List Visualizer">
-      <svg class="w-5 h-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">List&lt;T&gt; Visualizer</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          List&lt;T&gt; Visualizer
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/span-visualizer"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="Span Visualizer">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M4 8h16M4 16h16M8 4v16M16 4v16" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">Span&lt;T&gt; Visualizer</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          Span&lt;T&gt; Visualizer
-        </span>
-      }
-    </a>
-
-    <!-- Utilities Section -->
-    @if (sidebarOpen()) {
-      <div class="px-3 mb-1 mt-4">
-        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Utilities</span>
-      </div>
-    }
-
-    <a
-      routerLink="/jwt-decoder"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="JWT Decoder">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">JWT Decoder</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          JWT Decoder
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/package-centralizer"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="Package Centralizer">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">Package Centralizer</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          Package Centralizer
-        </span>
-      }
-    </a>
-
-    <a
-      routerLink="/regex-tester"
-      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
-      [class.justify-center]="!sidebarOpen()"
-      [class.px-3]="sidebarOpen()"
-      [class.gap-3]="sidebarOpen()"
-      aria-label="Regex Tester">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="10" cy="10" r="7"></circle>
-        <line x1="21" y1="21" x2="15" y2="15" stroke-linecap="round"></line>
-      </svg>
-      @if (sidebarOpen()) {
-        <span class="text-sm whitespace-nowrap overflow-hidden">Regex Tester</span>
-      } @else {
-        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          Regex Tester
-        </span>
-      }
-    </a>
   </nav>
 
   @if (sidebarOpen()) {
-    <div class="px-3 py-3 border-t border-gray-800">
-      <div class="flex items-center gap-2 text-xs text-gray-500">
-        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="px-3 py-3 border-t border-gray-800 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-1.5 text-xs text-gray-500 min-w-0">
+        <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
           <path d="M12 6v6l4 2"></path>
         </svg>
-        <a target="_blank" href="https://github.com/BitSpireGmbH/toolbox"><span>{{ version() }}</span></a>
+        <a target="_blank" href="https://github.com/BitSpireGmbH/toolbox" class="truncate"><span>{{ version() }}</span></a>
       </div>
+      <a target="_blank" href="https://bitspire.ch" class="shrink-0" aria-label="Brought to you by BitSpire">
+        <img src="assets/bitspire-logo.webp" alt="BitSpire" class="h-4 w-auto opacity-70 hover:opacity-100 transition-opacity" />
+      </a>
     </div>
   }
 </div>
@@ -393,11 +155,17 @@
       </button>
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-4" aria-label="Mobile navigation">
-      <div class="px-4 mb-3">
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Navigation</span>
-      </div>
+    <div class="px-4 pt-4 shrink-0">
+      <input
+        type="text"
+        [value]="filterQuery()"
+        (input)="onFilterInput($any($event.target).value)"
+        placeholder="Filter tools…"
+        aria-label="Filter tools"
+        class="w-full text-sm bg-gray-800/60 text-gray-200 placeholder-gray-500 rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-brand-primary" />
+    </div>
 
+    <nav class="flex-1 overflow-y-auto py-4" aria-label="Mobile navigation">
       <a
         routerLink="/home"
         routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
@@ -411,177 +179,23 @@
         <span class="font-medium">Home</span>
       </a>
 
-      <!-- Converters -->
-      <div class="px-4 mb-2 mt-6">
-        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Converters</span>
-      </div>
-
-      <a
-        routerLink="/csharp-json"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 19H16C17.1046 19 18 18.1046 18 17V14.5616C18 13.6438 18.6246 12.8439 19.5149 12.6213L21.0299 12.2425C21.2823 12.1794 21.2823 11.8206 21.0299 11.7575L19.5149 11.3787C18.6246 11.1561 18 10.3562 18 9.43845V5H14"/>
-          <path d="M10 5H8C6.89543 5 6 5.89543 6 7V9.43845C6 10.3562 5.37541 11.1561 4.48507 11.3787L2.97014 11.7575C2.71765 11.8206 2.71765 12.1794 2.97014 12.2425L4.48507 12.6213C5.37541 12.8439 6 13.6438 6 14.5616V19H10"/>
-        </svg>
-        <span class="font-medium">JSON → C#</span>
-      </a>
-
-      <a
-        routerLink="/csharp-typescript"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="16 18 22 12 16 6"></polyline>
-          <polyline points="8 6 2 12 8 18"></polyline>
-        </svg>
-        <span class="font-medium">C# ↔ TypeScript</span>
-      </a>
-
-      <a
-        routerLink="/strong-typer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-        </svg>
-        <span class="font-medium">Strong-Typer</span>
-      </a>
-
-      <a
-        routerLink="/curl-to-httpclient"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="4 17 10 11 4 5" stroke-linecap="round" stroke-linejoin="round"></polyline>
-          <line x1="12" y1="19" x2="20" y2="19" stroke-linecap="round"></line>
-        </svg>
-        <span class="font-medium">cURL → HttpClient</span>
-      </a>
-
-      <!-- ASP.NET Core -->
-      <div class="px-4 mb-2 mt-6">
-        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">ASP.NET Core</span>
-      </div>
-
-      <a
-        routerLink="/middleware-designer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
-        </svg>
-        <span class="font-medium">Middleware Designer</span>
-      </a>
-
-      <a
-        routerLink="/typed-di-helper"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-        </svg>
-        <span class="font-medium">Typed DI Helper</span>
-      </a>
-
-      <!-- Analysis -->
-      <div class="px-4 mb-2 mt-6">
-        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Analysis</span>
-      </div>
-
-      <a
-        routerLink="/srp-analyzer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9" />
-        </svg>
-        <span class="font-medium">SRP Analyzer</span>
-      </a>
-
-      <a
-        routerLink="/csharp-mindmap"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="2" y="2" width="20" height="20" rx="4" stroke="currentColor" stroke-width="2"></rect>
-          <text x="50%" y="50%" fill="currentColor" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-size="10" font-weight="700" text-anchor="middle" dominant-baseline="central">C#</text>
-        </svg>
-        <span class="font-medium">C# Mindmap</span>
-      </a>
-
-      <a
-        routerLink="/list-visualizer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
-        </svg>
-        <span class="font-medium">List&lt;T&gt; Visualizer</span>
-      </a>
-
-      <a
-        routerLink="/span-visualizer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M4 8h16M4 16h16M8 4v16M16 4v16" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="font-medium">Span&lt;T&gt; Visualizer</span>
-      </a>
-
-
-      <!-- Utilities -->
-      <div class="px-4 mb-2 mt-6">
-        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Utilities</span>
-      </div>
-
-      <a
-        routerLink="/jwt-decoder"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        <span class="font-medium">JWT Decoder</span>
-      </a>
-
-      <a
-        routerLink="/package-centralizer"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-          <line x1="12" y1="22.08" x2="12" y2="12"></line>
-        </svg>
-        <span class="font-medium">Package Centralizer</span>
-      </a>
-
-      <a
-        routerLink="/regex-tester"
-        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        (click)="onCloseSidebar()"
-        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="10" cy="10" r="7"></circle>
-          <line x1="21" y1="21" x2="15" y2="15" stroke-linecap="round"></line>
-        </svg>
-        <span class="font-medium">Regex Tester</span>
-      </a>
+      @for (group of groups(); track group.category) {
+        <div class="px-4 mb-2 mt-6">
+          <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ group.category }}</span>
+        </div>
+        @for (tool of group.tools; track tool.path) {
+          <a
+            [routerLink]="'/' + tool.path"
+            routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
+            (click)="onCloseSidebar()"
+            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+            <app-tool-icon [name]="tool.icon" svgClass="w-5 h-5 shrink-0" />
+            <span class="font-medium">{{ tool.title }}</span>
+          </a>
+        }
+      } @empty {
+        <p class="px-4 mt-6 text-sm text-gray-500">No tools match &quot;{{ filterQuery() }}&quot;</p>
+      }
     </nav>
 
     <div class="shrink-0 px-4 py-6 border-t border-gray-800 bg-gray-950">

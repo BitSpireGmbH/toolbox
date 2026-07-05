@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { TOOLS } from './shared/tools.registry';
 
 export const routes: Routes = [
   {
@@ -10,56 +11,8 @@ export const routes: Routes = [
     path: 'home',
     loadComponent: () => import('./landing-page/landing-page').then(m => m.LandingPageComponent)
   },
-  {
-    path: 'csharp-json',
-    loadComponent: () => import('./csharp-json/csharp-json').then(m => m.CsharpJsonComponent)
-  },
-  {
-    path: 'csharp-typescript',
-    loadComponent: () => import('./csharp-typescript/csharp-typescript').then(m => m.CsharpTypescriptComponent)
-  },
-  {
-    path: 'middleware-designer',
-    loadComponent: () => import('./middleware-designer/middleware-designer').then(m => m.MiddlewareDesignerComponent)
-  },
-  {
-    path: 'jwt-decoder',
-    loadComponent: () => import('./jwt-decoder/jwt-decoder').then(m => m.JwtDecoderComponent)
-  },
-  {
-    path: 'package-centralizer',
-    loadComponent: () => import('./package-centralizer/package-centralizer').then(m => m.PackageCentralizerComponent)
-  },
-  {
-    path: 'csharp-mindmap',
-    loadComponent: () => import('./csharp-mindmap/csharp-mindmap.component').then(m => m.CsharpMindmapComponent)
-  },
-  {
-    path: 'list-visualizer',
-    loadComponent: () => import('./list-visualizer/list-visualizer').then(m => m.ListVisualizerComponent)
-  },
-  {
-    path: 'srp-analyzer',
-    loadComponent: () => import('./srp-analyzer/srp-analyzer').then(m => m.SrpAnalyzerComponent)
-  },
-  {
-    path: 'strong-typer',
-    loadComponent: () => import('./strong-typer/strong-typer').then(m => m.StrongTyperComponent)
-  },
-  {
-    path: 'typed-di-helper',
-    loadComponent: () => import('./typed-di-helper/typed-di-helper').then(m => m.TypedDiHelperComponent)
-  },
-  {
-    path: 'span-visualizer',
-    loadComponent: () => import('./span-visualizer/span-visualizer').then(m => m.SpanVisualizerComponent)
-  },
-  {
-    path: 'curl-to-httpclient',
-    loadComponent: () => import('./curl-to-httpclient/curl-to-httpclient').then(m => m.CurlToHttpClientComponent)
-  },
-  {
-    path: 'regex-tester',
-    loadComponent: () => import('./regex-tester/regex-tester').then(m => m.RegexTesterComponent)
-  }
+  ...TOOLS.map(tool => ({
+    path: tool.path,
+    loadComponent: tool.loadComponent
+  }))
 ];
