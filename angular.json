@@ -24,6 +24,11 @@
             "assets": [
               {
                 "glob": "**/*",
+                "input": "public",
+                "output": "/"
+              },
+              {
+                "glob": "**/*",
                 "input": "src/assets",
                 "output": "assets"
               },
@@ -52,7 +57,8 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,

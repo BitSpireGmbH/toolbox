@@ -2,6 +2,14 @@
 
 A client-side developer toolkit with utilities for code conversion and middleware design for .NET developers.
 
+## PWA & Offline Support
+
+Toolbox is a full [Progressive Web App](https://web.dev/explore/progressive-web-apps) — install it and use every tool with **no internet connection required**.
+
+- **Installable** - use your browser's "Install app" / "Add to Home Screen" option to run Toolbox in its own window, on desktop or mobile.
+- **Works fully offline** - all tools run entirely client-side, so once the app has loaded once, it keeps working with no network at all (flight mode, tunnels, flaky wifi, you name it).
+- **Background update checks** - a service worker periodically checks for new deployed versions. When one is ready, a small "reload to update" banner appears - your current session is never interrupted or reloaded without asking.
+
 ## Features
 
 - **JSON to C# Converter** - Convert JSON into C# classes, records, or structs with customizable serialization options

@@ -1,6 +1,7 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavmenuComponent } from './navmenu/navmenu.component';
+import { PwaUpdateService } from './services/pwa-update.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,8 @@ import { NavmenuComponent } from './navmenu/navmenu.component';
   styleUrl: './app.css',
 })
 export class App {
+  protected readonly pwaUpdate = inject(PwaUpdateService);
+
   protected readonly title = signal('toolbox');
   protected readonly sidebarOpen = signal(false);
 

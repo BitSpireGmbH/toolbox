@@ -8,3 +8,24 @@
     <router-outlet />
   </main>
 </div>
+
+@if (pwaUpdate.updateAvailable()) {
+  <div class="fixed inset-x-0 bottom-0 z-50 flex flex-col items-center gap-3 border-t border-slate-700 bg-slate-800 px-4 py-3 text-sm text-white shadow-lg sm:flex-row sm:justify-center">
+    <span>🔄 A new version is available.</span>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        (click)="pwaUpdate.applyUpdate()"
+        class="rounded-md bg-blue-600 px-3 py-1.5 font-medium hover:bg-blue-500">
+        Reload
+      </button>
+      <button
+        type="button"
+        (click)="pwaUpdate.dismiss()"
+        aria-label="Dismiss update notification"
+        class="rounded-md px-2 py-1.5 text-slate-300 hover:text-white">
+        ✕
+      </button>
+    </div>
+  </div>
+}
