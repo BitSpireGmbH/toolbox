@@ -15,6 +15,7 @@ A client-side developer toolkit with utilities for code conversion and middlewar
 - **SRP Analyzer** - Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies
 - **Strong Typer** - Generate C# Options classes from JSON configuration
 - **Typed DI Helper** - Generate strongly-typed dependency injection configurations for .NET HttpClient and SignalR with support for resilience and protocols
+- **cURL → HttpClient** - Convert any curl command into idiomatic C# HttpClient code (inline, IHttpClientFactory, or typed client) with optional body record generation
 
 ## Support & Contributing
 

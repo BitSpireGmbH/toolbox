@@ -136,6 +136,12 @@ export class SearchDialogComponent {
       route: '/package-centralizer',
       category: 'Converters & Generators'
     },
+    {
+      title: 'cURL to HttpClient',
+      description: 'Convert curl commands to idiomatic C# HttpClient code',
+      route: '/curl-to-httpclient',
+      category: 'Converters & Generators'
+    },
 
     // Analysis & Debugging
     {

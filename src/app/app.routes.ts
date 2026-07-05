@@ -53,5 +53,9 @@ export const routes: Routes = [
   {
     path: 'span-visualizer',
     loadComponent: () => import('./span-visualizer/span-visualizer').then(m => m.SpanVisualizerComponent)
+  },
+  {
+    path: 'curl-to-httpclient',
+    loadComponent: () => import('./curl-to-httpclient/curl-to-httpclient').then(m => m.CurlToHttpClientComponent)
   }
 ];

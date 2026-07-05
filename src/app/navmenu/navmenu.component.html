@@ -107,6 +107,27 @@
       }
     </a>
 
+    <a
+      routerLink="/curl-to-httpclient"
+      routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
+      class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
+      [class.justify-center]="!sidebarOpen()"
+      [class.px-3]="sidebarOpen()"
+      [class.gap-3]="sidebarOpen()"
+      aria-label="cURL to HttpClient Converter">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="4 17 10 11 4 5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        <line x1="12" y1="19" x2="20" y2="19" stroke-linecap="round"></line>
+      </svg>
+      @if (sidebarOpen()) {
+        <span class="text-sm whitespace-nowrap overflow-hidden">cURL → HttpClient</span>
+      } @else {
+        <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          cURL → HttpClient
+        </span>
+      }
+    </a>
+
     <!-- ASP.NET Core Section -->
     @if (sidebarOpen()) {
       <div class="px-3 mb-1 mt-4">
@@ -409,6 +430,18 @@
         <span class="font-medium">Strong-Typer</span>
       </a>
 
+      <a
+        routerLink="/curl-to-httpclient"
+        routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
+        (click)="onCloseSidebar()"
+        class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 17 10 11 4 5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19" stroke-linecap="round"></line>
+        </svg>
+        <span class="font-medium">cURL → HttpClient</span>
+      </a>
+
       <!-- ASP.NET Core -->
       <div class="px-4 mb-2 mt-6">
         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">ASP.NET Core</span>
@@ -485,6 +518,7 @@
         </svg>
         <span class="font-medium">Span&lt;T&gt; Visualizer</span>
       </a>
+
 
       <!-- Utilities -->
       <div class="px-4 mb-2 mt-6">
