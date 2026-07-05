@@ -16,6 +16,7 @@ A client-side developer toolkit with utilities for code conversion and middlewar
 - **Strong Typer** - Generate C# Options classes from JSON configuration
 - **Typed DI Helper** - Generate strongly-typed dependency injection configurations for .NET HttpClient and SignalR with support for resilience and protocols
 - **cURL → HttpClient** - Convert any curl command into idiomatic C# HttpClient code (inline, IHttpClientFactory, or typed client) with optional body record generation
+- **Regex Tester** - Test .NET regular expressions with live match highlighting and named-group inspection, generating source-generated (`[GeneratedRegex]`, default) or classic `new Regex(...)` C# code
 
 ## Support & Contributing
 

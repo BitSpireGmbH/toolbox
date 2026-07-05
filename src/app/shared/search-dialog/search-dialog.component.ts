@@ -162,6 +162,12 @@ export class SearchDialogComponent {
       route: '/span-visualizer',
       category: 'Analysis & Debugging'
     },
+    {
+      title: 'Regex Tester',
+      description: 'Test .NET regex with live matches and source-generated code',
+      route: '/regex-tester',
+      category: 'Analysis & Debugging'
+    },
 
     // Design & Architecture
     {

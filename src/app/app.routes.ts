@@ -57,5 +57,9 @@ export const routes: Routes = [
   {
     path: 'curl-to-httpclient',
     loadComponent: () => import('./curl-to-httpclient/curl-to-httpclient').then(m => m.CurlToHttpClientComponent)
+  },
+  {
+    path: 'regex-tester',
+    loadComponent: () => import('./regex-tester/regex-tester').then(m => m.RegexTesterComponent)
   }
 ];
