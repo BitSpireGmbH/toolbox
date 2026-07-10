@@ -29,7 +29,7 @@ interface ToolGroup {
             target="_blank"
             class="inline-flex items-center gap-1.5 mb-4 px-3 py-1 rounded-full bg-white/70 border border-gray-200 text-xs font-medium text-gray-600 hover:text-brand-primary hover:border-brand-primary transition-colors shadow-sm">
             <span aria-hidden="true">⚡</span>
-            <span>A BitSpire open-source project</span>
+            <span>Made by BitSpire - open source</span>
           </a>
           <p class="text-xl text-gray-600 font-medium max-w-2xl mx-auto mb-6">
             Your go-to collection of tools for everyday web development
@@ -145,7 +145,7 @@ interface ToolGroup {
             </a>
           </p>
           <a href="https://bitspire.ch" class="mt-4 inline-flex items-center justify-center gap-2" target="_blank">
-            <span class="text-xs">Brought to you by:</span>
+            <span class="text-xs">Made by BitSpire</span>
             <img src="assets/bitspire-logo.webp" alt="BitSpire Logo" class="w-24" height="auto" />
           </a>
         </footer>

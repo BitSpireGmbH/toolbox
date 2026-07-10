@@ -107,7 +107,7 @@ describe('CurlToHttpClientConverterService', () => {
     });
   });
 
-  describe('generate — inline client style', () => {
+  describe('generate - inline client style', () => {
     it('emits HttpClient with BaseAddress and HttpRequestMessage', () => {
       const code = service.convert(`curl https://api.example.com/ping`, defaultOptions);
       expect(code).toContain('new HttpClient { BaseAddress = new Uri("https://api.example.com") }');
@@ -194,7 +194,7 @@ describe('CurlToHttpClientConverterService', () => {
     });
   });
 
-  describe('generate — factory client style', () => {
+  describe('generate - factory client style', () => {
     it('uses IHttpClientFactory.CreateClient', () => {
       const code = service.convert(`curl https://api.example.com/ping`, {
         ...defaultOptions,
@@ -206,7 +206,7 @@ describe('CurlToHttpClientConverterService', () => {
     });
   });
 
-  describe('generate — typed client style', () => {
+  describe('generate - typed client style', () => {
     it('generates a sealed class with primary constructor accepting HttpClient', () => {
       const code = service.convert(`curl https://api.example.com/users/me`, {
         ...defaultOptions,

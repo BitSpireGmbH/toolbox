@@ -1,5 +1,6 @@
 import type { Type } from '@angular/core';
 import type { ToolIconName } from './tool-icon/tool-icon.component';
+import type { SeoMetadata } from './seo.models';
 
 /**
  * The four groupings shown in the sidebar, the landing page, and the search
@@ -30,7 +31,7 @@ export interface ToolAccent {
 }
 
 /**
- * A single tool. This is the ONLY place a tool is registered — routes, the
+ * A single tool. This is the ONLY place a tool is registered - routes, the
  * desktop + mobile sidebar, the landing page cards, and the ⌘K search
  * palette all read this same array, so a tool can never appear in one
  * surface while missing from another.
@@ -41,6 +42,8 @@ export interface Tool {
   title: string;
   tagline: string;
   description: string;
+  /** Search-result and browser title for this tool's route. */
+  seo: SeoMetadata;
   /** Landing-page card call-to-action label, e.g. 'Start Converting'. */
   cta: string;
   category: ToolCategory;
@@ -56,6 +59,10 @@ export const TOOLS: Tool[] = [
     title: 'JSON → C#',
     tagline: 'One-way Converter',
     description: 'Convert JSON to C# classes with support for records, structs, and various serializers.',
+    seo: {
+      title: 'JSON to C# Converter | .NET Developer Toolbox',
+      description: 'Convert JSON to C# classes, records, or structs with serializer options. Your data stays private in your browser.',
+    },
     cta: 'Start Converting',
     category: 'Converters',
     icon: 'braces',
@@ -74,6 +81,10 @@ export const TOOLS: Tool[] = [
     title: 'C# ↔ TypeScript',
     tagline: 'Bidirectional Converter',
     description: 'Convert between C# classes and TypeScript interfaces for full-stack development.',
+    seo: {
+      title: 'C# to TypeScript Converter | .NET Developer Toolbox',
+      description: 'Convert C# classes to TypeScript interfaces and TypeScript back to C# for full-stack development in your browser.',
+    },
     cta: 'Start Converting',
     category: 'Converters',
     icon: 'swap',
@@ -92,6 +103,10 @@ export const TOOLS: Tool[] = [
     title: 'Strong-Typer',
     tagline: 'Options Generator',
     description: 'Create strongly-typed C# Options from JSON with validation and registration code.',
+    seo: {
+      title: 'JSON to C# Options Class Generator | .NET Developer Toolbox',
+      description: 'Generate strongly typed C# Options classes from JSON configuration, including validation and registration code.',
+    },
     cta: 'Start Generating',
     category: 'Converters',
     icon: 'layers',
@@ -109,7 +124,11 @@ export const TOOLS: Tool[] = [
     path: 'curl-to-httpclient',
     title: 'cURL → HttpClient',
     tagline: 'API Code Generator',
-    description: 'Paste any curl command and get idiomatic C# HttpClient code — inline, factory, or typed.',
+    description: 'Paste any curl command and get idiomatic C# HttpClient code - inline, factory, or typed.',
+    seo: {
+      title: 'cURL to C# HttpClient Converter | .NET Developer Toolbox',
+      description: 'Turn cURL commands into idiomatic C# HttpClient code using inline, factory, or typed-client patterns.',
+    },
     cta: 'Start Converting',
     category: 'Converters',
     icon: 'terminal',
@@ -130,6 +149,10 @@ export const TOOLS: Tool[] = [
     title: 'Middleware Designer',
     tagline: 'Visual Pipeline Builder',
     description: 'Build ASP.NET Core middleware pipelines visually and export ready-to-use C# code.',
+    seo: {
+      title: 'ASP.NET Core Middleware Designer | .NET Developer Toolbox',
+      description: 'Design ASP.NET Core middleware pipelines visually, simulate requests, and export ready-to-use C# code.',
+    },
     cta: 'Start Designing',
     category: 'ASP.NET Core',
     icon: 'pipeline',
@@ -148,6 +171,10 @@ export const TOOLS: Tool[] = [
     title: 'Typed DI Helper',
     tagline: 'DI Snippet Generator',
     description: 'Generate boilerplate for strongly-typed HttpClient and SignalR Hub configurations in .NET.',
+    seo: {
+      title: 'Typed HttpClient and SignalR DI Generator | .NET Developer Toolbox',
+      description: 'Generate strongly typed .NET dependency-injection configuration for HttpClient and SignalR hubs.',
+    },
     cta: 'Start Generating',
     category: 'ASP.NET Core',
     icon: 'link',
@@ -168,6 +195,10 @@ export const TOOLS: Tool[] = [
     title: 'SRP Analyzer',
     tagline: 'Code Quality Tool',
     description: 'Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies.',
+    seo: {
+      title: 'C# Single Responsibility Principle Analyzer | .NET Developer Toolbox',
+      description: 'Analyze C# classes for Single Responsibility Principle violations with color-coded dependency insights.',
+    },
     cta: 'Start Analyzing',
     category: 'Architecture & Analysis',
     icon: 'shears',
@@ -186,6 +217,10 @@ export const TOOLS: Tool[] = [
     title: 'C# Mindmap',
     tagline: 'Interactive History',
     description: 'Explore the evolution of C# language features with an interactive mind map.',
+    seo: {
+      title: 'C# Version History and Features | .NET Developer Toolbox',
+      description: 'Explore the evolution of C# language versions and features through an interactive mind map.',
+    },
     cta: 'Start Exploring',
     category: 'Architecture & Analysis',
     icon: 'csharp-box',
@@ -204,6 +239,10 @@ export const TOOLS: Tool[] = [
     title: 'List<T> Visualizer',
     tagline: 'Memory & Resizing',
     description: "Visualize memory addresses and dynamic resizing behavior of C#'s List<T>.",
+    seo: {
+      title: 'C# List<T> Visualizer | .NET Developer Toolbox',
+      description: "Visualize C# List<T> memory layout, capacity growth, and dynamic resizing behavior.",
+    },
     cta: 'Open Visualizer',
     category: 'Architecture & Analysis',
     icon: 'list',
@@ -222,6 +261,10 @@ export const TOOLS: Tool[] = [
     title: 'Span<T> Visualizer',
     tagline: 'Memory Slices & Zero Alloc',
     description: 'Visualize how Span<T> creates zero-allocation memory slices and why it beats Substring().',
+    seo: {
+      title: 'C# Span<T> Visualizer | .NET Developer Toolbox',
+      description: 'Visualize how C# Span<T> creates zero-allocation memory slices and compare it with Substring().',
+    },
     cta: 'Open Visualizer',
     category: 'Architecture & Analysis',
     icon: 'grid',
@@ -242,6 +285,10 @@ export const TOOLS: Tool[] = [
     title: 'JWT Decoder',
     tagline: 'Token Inspector',
     description: 'Decode and inspect JSON Web Tokens with claim explanations and validity checks.',
+    seo: {
+      title: '.NET JWT Decoder | .NET Developer Toolbox',
+      description: 'Decode JSON Web Tokens in your browser, inspect claims, and check token validity without sending data to a server.',
+    },
     cta: 'Start Decoding',
     category: 'Utilities',
     icon: 'lock',
@@ -260,6 +307,10 @@ export const TOOLS: Tool[] = [
     title: 'Package Centralizer',
     tagline: 'NuGet CPM Tool',
     description: 'Convert .NET projects to Central Package Management with Directory.Packages.props.',
+    seo: {
+      title: 'Central Package Management Converter | .NET Developer Toolbox',
+      description: 'Convert .NET projects to Central Package Management and generate a Directory.Packages.props file.',
+    },
     cta: 'Start Centralizing',
     category: 'Utilities',
     icon: 'package',
@@ -278,6 +329,10 @@ export const TOOLS: Tool[] = [
     title: 'Regex Tester',
     tagline: 'Pattern Matching & Codegen',
     description: 'Test .NET regex with live matches and generate source-generated or classic C# code.',
+    seo: {
+      title: '.NET Regex Tester and C# Generator | .NET Developer Toolbox',
+      description: 'Test .NET regular expressions with live match highlighting and generate source-generated or classic C# regex code.',
+    },
     cta: 'Start Testing',
     category: 'Utilities',
     icon: 'regex',

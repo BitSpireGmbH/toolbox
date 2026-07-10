@@ -1,7 +1,7 @@
 {
   "name": ".NET Developer Toolbox",
   "short_name": ".NET Toolbox",
-  "description": "Privacy-first developer toolkit for .NET developers, built by BitSpire GmbH. Convert JSON to C#, C# to TypeScript, decode JWTs, design middleware pipelines, and more — all processing happens client-side in your browser.",
+  "description": "Privacy-first developer toolkit for .NET developers, built by BitSpire GmbH. Convert JSON to C#, C# to TypeScript, decode JWTs, design middleware pipelines, and more - all processing happens client-side in your browser.",
   "theme_color": "#1e293b",
   "background_color": "#1e293b",
   "display": "standalone",

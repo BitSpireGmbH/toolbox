@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { NavmenuComponent } from './navmenu/navmenu.component';
 import { PwaUpdateService } from './services/pwa-update.service';
 import { CommandPaletteService } from './shared/search-dialog/command-palette.service';
+import { SeoService } from './services/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ import { CommandPaletteService } from './shared/search-dialog/command-palette.se
 export class App {
   protected readonly pwaUpdate = inject(PwaUpdateService);
   private readonly commandPalette = inject(CommandPaletteService);
+  private readonly seo = inject(SeoService);
 
   protected readonly title = signal('toolbox');
   protected readonly sidebarOpen = signal(false);
@@ -29,7 +31,7 @@ export class App {
     this.sidebarOpen.set(false);
   }
 
-  /** Global ⌘K / Ctrl+K shortcut — works on every route, not just the landing page. */
+  /** Global ⌘K / Ctrl+K shortcut - works on every route, not just the landing page. */
   protected onKeyDown(event: KeyboardEvent): void {
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     const isSearchKey = isMac ? event.metaKey && event.key === 'k' : event.ctrlKey && event.key === 'k';

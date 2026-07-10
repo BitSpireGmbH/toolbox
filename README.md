@@ -4,7 +4,7 @@ A client-side developer toolkit with utilities for code conversion and middlewar
 
 ## PWA & Offline Support
 
-Toolbox is a full [Progressive Web App](https://web.dev/explore/progressive-web-apps) — install it and use every tool with **no internet connection required**.
+Toolbox is a full [Progressive Web App](https://web.dev/explore/progressive-web-apps) - install it and use every tool with **no internet connection required**.
 
 - **Installable** - use your browser's "Install app" / "Add to Home Screen" option to run Toolbox in its own window, on desktop or mobile.
 - **Works fully offline** - all tools run entirely client-side, so once the app has loaded once, it keeps working with no network at all (flight mode, tunnels, flaky wifi, you name it).

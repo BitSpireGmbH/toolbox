@@ -419,7 +419,7 @@ export class CurlToHttpClientConverterService {
     }
 
     if (lower === 'content-type' || lower === 'content-length') {
-      // Set on Content, not on Headers — added when content is created
+      // Set on Content, not on Headers - added when content is created
       return [`${indent}// ${name} is set on the request content (see Content below)`];
     }
 

@@ -109,8 +109,8 @@ export class SearchDialogComponent {
   readonly selectedIndex = signal(0);
 
   /**
-   * All tools come straight from the shared registry — the same array that
-   * drives routes, the sidebar, and the landing page — so this list can
+   * All tools come straight from the shared registry - the same array that
+   * drives routes, the sidebar, and the landing page - so this list can
    * never drift out of sync (previously it was a hand-maintained copy that
    * pointed at dead routes and omitted real tools like cURL and Regex Tester).
    */

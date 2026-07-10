@@ -59,11 +59,11 @@ interface SubstringCharCell {
               <span class="font-mono font-semibold">Span&lt;T&gt;</span> (introduced in .NET Core 2.1) represents a <strong>contiguous slice of memory</strong>. You can think of it as a very thin wrapper holding just two things: a <strong>pointer</strong> to the start of the memory and a <strong>length</strong>.
             </p>
             <p class="text-sm text-blue-800 leading-relaxed">
-              It is a <code class="font-mono bg-blue-100 px-1 rounded">readonly ref struct</code>, which means it <strong>always lives on the Stack</strong> — never on the Heap. This makes allocation essentially free. The trade-off: you can't store it as a field on a class.
+              It is a <code class="font-mono bg-blue-100 px-1 rounded">readonly ref struct</code>, which means it <strong>always lives on the Stack</strong> - never on the Heap. This makes allocation essentially free. The trade-off: you can't store it as a field on a class.
               <a href="https://steven-giesel.com/blogPost/9a40d278-9a9f-49fe-bbfd-2d813a58e73e/heap-stack-boxing-and-unboxing-performance-lets-order-things" target="_blank" rel="noopener noreferrer" class="ml-1 text-brand-primary underline hover:no-underline text-xs font-medium">Stack vs Heap deep-dive ↗</a>
             </p>
             <p class="text-sm text-blue-800 leading-relaxed">
-              <span class="font-mono font-semibold">ReadOnlySpan&lt;T&gt;</span> is the same concept but does not allow mutating the memory it points to — perfect for reading strings without copying them.
+              <span class="font-mono font-semibold">ReadOnlySpan&lt;T&gt;</span> is the same concept but does not allow mutating the memory it points to - perfect for reading strings without copying them.
             </p>
           </div>
         }
@@ -267,7 +267,7 @@ interface SubstringCharCell {
                       HEAP
                     </span>
                     <h3 class="text-sm font-semibold text-gray-700">
-                      Underlying <code class="font-mono">char[]</code> — @ <span class="font-mono text-gray-500">0x{{ BASE_ADDR.toString(16).toUpperCase() }}</span>
+                      Underlying <code class="font-mono">char[]</code> - @ <span class="font-mono text-gray-500">0x{{ BASE_ADDR.toString(16).toUpperCase() }}</span>
                     </h3>
                   </div>
                   <div class="p-5">
@@ -316,7 +316,7 @@ interface SubstringCharCell {
                             [class.text-blue-700]="spanType() === 'Span'"
                             [class.text-blue-700]="spanType() === 'ReadOnlySpan'">
                             {{ spanType() }}&lt;char&gt; window: indices [{{ spanStart() }}..{{ spanStart() + spanLength() - 1 }}]
-                            — <span class="font-mono">"{{ spanSliceText() }}"</span>
+                            - <span class="font-mono">"{{ spanSliceText() }}"</span>
                           </p>
                         </div>
                         <p class="text-[11px] text-gray-500 mt-1 ml-4">
@@ -340,7 +340,7 @@ interface SubstringCharCell {
                   </p>
                   @if (spanType() === 'Span') {
                     <p class="text-sm text-blue-700">
-                      <code class="font-mono bg-blue-100 px-1 rounded">Span&lt;char&gt;</code> is just a struct containing a pointer and a length. Moving the window start/length sliders above does <strong>not</strong> copy any characters — it only changes two numbers in the struct.
+                      <code class="font-mono bg-blue-100 px-1 rounded">Span&lt;char&gt;</code> is just a struct containing a pointer and a length. Moving the window start/length sliders above does <strong>not</strong> copy any characters - it only changes two numbers in the struct.
                     </p>
                   } @else {
                     <p class="text-sm text-blue-700">
@@ -413,14 +413,14 @@ interface SubstringCharCell {
                 <span class="text-2xl font-bold text-red-600" aria-label="1 heap allocation">1</span>
                 <div>
                   <p class="text-sm font-semibold text-red-800">Substring()</p>
-                  <p class="text-xs text-red-600">heap allocation — new string object</p>
+                  <p class="text-xs text-red-600">heap allocation - new string object</p>
                 </div>
               </div>
               <div class="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
                 <span class="text-2xl font-bold text-green-600" aria-label="0 heap allocations">0</span>
                 <div>
                   <p class="text-sm font-semibold text-green-800">AsSpan().Slice()</p>
-                  <p class="text-xs text-green-600">heap allocations — zero-copy view</p>
+                  <p class="text-xs text-green-600">heap allocations - zero-copy view</p>
                 </div>
               </div>
             </div>
@@ -546,7 +546,7 @@ interface SubstringCharCell {
                     <!-- No new allocation indicator -->
                     <div class="flex items-center gap-2 py-2" aria-hidden="true">
                       <div class="flex-1 border-t-2 border-dashed border-green-200"></div>
-                      <div class="text-xs text-green-500 font-medium">no copy — just pointer + length</div>
+                      <div class="text-xs text-green-500 font-medium">no copy - just pointer + length</div>
                       <div class="flex-1 border-t-2 border-dashed border-green-200"></div>
                     </div>
 
@@ -603,11 +603,11 @@ interface SubstringCharCell {
       @if (activeTab() === 'stack-heap') {
         <div role="tabpanel" aria-labelledby="tab-stack-heap" class="space-y-6">
 
-          <!-- Nuance callout — the most important message -->
+          <!-- Nuance callout - the most important message -->
           <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-lg p-4">
-            <p class="text-sm font-bold text-emerald-900 mb-1">💡 Heap allocation is not bad — it's the right default</p>
+            <p class="text-sm font-bold text-emerald-900 mb-1">💡 Heap allocation is not bad - it's the right default</p>
             <p class="text-sm text-emerald-800 leading-relaxed">
-              The .NET GC is highly optimised. For long-lived objects, large data, or anything shared across methods and threads, the Heap is exactly where you want to be. Avoiding all allocations is not the goal — <strong>avoiding <em>unnecessary</em> short-lived allocations in hot paths</strong> is. Measure first, optimize second.
+              The .NET GC is highly optimised. For long-lived objects, large data, or anything shared across methods and threads, the Heap is exactly where you want to be. Avoiding all allocations is not the goal - <strong>avoiding <em>unnecessary</em> short-lived allocations in hot paths</strong> is. Measure first, optimize second.
             </p>
           </div>
 
@@ -693,7 +693,7 @@ interface SubstringCharCell {
                   <div class="bg-teal-50 border border-teal-200 rounded-lg p-3">
                     <p class="text-xs font-bold text-teal-800 mb-1">Span's lifetime = its stack frame</p>
                     <p class="text-xs text-teal-700 leading-relaxed">
-                      A <code class="font-mono bg-teal-100 px-0.5 rounded">Span&lt;T&gt;</code> is a struct that lives in the stack frame of the method that declares it. When that method returns, the frame is popped — the Span is gone. The underlying data (on the Heap) still exists until the GC collects it, but the Span itself no longer occupies any memory.
+                      A <code class="font-mono bg-teal-100 px-0.5 rounded">Span&lt;T&gt;</code> is a struct that lives in the stack frame of the method that declares it. When that method returns, the frame is popped - the Span is gone. The underlying data (on the Heap) still exists until the GC collects it, but the Span itself no longer occupies any memory.
                     </p>
                   </div>
                   <div class="bg-teal-50 border border-teal-200 rounded-lg p-3">
@@ -705,7 +705,7 @@ interface SubstringCharCell {
                   <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
                     <p class="text-xs font-bold text-gray-700 mb-1">Stack allocation cost</p>
                     <p class="text-xs text-gray-600 leading-relaxed">
-                      Placing a value on the stack means incrementing the stack pointer register — a single CPU instruction. There is no OS call, no GC bookkeeping, no memory search. It is the cheapest possible "allocation".
+                      Placing a value on the stack means incrementing the stack pointer register - a single CPU instruction. There is no OS call, no GC bookkeeping, no memory search. It is the cheapest possible "allocation".
                     </p>
                   </div>
                 </div>
@@ -725,7 +725,7 @@ interface SubstringCharCell {
                 <div>
                   <p class="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
                     <span class="w-5 h-5 bg-red-100 text-red-700 rounded text-[10px] font-bold flex items-center justify-center" aria-hidden="true">✗</span>
-                    Invalid — Span across <code class="font-mono">await</code>
+                    Invalid - Span across <code class="font-mono">await</code>
                   </p>
                   <div class="bg-gray-900 rounded-lg p-3">
                     <code class="text-xs font-mono text-gray-200 leading-relaxed block">
@@ -753,7 +753,7 @@ interface SubstringCharCell {
                   <div class="bg-red-50 border border-red-200 rounded-lg p-3">
                     <p class="text-xs font-bold text-red-800 mb-1">Why Span can't be a field</p>
                     <p class="text-xs text-red-700 leading-relaxed">
-                      <code class="font-mono bg-red-100 px-0.5 rounded">Span&lt;T&gt;</code> is a <code class="font-mono bg-red-100 px-0.5 rounded">ref struct</code>. The CLR forbids <code class="font-mono bg-red-100 px-0.5 rounded">ref struct</code>s as fields on a class — because a class lives on the Heap, which would mean the Span (with its raw pointer) also lives on the Heap, which would break the GC's safety guarantees. So the compiler rejects the code outright.
+                      <code class="font-mono bg-red-100 px-0.5 rounded">Span&lt;T&gt;</code> is a <code class="font-mono bg-red-100 px-0.5 rounded">ref struct</code>. The CLR forbids <code class="font-mono bg-red-100 px-0.5 rounded">ref struct</code>s as fields on a class - because a class lives on the Heap, which would mean the Span (with its raw pointer) also lives on the Heap, which would break the GC's safety guarantees. So the compiler rejects the code outright.
                     </p>
                   </div>
                 </div>
@@ -764,7 +764,7 @@ interface SubstringCharCell {
                   <div>
                     <p class="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
                       <span class="w-5 h-5 bg-red-100 text-red-700 rounded text-[10px] font-bold flex items-center justify-center" aria-hidden="true">✗</span>
-                      Invalid — Span across <code class="font-mono">yield</code>
+                      Invalid - Span across <code class="font-mono">yield</code>
                     </p>
                     <div class="bg-gray-900 rounded-lg p-3">
                       <code class="text-xs font-mono text-gray-200 leading-relaxed block">
@@ -784,7 +784,7 @@ interface SubstringCharCell {
                   <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 self-start">
                     <p class="text-xs font-bold text-amber-800 mb-1">Same reason: iterator state machines</p>
                     <p class="text-xs text-amber-700 leading-relaxed">
-                      Methods with <code class="font-mono bg-amber-100 px-0.5 rounded">yield return</code> are also rewritten into state machine classes. Execution is suspended at every <code class="font-mono bg-amber-100 px-0.5 rounded">yield</code> and resumed later — so again, local variables that span the boundary must become heap fields. The same constraint applies.
+                      Methods with <code class="font-mono bg-amber-100 px-0.5 rounded">yield return</code> are also rewritten into state machine classes. Execution is suspended at every <code class="font-mono bg-amber-100 px-0.5 rounded">yield</code> and resumed later - so again, local variables that span the boundary must become heap fields. The same constraint applies.
                     </p>
                   </div>
                 </div>
@@ -798,7 +798,7 @@ interface SubstringCharCell {
                 </p>
                 <div class="bg-gray-900 rounded-lg p-3">
                   <code class="text-xs font-mono text-gray-200 leading-relaxed block">
-                    <span class="text-gray-500">// ✅ Works — Span stays inside a sync method</span><br>
+                    <span class="text-gray-500">// ✅ Works - Span stays inside a sync method</span><br>
                     <span class="text-blue-300">async</span> <span class="text-green-400">Task</span>&lt;<span class="text-blue-300">int</span>&gt; ProcessAsync(<span class="text-green-400">string</span> s)<br>
                     &#123;<br>
                     &nbsp;&nbsp;<span class="text-blue-300">var</span> count = CountVowels(s.AsSpan()); <span class="text-gray-500">// sync call</span><br>
@@ -818,10 +818,10 @@ interface SubstringCharCell {
             </div>
           </div>
 
-          <!-- Stack vs Heap comparison — nuanced -->
+          <!-- Stack vs Heap comparison - nuanced -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
-              <h3 class="text-sm font-bold text-gray-800">Stack vs Heap — choosing the right tool</h3>
+              <h3 class="text-sm font-bold text-gray-800">Stack vs Heap - choosing the right tool</h3>
             </div>
             <div class="p-5">
               <div class="grid lg:grid-cols-2 gap-6">
@@ -845,7 +845,7 @@ interface SubstringCharCell {
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
                       <p class="text-xs font-bold text-gray-700 mb-1.5">Constraints</p>
                       <ul class="text-xs text-gray-600 space-y-1">
-                        <li class="flex items-start gap-1.5"><span class="text-gray-400 shrink-0">·</span>Fixed size per thread (OS-dependent default — stack overflow if exceeded)</li>
+                        <li class="flex items-start gap-1.5"><span class="text-gray-400 shrink-0">·</span>Fixed size per thread (OS-dependent default - stack overflow if exceeded)</li>
                         <li class="flex items-start gap-1.5"><span class="text-gray-400 shrink-0">·</span>Cannot outlive the method that created the value</li>
                         <li class="flex items-start gap-1.5"><span class="text-gray-400 shrink-0">·</span><code class="font-mono bg-gray-100 px-0.5 rounded">ref struct</code>s can't be shared across threads, async, or iterators</li>
                       </ul>
@@ -862,18 +862,18 @@ interface SubstringCharCell {
                   </div>
                   <div class="space-y-2">
                     <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                      <p class="text-xs font-bold text-orange-800 mb-1.5">Use for — and this is most code!</p>
+                      <p class="text-xs font-bold text-orange-800 mb-1.5">Use for - and this is most code!</p>
                       <ul class="text-xs text-orange-700 space-y-1">
                         <li class="flex items-start gap-1.5"><span class="text-orange-500 mt-0.5 shrink-0">✓</span>Objects that outlive a single method (<code class="font-mono bg-orange-100 px-0.5 rounded">class</code>, <code class="font-mono bg-orange-100 px-0.5 rounded">string</code>, collections)</li>
                         <li class="flex items-start gap-1.5"><span class="text-orange-500 mt-0.5 shrink-0">✓</span>Anything shared across async boundaries or threads</li>
-                        <li class="flex items-start gap-1.5"><span class="text-orange-500 mt-0.5 shrink-0">✓</span>Large data structures — heap is essentially unlimited</li>
+                        <li class="flex items-start gap-1.5"><span class="text-orange-500 mt-0.5 shrink-0">✓</span>Large data structures - heap is essentially unlimited</li>
                         <li class="flex items-start gap-1.5"><span class="text-orange-500 mt-0.5 shrink-0">✓</span>Returning data from a method to its caller</li>
                       </ul>
                     </div>
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
                       <p class="text-xs font-bold text-gray-700 mb-1.5">The real cost of heap allocation</p>
                       <p class="text-xs text-gray-600 leading-relaxed">
-                        A single allocation is cheap — the GC's gen-0 allocator is highly optimized. The issue arises in <strong>high-frequency hot paths</strong>: thousands of short-lived objects per second drive frequent gen-0 collections and occasional promotions to gen-1/gen-2, which pause execution. That's when Span pays off.
+                        A single allocation is cheap - the GC's gen-0 allocator is highly optimized. The issue arises in <strong>high-frequency hot paths</strong>: thousands of short-lived objects per second drive frequent gen-0 collections and occasional promotions to gen-1/gen-2, which pause execution. That's when Span pays off.
                       </p>
                     </div>
                   </div>
