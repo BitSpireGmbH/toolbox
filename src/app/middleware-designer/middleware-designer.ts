@@ -188,8 +188,8 @@ import {
 
         <!-- Code Output -->
         @if (splitRatio() < 100) {
-        <div class="shrink-0 transition-all w-full lg:w-[var(--code-width)]" [style.--code-width]="(100 - splitRatio()) + '%'">
-          <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow h-full w-full flex flex-col">
+        <div class="shrink-0 self-start transition-all w-full lg:w-[var(--code-width)]" [style.--code-width]="(100 - splitRatio()) + '%'">
+          <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow w-full flex flex-col">
             <div class="bg-linear-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex justify-between items-center shrink-0">
               <div class="flex items-center gap-2">
                 <div class="w-1.5 h-1.5 rounded-full" [class]="generatedCode() ? 'bg-green-500' : 'bg-gray-500'"></div>
@@ -213,7 +213,7 @@ import {
             <app-code-block
               [code]="generatedCode()"
               placeholder="Generated C# code will appear here..."
-              heightClass="grow min-h-150" />
+              heightClass="min-h-150" />
           </div>
         </div>
         }

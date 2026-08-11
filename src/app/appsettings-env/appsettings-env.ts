@@ -73,11 +73,6 @@ Feature__Retries=3`;
           class="px-4 py-2 rounded-lg border font-medium text-sm transition-all cursor-pointer">
           Env Vars &rarr; appsettings.json
         </button>
-        <button
-          (click)="loadExample()"
-          class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 font-medium text-sm transition-all cursor-pointer">
-          Load example
-        </button>
       </div>
 
       <!-- Options -->
@@ -339,14 +334,6 @@ export class AppsettingsEnvComponent {
   protected readonly selectedFormat = computed<EnvFormatDescriptor>(
     () => ENV_FORMATS.find(entry => entry.id === this.format()) ?? ENV_FORMATS[0]
   );
-
-  protected loadExample(): void {
-    if (this.direction() === 'to-env') {
-      this.jsonInput.set(SAMPLE_APPSETTINGS);
-    } else {
-      this.envInput.set(SAMPLE_ENV);
-    }
-  }
 
   protected async copyToClipboard(): Promise<void> {
     try {

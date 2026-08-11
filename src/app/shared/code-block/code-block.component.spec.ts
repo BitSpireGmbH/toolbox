@@ -120,4 +120,18 @@ describe('CodeBlockComponent', () => {
     expect(cls).toContain('h-64');
     expect(cls).toContain('bg-gray-900');
   });
+
+  /*
+   * Generated code is full of identifiers longer than a narrow panel, so the
+   * panel wraps instead of scrolling sideways - the behaviour the readonly
+   * textareas this component replaced had for free.
+   */
+  it('wraps long lines instead of scrolling horizontally', async () => {
+    fixture.componentRef.setInput('code', 'var x = 1;');
+    await fixture.whenStable();
+
+    const cls = el().querySelector('pre')?.getAttribute('class') ?? '';
+    expect(cls).toContain('whitespace-pre-wrap');
+    expect(cls).toContain('break-words');
+  });
 });

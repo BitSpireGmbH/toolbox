@@ -11,6 +11,11 @@ import { CodeHighlightService, HighlightLanguage } from '../../services/code-hig
  * The `language-*` class on <code> is what the global Prism rules in
  * styles.css hook onto - without it tokens fall back to the inherited body
  * colour, which is near-black on these dark panels.
+ *
+ * Long lines wrap rather than scroll sideways, the way the readonly textareas
+ * this replaced did. Generated code routinely emits identifiers too long for a
+ * narrow panel (JwtBearerDefaults.AuthenticationScheme and friends), and a
+ * horizontal scrollbar there is worse than a wrapped line.
  */
 @Component({
   selector: 'app-code-block',
@@ -20,7 +25,7 @@ import { CodeHighlightService, HighlightLanguage } from '../../services/code-hig
   // [innerHTML] must also sit directly on <code> - binding it to a wrapper
   // <span> inside the @if rendered once and then never updated again.
   template: `
-    <pre tabindex="0" [class]="heightClass()" class="m-0 p-4 font-mono text-sm leading-relaxed overflow-auto bg-gray-900">@if (code()) {<code [class]="'language-' + language()" [innerHTML]="highlighted()"></code>}@else {<code [class]="error() ? 'text-red-400' : 'text-gray-500'">{{ placeholder() }}</code>}</pre>
+    <pre tabindex="0" [class]="heightClass()" class="m-0 p-4 font-mono text-sm leading-relaxed overflow-auto whitespace-pre-wrap break-words bg-gray-900">@if (code()) {<code [class]="'language-' + language()" [innerHTML]="highlighted()"></code>}@else {<code [class]="error() ? 'text-red-400' : 'text-gray-500'">{{ placeholder() }}</code>}</pre>
   `,
 })
 export class CodeBlockComponent {
