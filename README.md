@@ -22,6 +22,7 @@ Toolbox is a full [Progressive Web App](https://web.dev/explore/progressive-web-
 - **Span<T> Visualizer** - Visualize the internal structure of C# Span<T>
 - **SRP Analyzer** - Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies
 - **Strong Typer** - Generate C# Options classes from JSON configuration
+- **appsettings ↔ Env Vars** - Flatten `appsettings.json` into environment variables (`Foo:Bar` → `Foo__Bar`) and back, with correct quoting for Bash, PowerShell, cmd/setx, and Docker
 - **Typed DI Helper** - Generate strongly-typed dependency injection configurations for .NET HttpClient and SignalR with support for resilience and protocols
 - **cURL → HttpClient** - Convert any curl command into idiomatic C# HttpClient code (inline, IHttpClientFactory, or typed client) with optional body record generation
 - **Regex Tester** - Test .NET regular expressions with live match highlighting and named-group inspection, generating source-generated (`[GeneratedRegex]`, default) or classic `new Regex(...)` C# code

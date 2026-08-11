@@ -1,6 +1,6 @@
 <!-- Desktop Sidebar -->
 <div
-  class="hidden md:flex flex-col bg-gray-950 border-r border-gray-800 shrink-0 transition-all duration-200 ease-in-out"
+  class="hidden md:flex h-screen flex-col bg-gray-950 border-r border-gray-800 shrink-0 transition-all duration-200 ease-in-out"
   [class.w-12]="!sidebarOpen()"
   [class.w-48]="sidebarOpen()">
   <div class="flex items-center h-12 border-b border-gray-800" [class.justify-center]="!sidebarOpen()" [class.px-3]="sidebarOpen()">
@@ -18,7 +18,8 @@
     }
   </div>
 
-  <nav class="flex-1 flex flex-col py-2 gap-1" [class.overflow-y-auto]="sidebarOpen()" aria-label="Main navigation">
+  <!-- min-h-0 is what lets flex-1 shrink below its content height, so overflow-y-auto can actually scroll. -->
+  <nav class="flex-1 min-h-0 flex flex-col py-2 gap-2" [class.overflow-y-auto]="sidebarOpen()" aria-label="Main navigation">
     @if (sidebarOpen()) {
       <div class="px-3 pb-2">
         <input
@@ -80,7 +81,7 @@
           [attr.aria-label]="tool.title">
           <app-tool-icon [name]="tool.icon" svgClass="w-5 h-5 shrink-0" />
           @if (sidebarOpen()) {
-            <span class="text-sm whitespace-nowrap overflow-hidden">{{ tool.title }}</span>
+            <span class="text-sm min-w-0 truncate">{{ tool.title }}</span>
           } @else {
             <span class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
               {{ tool.title }}
@@ -96,7 +97,7 @@
   </nav>
 
   @if (sidebarOpen()) {
-    <div class="px-3 py-3 border-t border-gray-800 flex items-center justify-between gap-2">
+    <div class="shrink-0 px-3 py-3 border-t border-gray-800 flex items-center justify-between gap-2">
       <div class="flex items-center gap-1.5 text-xs text-gray-500 min-w-0">
         <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
@@ -165,7 +166,7 @@
         class="w-full text-sm bg-gray-800/60 text-gray-200 placeholder-gray-500 rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-brand-primary" />
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-4" aria-label="Mobile navigation">
+    <nav class="flex-1 min-h-0 overflow-y-auto py-4" aria-label="Mobile navigation">
       <a
         routerLink="/home"
         routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"

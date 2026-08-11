@@ -18,7 +18,8 @@ export type ToolIconName =
   | 'grid'
   | 'lock'
   | 'package'
-  | 'regex';
+  | 'regex'
+  | 'env';
 
 @Component({
   selector: 'app-tool-icon',
@@ -96,6 +97,14 @@ export type ToolIconName =
         <svg [attr.class]="svgClass()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="10" cy="10" r="7"></circle>
           <line x1="21" y1="21" x2="15" y2="15" stroke-linecap="round"></line>
+        </svg>
+      }
+      @case ('env') {
+        <svg [attr.class]="svgClass()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <polyline points="9 9 6 12 9 15" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          <polyline points="15 9 18 12 15 15" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          <line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round"></line>
         </svg>
       }
     }

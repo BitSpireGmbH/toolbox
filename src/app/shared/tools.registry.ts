@@ -121,6 +121,28 @@ export const TOOLS: Tool[] = [
     loadComponent: () => import('../strong-typer/strong-typer').then(m => m.StrongTyperComponent),
   },
   {
+    path: 'appsettings-env',
+    title: 'appsettings ↔ Env Vars',
+    tagline: 'Config Flattener',
+    description: 'Flatten appsettings.json into environment variables and back, with correct quoting per platform.',
+    seo: {
+      title: 'appsettings.json to Environment Variables Converter | .NET Developer Toolbox',
+      description: 'Convert appsettings.json to environment variables (Foo:Bar → Foo__Bar) and back, with Bash, PowerShell, cmd/setx, and Docker output. Runs entirely in your browser.',
+    },
+    cta: 'Start Converting',
+    category: 'Converters',
+    icon: 'env',
+    accent: {
+      badge: 'from-amber-500 to-orange-600 group-hover:shadow-amber-500/25',
+      overlay: 'from-amber-500/0 via-amber-500/0 to-amber-500/5',
+      border: 'hover:border-amber-500',
+      ring: 'focus:ring-amber-500',
+      titleHover: 'group-hover:text-amber-600',
+      ctaText: 'text-amber-600',
+    },
+    loadComponent: () => import('../appsettings-env/appsettings-env').then(m => m.AppsettingsEnvComponent),
+  },
+  {
     path: 'curl-to-httpclient',
     title: 'cURL → HttpClient',
     tagline: 'API Code Generator',
