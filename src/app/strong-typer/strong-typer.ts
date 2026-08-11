@@ -2,10 +2,11 @@ import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { StrongTyperConverterService, ConfigNode } from '../services/strong-typer-converter.service';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 
 @Component({
   selector: 'app-strong-typer',
-  imports: [FormsModule, NgTemplateOutlet],
+  imports: [FormsModule, NgTemplateOutlet, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -164,7 +165,7 @@ import { StrongTyperConverterService, ConfigNode } from '../services/strong-type
           </div>
           <div class="flex-1 overflow-auto bg-[#0d1117]">
             @if (outputCode()) {
-              <pre class="p-4 font-mono text-sm text-gray-300 leading-relaxed"><code>{{ outputCode() }}</code></pre>
+              <app-code-block [code]="outputCode()" />
             } @else {
               <div class="flex items-center justify-center h-full text-gray-600 italic text-sm">
                 Select an object to generate code

@@ -1,10 +1,11 @@
 import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CsharpJsonConverterService, JsonToCsharpOptions } from '../services/csharp-json-converter.service';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 
 @Component({
   selector: 'app-csharp-json',
-  imports: [FormsModule],
+  imports: [FormsModule, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -198,13 +199,11 @@ import { CsharpJsonConverterService, JsonToCsharpOptions } from '../services/csh
               </span>
             </button>
           </div>
-          <textarea
-            [value]="outputCode()"
-            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-900"
-            [class]="errorMessage() ? 'text-red-400' : 'text-green-400'"
+          <app-code-block
+            [code]="outputCode()"
+            [error]="!!errorMessage()"
             [placeholder]="errorMessage() || 'C# class will appear here automatically...'"
-            readonly
-          ></textarea>
+            heightClass="h-[500px] md:h-[600px]" />
         </div>
       </div>
     </div>

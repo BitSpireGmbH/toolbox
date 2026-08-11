@@ -19,7 +19,8 @@ export type ToolIconName =
   | 'lock'
   | 'package'
   | 'regex'
-  | 'env';
+  | 'env'
+  | 'signpost';
 
 @Component({
   selector: 'app-tool-icon',
@@ -105,6 +106,13 @@ export type ToolIconName =
           <polyline points="9 9 6 12 9 15" stroke-linecap="round" stroke-linejoin="round"></polyline>
           <polyline points="15 9 18 12 15 15" stroke-linecap="round" stroke-linejoin="round"></polyline>
           <line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round"></line>
+        </svg>
+      }
+      @case ('signpost') {
+        <svg [attr.class]="svgClass()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="12" y1="3" x2="12" y2="21" stroke-linecap="round"></line>
+          <path d="M12 6h6l2.5 2.5L18 11h-6" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M12 14H6l-2.5 2.5L6 19h6" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
       }
     }

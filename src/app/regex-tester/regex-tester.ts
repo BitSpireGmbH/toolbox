@@ -5,10 +5,11 @@ import {
   RegexOptionsModel,
   RegexCodeStyle,
 } from '../services/regex-tester.service';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 
 @Component({
   selector: 'app-regex-tester',
-  imports: [FormsModule],
+  imports: [FormsModule, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -267,11 +268,7 @@ import {
             </span>
           </button>
         </div>
-        <textarea
-          [value]="outputCode()"
-          class="w-full h-64 p-4 font-mono text-sm text-green-400 focus:outline-none resize-none bg-gray-900"
-          readonly
-        ></textarea>
+        <app-code-block [code]="outputCode()" heightClass="h-64" />
       </div>
     </div>
   `,

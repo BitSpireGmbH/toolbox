@@ -15,6 +15,7 @@ import { ValidationMessagesComponent } from './components/validation-messages';
 import { MiddlewareEditModalComponent } from './components/middleware-edit-modal';
 import { MiddlewareSimulationPanelComponent } from './components/middleware-simulation-panel';
 import { MIDDLEWARE_LIBRARY } from './middleware-library.const';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 import {
   EditConfig,
   initializeEditConfig,
@@ -26,7 +27,7 @@ import {
 
 @Component({
   selector: 'app-middleware-designer',
-  imports: [FormsModule, DragDropModule, MiddlewareLibraryItemComponent, MiddlewareNodeCardComponent, ValidationMessagesComponent, MiddlewareEditModalComponent, MiddlewareSimulationPanelComponent],
+  imports: [FormsModule, DragDropModule, MiddlewareLibraryItemComponent, MiddlewareNodeCardComponent, ValidationMessagesComponent, MiddlewareEditModalComponent, MiddlewareSimulationPanelComponent, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -209,11 +210,10 @@ import {
               </button>
             </div>
 
-            <textarea
-              [value]="generatedCode()"
-              readonly
-              class="w-full grow p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-none min-h-150"
-              placeholder="Generated C# code will appear here..."></textarea>
+            <app-code-block
+              [code]="generatedCode()"
+              placeholder="Generated C# code will appear here..."
+              heightClass="grow min-h-150" />
           </div>
         </div>
         }

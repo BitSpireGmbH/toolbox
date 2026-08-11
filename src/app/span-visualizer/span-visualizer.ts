@@ -1,5 +1,6 @@
 import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 
 type ActiveTab = 'what-is-span' | 'substring-vs-slice' | 'stack-heap';
 type SpanType = 'Span' | 'ReadOnlySpan';
@@ -19,7 +20,7 @@ interface SubstringCharCell {
 
 @Component({
   selector: 'app-span-visualizer',
-  imports: [FormsModule],
+  imports: [FormsModule, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -231,19 +232,9 @@ interface SubstringCharCell {
                     </div>
                   </div>
 
-                  <div class="mt-3 bg-gray-900 rounded-lg p-3">
-                    <p class="text-[10px] text-gray-500 mb-1 font-mono">C# code</p>
-                    <code class="text-xs font-mono text-green-400 block leading-relaxed">
-                      @if (spanType() === 'Span') {
-                        <span>string s = "{{ sourceText() }}";</span><br>
-                        <span>Span&lt;char&gt; span =</span><br>
-                        <span>&nbsp;&nbsp;s.AsSpan({{ spanStart() }}, {{ spanLength() }});</span>
-                      } @else {
-                        <span>string s = "{{ sourceText() }}";</span><br>
-                        <span>ReadOnlySpan&lt;char&gt; span =</span><br>
-                        <span>&nbsp;&nbsp;s.AsSpan({{ spanStart() }}, {{ spanLength() }});</span>
-                      }
-                    </code>
+                  <div class="mt-3 bg-gray-900 rounded-lg overflow-hidden">
+                    <p class="text-[10px] text-gray-500 px-3 pt-3 font-mono">C# code</p>
+                    <app-code-block [code]="spanCode()" />
                   </div>
                 </div>
               }
@@ -899,6 +890,14 @@ export class SpanVisualizerComponent {
   protected readonly spanStart = signal<number>(0);
   protected readonly spanLength = signal<number>(5);
   protected readonly spanType = signal<SpanType>('Span');
+
+  /** The snippet shown under the visualiser, built so Prism can tokenise it. */
+  protected readonly spanCode = computed(
+    () =>
+      `string s = "${this.sourceText()}";\n` +
+      `${this.spanType()}<char> span =\n` +
+      `  s.AsSpan(${this.spanStart()}, ${this.spanLength()});`
+  );
 
   protected readonly maxSpanLength = computed(() =>
     Math.max(1, this.sourceText().length - this.spanStart())

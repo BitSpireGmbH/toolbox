@@ -1,5 +1,6 @@
 import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 import {
   CurlToHttpClientConverterService,
   CurlToHttpClientOptions,
@@ -9,7 +10,7 @@ import {
 
 @Component({
   selector: 'app-curl-to-httpclient',
-  imports: [FormsModule],
+  imports: [FormsModule, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -151,13 +152,11 @@ import {
               </span>
             </button>
           </div>
-          <textarea
-            [value]="outputCode()"
-            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-900"
-            [class]="errorMessage() ? 'text-red-400' : 'text-green-400'"
+          <app-code-block
+            [code]="outputCode()"
+            [error]="!!errorMessage()"
             [placeholder]="errorMessage() || 'C# code will appear here automatically...'"
-            readonly
-          ></textarea>
+            heightClass="h-[500px] md:h-[600px]" />
         </div>
       </div>
     </div>

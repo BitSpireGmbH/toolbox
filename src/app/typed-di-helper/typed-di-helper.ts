@@ -1,12 +1,13 @@
 import { Component, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TypedDiHelperService } from '../services/typed-di-helper.service';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 
 type HelperType = 'http' | 'signalr';
 
 @Component({
   selector: 'app-typed-di-helper',
-  imports: [FormsModule],
+  imports: [FormsModule, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -206,7 +207,7 @@ type HelperType = 'http' | 'signalr';
                  }
                </button>
             </div>
-            <pre class="p-6 text-sm font-mono text-blue-300 overflow-auto flex-1"><code>{{ generatedCode() }}</code></pre>
+            <app-code-block [code]="generatedCode()" heightClass="flex-1" />
           </div>
         </div>
       </div>

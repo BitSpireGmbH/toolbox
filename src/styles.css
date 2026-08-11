@@ -4,3 +4,74 @@
   --color-brand-primary: #1976D2;
   --color-brand-secondary: #9C27B0;
 }
+
+/*
+ * Prism token colors for generated-code panels.
+ *
+ * These must be global: Angular's emulated encapsulation does not stamp its
+ * _ngcontent attribute onto nodes injected via [innerHTML], so component-scoped
+ * styles would silently never apply. Hand-written rather than importing a stock
+ * Prism theme, to match the dark code panels the tools already use.
+ *
+ * The base color below is load-bearing. Prism only emits spans for tokens it
+ * recognises; everything else - identifiers, whitespace, most punctuation -
+ * stays bare text and inherits its color. Without this rule that inherited
+ * color is the body's near-black, which is invisible on bg-gray-900.
+ */
+code[class*='language-'],
+pre[class*='language-'] {
+  color: #d3d8e6;
+}
+
+.token.comment,
+.token.prolog,
+.token.cdata {
+  color: #8b93a7;
+}
+
+.token.punctuation {
+  color: #9aa0b4;
+}
+
+.token.keyword,
+.token.boolean,
+.token.null {
+  color: #c586c0;
+}
+
+.token.string,
+.token.char {
+  color: #e0af68;
+}
+
+.token.number {
+  color: #b5cea8;
+}
+
+.token.class-name,
+.token.builtin,
+.token.generic-method {
+  color: #7ee0c3;
+}
+
+.token.function {
+  color: #82aaff;
+}
+
+.token.operator {
+  color: #9aa0b4;
+  background: transparent;
+}
+
+.token.attribute,
+.token.annotation,
+.token.preprocessor {
+  color: #ffb86c;
+}
+
+/* Copyable snippets are keyboard-reachable, so they need a visible focus ring. */
+pre[tabindex]:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: -2px;
+}
+

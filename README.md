@@ -15,6 +15,7 @@ Toolbox is a full [Progressive Web App](https://web.dev/explore/progressive-web-
 - **JSON to C# Converter** - Convert JSON into C# classes, records, or structs with customizable serialization options
 - **C# ↔ TypeScript Converter** - Bidirectional conversion between C# classes and TypeScript interfaces or types
 - **Middleware Designer** - Visual drag-and-drop builder for ASP.NET Core middleware pipelines with request simulation and code generation
+- **ASP.NET Core Response Guide** - Searchable reference of HTTP response scenarios, each shown as both an MVC controller action and a Minimal API `TypedResults` endpoint. Covers the everyday codes (200/201/204/400/401/403/404/409) plus the ones that actually show up in microservice failures: `429` with the `Retry-After` contract, `408`, `502`, `503`, `504`, `507`/`508`, and reference entries for codes you only ever see in logs - nginx `499`, AWS/proxy `599`, and the Cloudflare `520`-`526` family
 - **JWT Decoder** - Decode and inspect JSON Web Tokens with claim explanations and validity checks.
 - **Package Centralizer** - Convert .NET projects to Central Package Management with Directory.Packages.props.
 - **C# Mind Map** - A list of all C# versions with their features, including links to the official documentation

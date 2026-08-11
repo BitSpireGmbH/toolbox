@@ -1,10 +1,11 @@
 import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, TypescriptToCsharpOptions } from '../services/csharp-typescript-converter.service';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
+import { CodeEditorComponent } from '../shared/code-editor/code-editor.component';
 
 @Component({
   selector: 'app-csharp-typescript',
-  imports: [FormsModule],
+  imports: [CodeBlockComponent, CodeEditorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -303,11 +304,11 @@ import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, Typescript
       <!-- Converter Area -->
       <div class="grid md:grid-cols-2 gap-5">
         <!-- Input Panel -->
-        <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-          <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
+        <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow">
+          <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-              <h3 class="font-semibold text-sm text-gray-700">
+              <h3 class="font-semibold text-sm text-gray-200">
                 @if (direction() === 'csharp-to-typescript') {
                   C# Input
                 } @else {
@@ -315,13 +316,15 @@ import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, Typescript
                 }
               </h3>
             </div>
-            <span class="text-xs text-gray-500">{{ inputCode().length }} chars</span>
+            <span class="text-xs text-gray-400">{{ inputCode().length }} chars</span>
           </div>
-          <textarea
-            [(ngModel)]="inputCode"
-            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-50/50"
+          <app-code-editor
+            [code]="inputCode()"
+            (codeChange)="inputCode.set($event)"
+            [language]="direction() === 'csharp-to-typescript' ? 'csharp' : 'typescript'"
+            [ariaLabel]="direction() === 'csharp-to-typescript' ? 'C# code input' : 'TypeScript code input'"
             [placeholder]="direction() === 'csharp-to-typescript' ? 'Paste your C# class here...' : 'Paste your TypeScript interface here...'"
-          ></textarea>
+            heightClass="h-[500px] md:h-[600px]" />
         </div>
 
         <!-- Output Panel -->
@@ -351,13 +354,12 @@ import { CsharpTypescriptConverterService, CsharpToTypescriptOptions, Typescript
               </span>
             </button>
           </div>
-          <textarea
-            [value]="outputCode()"
-            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-900"
-            [class]="errorMessage() ? 'text-red-400' : 'text-purple-400'"
+          <app-code-block
+            [code]="outputCode()"
+            [language]="direction() === 'csharp-to-typescript' ? 'typescript' : 'csharp'"
+            [error]="!!errorMessage()"
             [placeholder]="errorMessage() || 'Converted output will appear here automatically...'"
-            readonly
-          ></textarea>
+            heightClass="h-[500px] md:h-[600px]" />
         </div>
       </div>
     </div>

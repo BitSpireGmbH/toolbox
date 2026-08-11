@@ -210,6 +210,28 @@ export const TOOLS: Tool[] = [
     },
     loadComponent: () => import('../typed-di-helper/typed-di-helper').then(m => m.TypedDiHelperComponent),
   },
+  {
+    path: 'response-guide',
+    title: 'Response Guide',
+    tagline: 'Status Code Reference',
+    description: 'Every response scenario as both an MVC controller and a Minimal API TypedResults endpoint.',
+    seo: {
+      title: 'ASP.NET Core Response and HTTP Status Code Guide | .NET Developer Toolbox',
+      description: 'Searchable ASP.NET Core response reference: controller and Minimal API TypedResults snippets for 200, 201, 400, 429 with Retry-After, 502, 503, 504, plus nginx 499 and Cloudflare 520-526 explained.',
+    },
+    cta: 'Start Browsing',
+    category: 'ASP.NET Core',
+    icon: 'signpost',
+    accent: {
+      badge: 'from-sky-500 to-blue-700 group-hover:shadow-sky-500/25',
+      overlay: 'from-sky-500/0 via-sky-500/0 to-sky-500/5',
+      border: 'hover:border-sky-500',
+      ring: 'focus:ring-sky-500',
+      titleHover: 'group-hover:text-sky-600',
+      ctaText: 'text-sky-600',
+    },
+    loadComponent: () => import('../response-guide/response-guide').then(m => m.ResponseGuideComponent),
+  },
 
   // ---- Architecture & Analysis ----
   {
