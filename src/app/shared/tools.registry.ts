@@ -372,10 +372,10 @@ export const TOOLS: Tool[] = [
     path: 'regex-tester',
     title: 'Regex Tester',
     tagline: 'Pattern Matching & Codegen',
-    description: 'Test .NET regex with live matches and generate source-generated or classic C# code.',
+    description: 'Test .NET regex, see every part of the pattern explained, and generate source-generated or classic C# code.',
     seo: {
       title: '.NET Regex Tester and C# Generator | .NET Developer Toolbox',
-      description: 'Test .NET regular expressions with live match highlighting and generate source-generated or classic C# regex code.',
+      description: 'Test .NET regular expressions with live match highlighting, a plain-English breakdown of every part of the pattern, and generated source-generated or classic C# regex code.',
     },
     cta: 'Start Testing',
     category: 'Utilities',
