@@ -33,6 +33,15 @@ describe('CodeBlockComponent', () => {
     expect(codeEl()?.getAttribute('class')).toContain('language-typescript');
   });
 
+  it('highlights markup, for the csproj the Package Centralizer emits', async () => {
+    fixture.componentRef.setInput('code', '<PackageVersion Include="Serilog" />');
+    fixture.componentRef.setInput('language', 'markup');
+    await fixture.whenStable();
+
+    expect(codeEl()?.getAttribute('class')).toContain('language-markup');
+    expect(el().innerHTML).toContain('token attr-value');
+  });
+
   it('renders Prism token markup for the supplied code', async () => {
     fixture.componentRef.setInput('code', 'public class Foo { }');
     await fixture.whenStable();

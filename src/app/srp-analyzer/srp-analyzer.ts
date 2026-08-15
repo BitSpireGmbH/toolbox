@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@a
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { SrpAnalyzerService, AnalysisResult } from '../services/srp-analyzer.service';
+import { CodeHighlightService } from '../services/code-highlight.service';
 
 @Component({
   selector: 'app-srp-analyzer',
@@ -74,13 +75,25 @@ import { SrpAnalyzerService, AnalysisResult } from '../services/srp-analyzer.ser
               </div>
               <span class="text-xs text-gray-500">{{ inputCode().length }} chars</span>
             </div>
-            <div class="relative h-[600px]">
-              <!-- Highlighted code background -->
+            <div class="srp-editor relative h-[600px]">
+              <!--
+                Three stacked layers, bottom to top: the dependency tints paint
+                only backgrounds and underlines, Prism paints only text colour,
+                and the textarea on top keeps native editing. They are separate
+                layers on purpose - merging Prism into the service's
+                index-marker highlighter would emit mis-nested tags wherever a
+                token range only partly overlaps a dependency identifier.
+              -->
               @if (analysis() && analysis()!.dependencies.length > 0) {
-                <div 
-                  class="absolute inset-0 p-4 font-mono text-sm whitespace-pre-wrap overflow-auto pointer-events-none"
+                <div
+                  aria-hidden="true"
+                  class="srp-layer absolute inset-0 overflow-auto pointer-events-none text-transparent"
                   [innerHTML]="highlightedCode()"></div>
               }
+              <pre
+                aria-hidden="true"
+                class="srp-layer absolute inset-0 m-0 overflow-auto pointer-events-none"
+              ><code class="language-csharp" [innerHTML]="prismCode()"></code></pre>
               <!-- Editable textarea overlay -->
               <textarea
                 [value]="inputCode()"
@@ -88,8 +101,7 @@ import { SrpAnalyzerService, AnalysisResult } from '../services/srp-analyzer.ser
                 (scroll)="onTextareaScroll($event)"
                 #textarea
                 placeholder="Paste your C# class here..."
-                [class]="analysis() && analysis()!.dependencies.length > 0 ? 'text-transparent caret-black' : 'text-gray-900'"
-                class="absolute inset-0 w-full h-full p-4 font-mono text-sm focus:outline-none resize-none bg-transparent"
+                class="absolute inset-0 w-full h-full focus:outline-none resize-none bg-transparent text-transparent caret-black placeholder:text-gray-400"
                 spellcheck="false"
                 aria-label="C# code input"></textarea>
             </div>
@@ -208,14 +220,49 @@ import { SrpAnalyzerService, AnalysisResult } from '../services/srp-analyzer.ser
     </div>
   `,
   styles: [`
+    /*
+     * All three layers must lay text out identically - any drift shows up as
+     * tint rectangles sliding off the identifiers they belong to, or a caret
+     * that misses its character. Declared together so they cannot diverge,
+     * and with a stable scrollbar gutter so the textarea's scrollbar does not
+     * narrow its line box relative to the layers underneath.
+     */
+    .srp-layer,
+    .srp-layer > code,
+    .srp-editor textarea {
+      padding: 1rem;
+      font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+      font-size: 0.875rem;
+      line-height: 1.625;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      tab-size: 4;
+    }
+
+    /* The padding belongs to the <pre>, not to the <code> inside it. */
+    .srp-layer > code {
+      padding: 0;
+      display: block;
+    }
+
+    .srp-layer,
+    .srp-editor textarea {
+      scrollbar-gutter: stable;
+    }
+
+    /*
+     * No horizontal padding on these, deliberately. The 2px they used to carry
+     * widened every tinted span, which nudged the rest of that line along -
+     * invisible while this layer was the one you read, but now that Prism sits
+     * above it, it left each tint rectangle offset from the identifier it
+     * belongs to. Only properties with no layout effect are safe here.
+     */
     :host ::ng-deep .srp-highlight {
-      padding: 0 2px;
       border-radius: 2px;
       transition: all 0.2s;
     }
-    
+
     :host ::ng-deep .srp-mixed {
-      padding: 0 2px;
       border-radius: 2px;
       cursor: help;
     }
@@ -229,6 +276,7 @@ import { SrpAnalyzerService, AnalysisResult } from '../services/srp-analyzer.ser
 export class SrpAnalyzerComponent {
   private readonly srpAnalyzer = inject(SrpAnalyzerService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly highlighter = inject(CodeHighlightService);
 
   protected readonly isInfoExpanded = signal(false);
   protected readonly inputCode = signal(`public class Processor
@@ -274,16 +322,24 @@ export class SrpAnalyzerComponent {
     return this.sanitizer.bypassSecurityTrustHtml(html);
   });
 
+  /** Token colours for the middle layer, over the dependency tints below it. */
+  protected readonly prismCode = computed<SafeHtml>(() =>
+    this.highlighter.highlight(this.inputCode(), 'csharp')
+  );
+
   protected toggleDependencySelection(depType: string): void {
     this.selectedDependency.update(current => current === depType ? null : depType);
   }
 
   protected onTextareaScroll(event: Event): void {
     const textarea = event.target as HTMLTextAreaElement;
-    const highlightedDiv = textarea.previousElementSibling as HTMLElement;
-    if (highlightedDiv) {
-      highlightedDiv.scrollTop = textarea.scrollTop;
-      highlightedDiv.scrollLeft = textarea.scrollLeft;
+    // Queried rather than walked via previousElementSibling: there are two
+    // layers now, and the tint one is conditional, so a sibling hop would sync
+    // whichever happened to be adjacent and leave the other behind.
+    const layers = textarea.parentElement?.querySelectorAll<HTMLElement>('.srp-layer') ?? [];
+    for (const layer of layers) {
+      layer.scrollTop = textarea.scrollTop;
+      layer.scrollLeft = textarea.scrollLeft;
     }
   }
 }

@@ -82,6 +82,42 @@ public class Processor
     expect(highlighted).toContain('class="srp-highlight"');
   });
 
+  /*
+   * The method wrapper is a full-width inline-block, so it cannot share a line
+   * with anything before it. Open it on the blank line between two methods and
+   * it wraps to a line of its own, pushing every character inside it one line
+   * down from where the same character sits in the Prism layer and the
+   * textarea stacked with it - which shows up as dependency tints painted a
+   * line below the identifiers they belong to.
+   */
+  it('opens the method wrapper on the method, not on the blank line above it', () => {
+    const code = `
+public class Processor
+{
+    private readonly IOrderService _orderService;
+
+    public Processor(IOrderService orderService)
+    {
+        _orderService = orderService;
+    }
+
+    public void ProcessOrder(Order order)
+    {
+        _orderService.Process(order);
+    }
+}`;
+    const result = service.analyzeCode(code, true);
+    const highlighted = service.highlightCode(code, result, null);
+
+    const openings = [...highlighted.matchAll(/<span class="srp-method"[^>]*>/g)];
+    expect(openings.length).toBeGreaterThan(0);
+
+    for (const opening of openings) {
+      const after = highlighted.slice(opening.index + opening[0].length);
+      expect(after.startsWith('\n'), 'method wrapper must not open on a newline').toBe(false);
+    }
+  });
+
   it('should correctly scope method bodies (no incorrect nesting with expression bodies)', () => {
     const code = `
 public class Test

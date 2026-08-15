@@ -2,10 +2,11 @@ import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@ang
 import { FormsModule } from '@angular/forms';
 import { CsharpJsonConverterService, JsonToCsharpOptions } from '../services/csharp-json-converter.service';
 import { CodeBlockComponent } from '../shared/code-block/code-block.component';
+import { CodeEditorComponent } from '../shared/code-editor/code-editor.component';
 
 @Component({
   selector: 'app-csharp-json',
-  imports: [FormsModule, CodeBlockComponent],
+  imports: [FormsModule, CodeBlockComponent, CodeEditorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -157,25 +158,21 @@ import { CodeBlockComponent } from '../shared/code-block/code-block.component';
       <!-- Converter Area -->
       <div class="grid md:grid-cols-2 gap-5">
         <!-- Input Panel -->
-        <div class="group relative bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-          <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
+        <div class="group relative bg-gray-900 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow">
+          <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2.5 border-b border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-              <h3 class="font-semibold text-sm text-gray-700">JSON Input</h3>
+              <h3 class="font-semibold text-sm text-gray-200">JSON Input</h3>
             </div>
-            <span class="text-xs text-gray-500">{{ inputCode().length }} chars</span>
+            <span class="text-xs text-gray-400">{{ inputCode().length }} chars</span>
           </div>
-          <textarea
-            [(ngModel)]="inputCode"
-            class="w-full h-[500px] md:h-[600px] p-4 font-mono text-sm focus:outline-none resize-none bg-gray-50/50"
-            placeholder="Paste your JSON here...
-
-{
-  &quot;name&quot;: &quot;John Doe&quot;,
-  &quot;age&quot;: 30,
-  &quot;email&quot;: &quot;john@example.com&quot;
-}"
-          ></textarea>
+          <app-code-editor
+            [code]="inputCode()"
+            (codeChange)="inputCode.set($event)"
+            language="json"
+            ariaLabel="JSON input"
+            [placeholder]="jsonPlaceholder"
+            heightClass="h-[500px] md:h-[600px]" />
         </div>
 
         <!-- Output Panel -->
@@ -222,7 +219,16 @@ export class CsharpJsonComponent {
   protected readonly wrapRootArray = signal<boolean>(false);
   protected readonly useWebDefaults = signal<boolean>(true);
   protected readonly rootClassName = signal<string>('');
-  
+
+  /** Bound rather than inline so the sample keeps real quotes instead of &quot;. */
+  protected readonly jsonPlaceholder = `Paste your JSON here...
+
+{
+  "name": "John Doe",
+  "age": 30,
+  "email": "john@example.com"
+}`;
+
   protected readonly inputCode = signal<string>(`{
   "id": 1,
   "firstName": "John",

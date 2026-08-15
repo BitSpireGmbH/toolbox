@@ -6,6 +6,8 @@ import {
     VersionResolutionStrategy,
     ParsedProject
 } from '../services/package-centralizer.service';
+import { CodeBlockComponent } from '../shared/code-block/code-block.component';
+import { CodeEditorComponent } from '../shared/code-editor/code-editor.component';
 
 interface ProjectTab {
     id: number;
@@ -15,7 +17,7 @@ interface ProjectTab {
 
 @Component({
     selector: 'app-package-centralizer',
-    imports: [FormsModule],
+    imports: [FormsModule, CodeBlockComponent, CodeEditorComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -114,15 +116,16 @@ interface ProjectTab {
             </div>
           </div>
           <!-- Tab Content -->
-          <div class="p-4">
+          <div>
             @for (tab of projectTabs(); track tab.id) {
               @if (activeTabId() === tab.id) {
-                <textarea
-                  [ngModel]="tab.content"
-                  (ngModelChange)="updateTabContent(tab.id, $event)"
-                  class="w-full h-80 font-mono text-sm p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                  [placeholder]="'<Project Sdk=&quot;Microsoft.NET.Sdk&quot;>\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=&quot;Newtonsoft.Json&quot; Version=&quot;13.0.1&quot; />\n  </ItemGroup>\n</Project>'">
-                </textarea>
+                <app-code-editor
+                  [code]="tab.content"
+                  (codeChange)="updateTabContent(tab.id, $event)"
+                  language="markup"
+                  [ariaLabel]="tab.name + ' content'"
+                  [placeholder]="csprojPlaceholder"
+                  heightClass="h-80" />
               }
             }
           </div>
@@ -303,11 +306,14 @@ interface ProjectTab {
             <!-- Output Content -->
             <div>
               @if (activeOutputTab() === 'props') {
-                <pre class="p-4 overflow-x-auto text-sm font-mono bg-gray-900 text-gray-100 max-h-96"><code>{{ result()!.directoryPackagesProps }}</code></pre>
+                <app-code-block
+                  [code]="result()!.directoryPackagesProps"
+                  language="markup"
+                  heightClass="max-h-96" />
               } @else {
                 @for (project of result()!.updatedProjects; track project.name) {
                   @if (activeOutputTab() === project.name) {
-                    <pre class="p-4 overflow-x-auto text-sm font-mono bg-gray-900 text-gray-100 max-h-96"><code>{{ project.content }}</code></pre>
+                    <app-code-block [code]="project.content" language="markup" heightClass="max-h-96" />
                   }
                 }
               }
@@ -335,6 +341,20 @@ export class PackageCentralizerComponent {
     private readonly service = inject(PackageCentralizerService);
 
     private nextTabId = 1;
+
+    /**
+     * Held as a field rather than inline in the template: the editor takes it as
+     * a bound input, and as an attribute every quote in it had to be written as
+     * &quot;, which made the sample unreadable.
+     */
+    protected readonly csprojPlaceholder = `<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+</Project>`;
 
     protected readonly projectTabs = signal<ProjectTab[]>([
         { id: 0, name: 'Project.csproj', content: '' }

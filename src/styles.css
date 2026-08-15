@@ -69,6 +69,92 @@ pre[class*='language-'] {
   color: #ffb86c;
 }
 
+/*
+ * Markup tokens, for .csproj and Directory.Packages.props.
+ *
+ * Prism nests these: the outer .tag span wraps the whole element, attributes
+ * included, so these three rules have to stay after it in the file - they
+ * match the child nodes directly and that is what makes attribute names and
+ * values read differently from the element name around them.
+ *
+ * No .namespace rule on purpose: the C# grammar emits that token too, so a
+ * colour here would quietly restyle every C# panel in the toolbox.
+ */
+.token.tag {
+  color: #82aaff;
+}
+
+.token.attr-name {
+  color: #7ee0c3;
+}
+
+/* Attribute values carry the package id and version, so they read as strings. */
+.token.attr-value {
+  color: #e0af68;
+}
+
+/* JSON object keys. */
+.token.property {
+  color: #82aaff;
+}
+
+/*
+ * Light variant, for the one code surface that is not a dark panel: the SRP
+ * Analyzer's editor. That tool paints its dependency tints as translucent
+ * pastels chosen against white, and its mixed-method marker is amber-100, so
+ * darkening the pane to reuse the palette above would mean re-picking every
+ * one of those colours. Overriding the token colours instead keeps the change
+ * to this block.
+ *
+ * Global for the same reason as the rules above - these style nodes injected
+ * via [innerHTML], which component-scoped styles never reach.
+ */
+.srp-editor code[class*='language-'] {
+  color: #1f2937;
+}
+
+.srp-editor .token.comment,
+.srp-editor .token.prolog,
+.srp-editor .token.cdata {
+  color: #6b7280;
+}
+
+.srp-editor .token.punctuation,
+.srp-editor .token.operator {
+  color: #6b7280;
+}
+
+.srp-editor .token.keyword,
+.srp-editor .token.boolean,
+.srp-editor .token.null {
+  color: #7c3aed;
+}
+
+.srp-editor .token.string,
+.srp-editor .token.char {
+  color: #b45309;
+}
+
+.srp-editor .token.number {
+  color: #059669;
+}
+
+.srp-editor .token.class-name,
+.srp-editor .token.builtin,
+.srp-editor .token.generic-method {
+  color: #0f766e;
+}
+
+.srp-editor .token.function {
+  color: #1d4ed8;
+}
+
+.srp-editor .token.attribute,
+.srp-editor .token.annotation,
+.srp-editor .token.preprocessor {
+  color: #c2410c;
+}
+
 /* Copyable snippets are keyboard-reachable, so they need a visible focus ring. */
 pre[tabindex]:focus-visible {
   outline: 2px solid var(--color-brand-primary);

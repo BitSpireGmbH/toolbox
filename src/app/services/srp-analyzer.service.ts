@@ -455,8 +455,20 @@ export class SrpAnalyzerService {
       }
 
       if (bgStyle) {
+          // Wind past the blank line separating this method from the last one.
+          // The span is a full-width inline-block, so it cannot share a line
+          // with anything before it: starting it on a newline makes it wrap to
+          // a line of its own and renders every character inside it one line
+          // below where the same character sits in the plain-text layers
+          // stacked with it, which drags the dependency tints off their
+          // identifiers.
+          let start = method.startIndex;
+          while (start < code.length && (code[start] === '\n' || code[start] === '\r')) {
+            start++;
+          }
+
           highlights.push({
-            index: method.startIndex,
+            index: start,
             type: 'start',
             content: `<span class="srp-method" style="${bgStyle} display: inline-block; width: 100%;">`, // Corrected escaping for class name
             priority: 1

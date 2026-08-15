@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DomSanitizer } from '@angular/platform-browser';
-import { CodeHighlightService } from './code-highlight.service';
+import { CodeHighlightService, HighlightLanguage } from './code-highlight.service';
 import { RESPONSE_CATALOG } from '../response-guide/response-catalog.const';
 
 /**
@@ -19,7 +19,7 @@ describe('CodeHighlightService', () => {
     sanitizer = TestBed.inject(DomSanitizer);
   });
 
-  const html = (code: string, language?: 'csharp' | 'typescript'): string =>
+  const html = (code: string, language?: HighlightLanguage): string =>
     sanitizer.sanitize(1 /* SecurityContext.HTML */, service.highlight(code, language)) ?? '';
 
   it('emits Prism token markup rather than plain text', () => {
@@ -47,6 +47,30 @@ public async Task<ActionResult<ProductDto>> GetById(int id)
 
     expect(result).toContain('class="token');
     expect(result).toContain('keyword');
+  });
+
+  /*
+   * The markup grammar rides along in Prism's core, so nothing imports it -
+   * which makes it exactly the kind of thing a dependency bump could drop
+   * without any import failing.
+   */
+  it('tokenises the csproj markup the Package Centralizer emits', () => {
+    const result = html(
+      '<PackageVersion Include="Serilog" Version="3.1.1" />',
+      'markup'
+    );
+
+    expect(result).toContain('token tag');
+    expect(result).toContain('token attr-name');
+    expect(result).toContain('token attr-value');
+  });
+
+  it('distinguishes JSON keys from their values', () => {
+    const result = html('{ "name": "John", "age": 30 }', 'json');
+
+    expect(result).toContain('token property');
+    expect(result).toContain('token string');
+    expect(result).toContain('token number');
   });
 
   it('escapes angle brackets so generics cannot inject markup', () => {
