@@ -1,6 +1,12 @@
-import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { JwtDecoderService, type DecodedJwt, type ClaimExplanation } from '../services/jwt-decoder.service';
+import {
+  JwtVerifyService,
+  type JwtSecretEncoding,
+  type JwtVerification,
+  type JwtVerifyStatus,
+} from '../services/jwt-verify.service';
 
 @Component({
   selector: 'app-jwt-decoder',
@@ -69,6 +75,80 @@ You can paste the token with or without the 'Bearer' prefix."
       </div>
 
       @if (decodedToken()) {
+        <!-- Signature Verification -->
+        <div class="mb-6 bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+          <div class="bg-linear-to-r from-emerald-50 to-emerald-100 px-4 py-2.5 border-b border-emerald-200">
+            <div class="flex items-center gap-2">
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+              <h3 class="font-semibold text-sm text-gray-700">Verify Signature</h3>
+              <span class="text-xs text-gray-500">runs the real .NET HMAC in your browser</span>
+            </div>
+          </div>
+
+          <div class="p-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                [(ngModel)]="secret"
+                class="flex-1 px-3 py-2 font-mono text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Signing secret — nothing leaves your browser"
+                aria-label="Signing secret"
+              />
+              <select
+                [(ngModel)]="secretEncoding"
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                aria-label="Secret encoding"
+              >
+                <option value="utf8">Plain text</option>
+                <option value="base64">base64</option>
+                <option value="base64url">base64url</option>
+              </select>
+            </div>
+
+            @if (verifying()) {
+              <p class="mt-3 text-sm text-gray-500">Checking…</p>
+            } @else if (verifyUnavailable()) {
+              <div class="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <p class="text-sm text-gray-700">
+                  The .NET runtime could not be loaded, so the signature cannot be checked.
+                  This tool will not guess.
+                </p>
+                @if (verifyFailure(); as reason) {
+                  <p class="mt-1 text-xs text-gray-500 font-mono">{{ reason }}</p>
+                }
+              </div>
+            } @else if (verification(); as result) {
+              <div class="mt-3 p-3 border rounded-lg" [class]="getVerificationClasses(result.status)">
+                <div class="flex items-start gap-2">
+                  <svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    @if (result.verified) {
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    } @else {
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    }
+                  </svg>
+                  <div>
+                    <p class="font-semibold text-sm">
+                      {{ result.verified ? 'Signature verified' : 'Not verified' }}
+                      @if (result.algorithm) {
+                        <span class="font-mono font-normal text-xs opacity-75">({{ result.algorithm }})</span>
+                      }
+                    </p>
+                    <p class="text-xs mt-1 leading-relaxed">{{ result.detail }}</p>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <p class="mt-3 text-xs text-gray-500">
+                Enter the signing secret to check whether this token is genuine. Decoding a
+                JWT proves nothing about who issued it — only the signature does.
+              </p>
+            }
+          </div>
+        </div>
+
         <!-- Output Area -->
         <div class="grid md:grid-cols-2 gap-5">
           <!-- Header Section -->
@@ -166,6 +246,7 @@ You can paste the token with or without the 'Bearer' prefix."
 })
 export class JwtDecoderComponent {
   private readonly decoderService = inject(JwtDecoderService);
+  private readonly verifyService = inject(JwtVerifyService);
 
   protected readonly inputToken = signal<string>('');
   protected readonly decodedToken = signal<DecodedJwt | null>(null);
@@ -173,6 +254,22 @@ export class JwtDecoderComponent {
   protected readonly headerExplanations = signal<ClaimExplanation[]>([]);
   protected readonly claimExplanations = signal<ClaimExplanation[]>([]);
   protected readonly validityInfo = signal<{ status: string; message: string; color: string } | null>(null);
+
+  protected readonly secret = signal<string>('');
+  protected readonly secretEncoding = signal<JwtSecretEncoding>('utf8');
+  protected readonly verification = signal<JwtVerification | null>(null);
+  protected readonly verifying = signal(false);
+
+  protected readonly verifyFailure = this.verifyService.runtimeFailure;
+  protected readonly verifyUnavailable = computed(() => this.verifyService.runtimeStatus() === 'failed');
+
+  /**
+   * Guards against out-of-order responses: every keystroke starts a request, and the
+   * runtime's first call also pays for the download, so an early slow one can easily
+   * land after a later fast one and show a verdict for a secret the user has moved on
+   * from.
+   */
+  private verifyRequestId = 0;
 
   constructor() {
     // Auto-decode on input change
@@ -188,6 +285,64 @@ export class JwtDecoderComponent {
         this.validityInfo.set(null);
       }
     });
+
+    // Verification is deliberately gated on a non-empty secret. The .NET runtime is
+    // several megabytes, and merely decoding a token should not download it - only
+    // actually asking for a cryptographic answer should.
+    effect(() => {
+      const token = this.inputToken().trim();
+      const secret = this.secret();
+      const encoding = this.secretEncoding();
+
+      if (!token || !secret) {
+        this.verification.set(null);
+        this.verifying.set(false);
+        this.verifyRequestId++;
+        return;
+      }
+
+      const requestId = ++this.verifyRequestId;
+      this.verifying.set(true);
+
+      void this.verifyService
+        .verify({ token, secret, secretEncoding: encoding })
+        .then(result => {
+          if (requestId === this.verifyRequestId) {
+            this.verification.set(result);
+          }
+        })
+        .catch(() => {
+          // The runtime failing to load is reported through verifyUnavailable(); there is
+          // nothing useful to show as a verdict, and guessing one would be the whole thing
+          // this feature exists to avoid.
+          if (requestId === this.verifyRequestId) {
+            this.verification.set(null);
+          }
+        })
+        .finally(() => {
+          if (requestId === this.verifyRequestId) {
+            this.verifying.set(false);
+          }
+        });
+    });
+  }
+
+  /**
+   * `alg: none` is styled as severely as a mismatch on purpose - it is not a milder
+   * problem than a bad signature, it is the absence of one.
+   */
+  protected getVerificationClasses(status: JwtVerifyStatus): string {
+    switch (status) {
+      case 'verified':
+        return 'bg-green-50 border-green-300 text-green-800';
+      case 'mismatch':
+      case 'alg-none':
+        return 'bg-red-50 border-red-300 text-red-800';
+      case 'unsupported-algorithm':
+        return 'bg-amber-50 border-amber-300 text-amber-800';
+      default:
+        return 'bg-gray-50 border-gray-300 text-gray-700';
+    }
   }
 
   protected decodeToken(): void {

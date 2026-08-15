@@ -1,6 +1,7 @@
-import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, effect, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CodeBlockComponent } from '../shared/code-block/code-block.component';
+import { AllocationProbeService, type SliceAllocation } from '../services/allocation-probe.service';
 
 type ActiveTab = 'what-is-span' | 'substring-vs-slice' | 'stack-heap';
 type SpanType = 'Span' | 'ReadOnlySpan';
@@ -398,23 +399,44 @@ interface SubstringCharCell {
               <p class="text-sm font-medium">Enter a source string to compare operations</p>
             </div>
           } @else {
-            <!-- Allocation comparison banner -->
-            <div class="grid sm:grid-cols-2 gap-3 mb-6">
-              <div class="flex items-center gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                <span class="text-2xl font-bold text-red-600" aria-label="1 heap allocation">1</span>
-                <div>
-                  <p class="text-sm font-semibold text-red-800">Substring()</p>
-                  <p class="text-xs text-red-600">heap allocation - new string object</p>
+            <!-- Allocation comparison banner: measured, not asserted -->
+            @if (measured(); as m) {
+              <div class="mb-6">
+                <div class="grid sm:grid-cols-3 gap-3">
+                  @for (sample of m.samples; track sample.id) {
+                    <div class="flex items-center gap-3 border rounded-lg px-4 py-3"
+                         [class]="allocationCardClasses(sample.bytesPerOperation)">
+                      <div class="shrink-0">
+                        <span class="text-2xl font-bold">{{ sample.bytesPerOperation }}</span>
+                        <span class="text-xs font-semibold ml-0.5">B</span>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold truncate">{{ sample.label }}</p>
+                        <p class="text-xs opacity-80">
+                          {{ sample.bytesPerOperation === 0 ? 'no heap allocation' : 'heap bytes per call' }}
+                        </p>
+                      </div>
+                    </div>
+                  }
                 </div>
+                <p class="mt-2 text-xs text-gray-500">
+                  Measured live over {{ m.iterations.toLocaleString() }} iterations each.
+                  {{ m.runtimeNote }}
+                </p>
               </div>
-              <div class="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-                <span class="text-2xl font-bold text-green-600" aria-label="0 heap allocations">0</span>
-                <div>
-                  <p class="text-sm font-semibold text-green-800">AsSpan().Slice()</p>
-                  <p class="text-xs text-green-600">heap allocations - zero-copy view</p>
-                </div>
+            } @else if (measuring()) {
+              <div class="mb-6 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <p class="text-sm text-gray-500">Measuring allocations in the .NET runtime…</p>
               </div>
-            </div>
+            } @else if (measurementUnavailable()) {
+              <div class="mb-6 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <p class="text-sm text-gray-700">
+                  The .NET runtime could not be loaded, so these allocations cannot be measured
+                  here. <strong>Substring()</strong> allocates a new string; <strong>AsSpan()</strong>
+                  does not — but this page will not put a number on it that it did not measure.
+                </p>
+              </div>
+            }
 
             <!-- Side by side -->
             <div class="grid lg:grid-cols-2 gap-6">
@@ -425,7 +447,7 @@ interface SubstringCharCell {
                     <div class="flex items-center justify-between">
                       <h3 class="text-sm font-bold text-red-800">string.Substring()</h3>
                       <span class="text-xs font-bold text-red-600 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full">
-                        🚨 1 allocation
+                        🚨 {{ bytesFor('substring') ?? '1 allocation' }}
                       </span>
                     </div>
                   </div>
@@ -502,7 +524,7 @@ interface SubstringCharCell {
                     <div class="flex items-center justify-between">
                       <h3 class="text-sm font-bold text-green-800">AsSpan().Slice()</h3>
                       <span class="text-xs font-bold text-green-600 bg-green-100 border border-green-200 px-2 py-0.5 rounded-full">
-                        ✅ 0 allocations
+                        ✅ {{ bytesFor('span-slice') ?? '0 allocations' }}
                       </span>
                     </div>
                   </div>
@@ -879,6 +901,8 @@ interface SubstringCharCell {
   `,
 })
 export class SpanVisualizerComponent {
+  private readonly allocationProbe = inject(AllocationProbeService);
+
   protected readonly BASE_ADDR = 0x5000;
   protected readonly SVS_NEW_ADDR = 0x8F40;
   protected readonly BYTES_PER_CHAR = 2; // UTF-16 chars in .NET
@@ -929,6 +953,79 @@ export class SpanVisualizerComponent {
   protected readonly svsSource = signal<string>('Hello, World!');
   protected readonly svsStart = signal<number>(0);
   protected readonly svsLength = signal<number>(5);
+
+  protected readonly measured = signal<SliceAllocation | null>(null);
+  protected readonly measuring = signal(false);
+  protected readonly measurementUnavailable = computed(
+    () => this.allocationProbe.runtimeStatus() === 'failed'
+  );
+
+  /** Guards against a slow first measurement (which also downloads the runtime) landing after a later one. */
+  private measureRequestId = 0;
+
+  constructor() {
+    // Gated on the tab being open: the .NET runtime is several megabytes, and the other
+    // two tabs teach their point without measuring anything, so merely visiting the page
+    // should not download it.
+    effect(() => {
+      if (this.activeTab() !== 'substring-vs-slice') {
+        return;
+      }
+
+      const input = this.svsSource();
+      const start = this.svsStart();
+      const length = this.svsLength();
+
+      if (input.length === 0 || start + length > input.length) {
+        this.measured.set(null);
+        return;
+      }
+
+      const requestId = ++this.measureRequestId;
+      this.measuring.set(true);
+
+      void this.allocationProbe
+        .measureSlice(input, start, length)
+        .then(result => {
+          if (requestId === this.measureRequestId) {
+            // An out-of-range slice is reported by .NET rather than thrown; showing stale
+            // numbers for a different slice would be worse than showing none.
+            this.measured.set(result.error ? null : result);
+          }
+        })
+        .catch(() => {
+          if (requestId === this.measureRequestId) {
+            this.measured.set(null);
+          }
+        })
+        .finally(() => {
+          if (requestId === this.measureRequestId) {
+            this.measuring.set(false);
+          }
+        });
+    });
+  }
+
+  /**
+   * Colour follows the measurement, not the operation. If a future runtime ever made
+   * `AsSpan` allocate, the card would turn red on its own rather than keep insisting the
+   * answer is green.
+   */
+  /**
+   * The measured figure for one sample, or null when nothing has been measured yet - in
+   * which case the template falls back to the claim the page always made. The fallback is
+   * the wording, never a fabricated byte count.
+   */
+  protected bytesFor(id: string): string | null {
+    const sample = this.measured()?.samples.find(s => s.id === id);
+    return sample ? `${sample.bytesPerOperation} bytes/call` : null;
+  }
+
+  protected allocationCardClasses(bytesPerOperation: number): string {
+    return bytesPerOperation === 0
+      ? 'bg-green-50 border-green-200 text-green-800'
+      : 'bg-red-50 border-red-200 text-red-800';
+  }
 
   protected readonly maxSvsLength = computed(() =>
     Math.max(1, this.svsSource().length - this.svsStart())

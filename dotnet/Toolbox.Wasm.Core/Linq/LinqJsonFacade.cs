@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Toolbox.Wasm.Core.Interop;
 
 namespace Toolbox.Wasm.Core.Linq;
 
@@ -14,17 +15,11 @@ public static class LinqJsonFacade
 {
     public static string Run(string specJson)
     {
-        LinqPipelineSpec spec;
-        try
+        // A malformed spec is a programming error on the TypeScript side, not something
+        // the user can trigger. Report it rather than silently running a default pipeline,
+        // which would look like the UI ignoring the controls.
+        if (!JsonBridge.TryRead(specJson, LinqJsonContext.Default.LinqPipelineSpec, out var spec, out var error))
         {
-            spec = JsonSerializer.Deserialize(specJson ?? string.Empty, LinqJsonContext.Default.LinqPipelineSpec)
-                ?? new LinqPipelineSpec();
-        }
-        catch (JsonException ex)
-        {
-            // A malformed spec is a programming error on the TypeScript side, not
-            // something the user can trigger. Report it rather than silently running a
-            // default pipeline, which would look like the UI ignoring the controls.
             return Serialize(new LinqRunResult(
                 [],
                 [],
@@ -32,7 +27,7 @@ public static class LinqJsonFacade
                 QuerySyntax: null,
                 ResultText: string.Empty,
                 new LinqStats(0, 0, 0, false),
-                Error: $"The pipeline description could not be read: {ex.Message}"));
+                Error: $"The pipeline description could not be read: {error}"));
         }
 
         return Serialize(LinqPipelineRunner.Run(spec));

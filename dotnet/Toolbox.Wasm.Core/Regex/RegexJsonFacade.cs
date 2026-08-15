@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Toolbox.Wasm.Core.Interop;
 
 namespace Toolbox.Wasm.Core.Regex;
 
@@ -35,21 +36,9 @@ public static class RegexJsonFacade
     /// something the user can trigger. Falling back to defaults keeps the tool usable
     /// instead of turning it into an opaque failure.
     /// </summary>
-    private static RegexOptionsModel ParseOptions(string optionsJson)
-    {
-        if (string.IsNullOrWhiteSpace(optionsJson))
-        {
-            return new RegexOptionsModel();
-        }
-
-        try
-        {
-            return JsonSerializer.Deserialize(optionsJson, RegexJsonContext.Default.RegexOptionsModel)
-                ?? new RegexOptionsModel();
-        }
-        catch (JsonException)
-        {
-            return new RegexOptionsModel();
-        }
-    }
+    private static RegexOptionsModel ParseOptions(string optionsJson) =>
+        JsonBridge.ReadOrDefault(
+            optionsJson,
+            RegexJsonContext.Default.RegexOptionsModel,
+            new RegexOptionsModel());
 }

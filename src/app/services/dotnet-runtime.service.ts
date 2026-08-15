@@ -9,8 +9,8 @@ export type DotnetRuntimeStatus = 'idle' | 'loading' | 'ready' | 'failed';
 
 /**
  * The methods `[JSExport]` publishes, reached by namespace and class name. Mirrors
- * `dotnet/Toolbox.Wasm/RegexInterop.cs` and `LinqInterop.cs` - every value is a JSON
- * string, because JSImport/JSExport cannot marshal complex objects.
+ * `dotnet/Toolbox.Wasm/RegexInterop.cs`, `LinqInterop.cs` and `CryptoInterop.cs` - every
+ * value is a JSON string, because JSImport/JSExport cannot marshal complex objects.
  *
  * Hand-maintained, so it has to be updated in lockstep with the C# side: a method
  * declared here but missing there fails at the call, not at build time.
@@ -31,11 +31,52 @@ export interface ToolboxWasmExports {
         Run(specJson: string): string;
         GetCatalog(): string;
       };
+      readonly CryptoInterop: {
+        VerifyJwt(requestJson: string): string;
+      };
+      readonly DiagnosticsInterop: {
+        MeasureSlice(requestJson: string): string;
+      };
       readonly RuntimeInterop: {
         GetFrameworkDescription(): string;
       };
     };
   };
+}
+
+/**
+ * The part of {@link DotnetRuntimeService} that {@link invokeWasm} needs. Structural on
+ * purpose: the tool specs fake the runtime with a plain object, and widening this to the
+ * whole class would force every one of them to grow a stub for machinery they do not use.
+ */
+export interface WasmRuntimeLoader {
+  load(): Promise<ToolboxWasmExports>;
+}
+
+/**
+ * Every .NET-backed tool does the same three things: wait for the runtime, call one
+ * `[JSExport]`, and parse the JSON that comes back - because JSImport/JSExport cannot
+ * marshal complex objects, so the boundary is always string-shaped.
+ *
+ * Taking a callback over the `Wasm` namespace rather than a method name keeps that fully
+ * typed: calling an export that is not declared in {@link ToolboxWasmExports} fails to
+ * compile here, rather than failing at the call the way a string lookup would.
+ *
+ * A free function rather than a method on the service, so that a spec faking `load()`
+ * still runs this real marshalling. Stubbing it per-service would leave the
+ * `JSON.stringify`/`JSON.parse` round trip - the only thing these thin services actually
+ * do - untested.
+ *
+ * Errors are deliberately not caught. A throw means the runtime itself is unavailable,
+ * and each tool decides for itself whether that means a fallback or refusing to answer;
+ * swallowing it here would take that choice away.
+ */
+export async function invokeWasm<T>(
+  runtime: WasmRuntimeLoader,
+  call: (wasm: ToolboxWasmExports['Toolbox']['Wasm']) => string
+): Promise<T> {
+  const exports = await runtime.load();
+  return JSON.parse(call(exports.Toolbox.Wasm)) as T;
 }
 
 interface DotnetRuntimeApi {

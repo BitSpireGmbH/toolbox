@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { DotnetRuntimeService } from './dotnet-runtime.service';
+import { DotnetRuntimeService, invokeWasm } from './dotnet-runtime.service';
 
 /**
  * Mirrors the C# contracts in `dotnet/Toolbox.Wasm.Core/Linq/LinqContracts.cs`. The
@@ -125,9 +125,7 @@ export class LinqVisualizerService {
   private catalogRequest: Promise<LinqCatalog> | null = null;
 
   loadCatalog(): Promise<LinqCatalog> {
-    this.catalogRequest ??= this.runtime
-      .load()
-      .then(exports => JSON.parse(exports.Toolbox.Wasm.LinqInterop.GetCatalog()) as LinqCatalog)
+    this.catalogRequest ??= invokeWasm<LinqCatalog>(this.runtime, wasm => wasm.LinqInterop.GetCatalog())
       .catch((error: unknown) => {
         // Discarded so a transient failure can be retried rather than poisoning the
         // session, matching how DotnetRuntimeService treats its own load.
@@ -142,8 +140,7 @@ export class LinqVisualizerService {
    * No error handling for bad pipelines: .NET catches those and returns them in the
    * payload's `error` field. A throw from here means the runtime itself broke.
    */
-  async run(spec: LinqPipelineSpec): Promise<LinqRunResult> {
-    const exports = await this.runtime.load();
-    return JSON.parse(exports.Toolbox.Wasm.LinqInterop.Run(JSON.stringify(spec))) as LinqRunResult;
+  run(spec: LinqPipelineSpec): Promise<LinqRunResult> {
+    return invokeWasm<LinqRunResult>(this.runtime, wasm => wasm.LinqInterop.Run(JSON.stringify(spec)));
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { DotnetRuntimeService } from '../dotnet-runtime.service';
+import { DotnetRuntimeService, invokeWasm } from '../dotnet-runtime.service';
 import {
   RegexEngine,
   RegexEvaluation,
@@ -24,33 +24,24 @@ export class RegexWasmEngine implements RegexEngine {
 
   private readonly runtime = inject(DotnetRuntimeService);
 
-  async evaluate(
+  evaluate(
     pattern: string,
     testInput: string,
     options: RegexOptionsModel
   ): Promise<RegexEvaluation> {
-    const exports = await this.runtime.load();
-    const json = exports.Toolbox.Wasm.RegexInterop.Evaluate(
-      pattern,
-      testInput,
-      JSON.stringify(options)
+    return invokeWasm<RegexEvaluation>(this.runtime, wasm =>
+      wasm.RegexInterop.Evaluate(pattern, testInput, JSON.stringify(options))
     );
-    return JSON.parse(json) as RegexEvaluation;
   }
 
-  async replacePreview(
+  replacePreview(
     pattern: string,
     testInput: string,
     replacement: string,
     options: RegexOptionsModel
   ): Promise<RegexReplaceResult> {
-    const exports = await this.runtime.load();
-    const json = exports.Toolbox.Wasm.RegexInterop.Replace(
-      pattern,
-      testInput,
-      replacement,
-      JSON.stringify(options)
+    return invokeWasm<RegexReplaceResult>(this.runtime, wasm =>
+      wasm.RegexInterop.Replace(pattern, testInput, replacement, JSON.stringify(options))
     );
-    return JSON.parse(json) as RegexReplaceResult;
   }
 }

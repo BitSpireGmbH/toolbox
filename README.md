@@ -16,11 +16,11 @@ Toolbox is a full [Progressive Web App](https://web.dev/explore/progressive-web-
 - **C# ↔ TypeScript Converter** - Bidirectional conversion between C# classes and TypeScript interfaces or types
 - **Middleware Designer** - Visual drag-and-drop builder for ASP.NET Core middleware pipelines with request simulation and code generation
 - **ASP.NET Core Response Guide** - Searchable reference of HTTP response scenarios, each shown as both an MVC controller action and a Minimal API `TypedResults` endpoint. Covers the everyday codes (200/201/204/400/401/403/404/409) plus the ones that actually show up in microservice failures: `429` with the `Retry-After` contract, `408`, `502`, `503`, `504`, `507`/`508`, and reference entries for codes you only ever see in logs - nginx `499`, AWS/proxy `599`, and the Cloudflare `520`-`526` family
-- **JWT Decoder** - Decode and inspect JSON Web Tokens with claim explanations and validity checks.
+- **JWT Decoder** - Decode and inspect JSON Web Tokens with claim explanations and validity checks, and verify the signature for real: paste the signing secret and the actual `System.Security.Cryptography` HMAC runs in your browser, so a tampered payload or a wrong secret is proven rather than assumed. `alg: none` is called out as the authentication bypass it is
 - **Package Centralizer** - Convert .NET projects to Central Package Management with Directory.Packages.props.
 - **C# Mind Map** - A list of all C# versions with their features, including links to the official documentation
 - **List<T> Visualizer** - Visualize the internal structure of C# List<T>
-- **Span<T> Visualizer** - Visualize the internal structure of C# Span<T>
+- **Span<T> Visualizer** - Visualize the internal structure of C# Span<T> and ReadOnlySpan<T>, with the allocation comparison *measured* rather than asserted: `Substring` vs `AsSpan()` vs `AsSpan().ToString()` are run through the real GC in your browser, so widening the slice visibly grows the string's byte count while the span stays at zero - and materialising a span back to a string costs exactly what `Substring` did
 - **SRP Analyzer** - Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies
 - **Strong Typer** - Generate C# Options classes from JSON configuration
 - **appsettings ↔ Env Vars** - Flatten `appsettings.json` into environment variables (`Foo:Bar` → `Foo__Bar`) and back, with correct quoting for Bash, PowerShell, cmd/setx, and Docker
@@ -56,6 +56,11 @@ TypeScript - the Regex Tester, for instance, matches with the actual
 `System.Text.RegularExpressions` so the live preview and the C# it generates are the
 same engine. That runtime is built from `dotnet/` and published into the app as a
 static asset.
+
+It is downloaded lazily and only once per session, so tools that do not need it stay as
+light as they were. Where an approximation would teach something false rather than merely
+degraded - LINQ enumeration order, or whether a JWT signature is genuine - the tool has no
+JavaScript fallback at all and says the runtime is unavailable instead of guessing.
 
 Use the npm scripts rather than calling `ng` directly: they publish the .NET runtime
 first. `ng build` on its own still succeeds without it, but the resulting app quietly
