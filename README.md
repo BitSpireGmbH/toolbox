@@ -38,20 +38,44 @@ Thanks to all [contributors](https://github.com/BitSpireGmbH/toolbox/graphs/cont
 
 ## Development
 
+### Prerequisites
+
+Node 22+, plus the .NET SDK pinned in `global.json` and the WebAssembly build tools:
+
+```bash
+dotnet workload install wasm-tools
+```
+
+Workloads install into the SDK directory, so if the SDK lives somewhere root-owned
+(`/usr/local/share/dotnet`, the default for the macOS installer) that command needs
+`sudo`. Without the workload, `npm run build:wasm` fails with `NETSDK1147`.
+
+Some tools run the real .NET runtime in the browser rather than approximating it in
+TypeScript - the Regex Tester, for instance, matches with the actual
+`System.Text.RegularExpressions` so the live preview and the C# it generates are the
+same engine. That runtime is built from `dotnet/` and published into the app as a
+static asset.
+
+Use the npm scripts rather than calling `ng` directly: they publish the .NET runtime
+first. `ng build` on its own still succeeds without it, but the resulting app quietly
+falls back to the browser's own regex engine.
+
 Start the development server:
 
 ```bash
-ng serve
+npm start
 ```
 
 Build for production:
 
 ```bash
-ng build
+npm run build
 ```
 
-Run tests:
+Run tests - `npm test` covers the Angular app, `npm run test:wasm` covers the .NET
+side (the latter needs no browser and is where .NET regex semantics are asserted):
 
 ```bash
-ng test
+npm test
+npm run test:wasm
 ```

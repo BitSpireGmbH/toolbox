@@ -36,6 +36,11 @@
                 "glob": "web.config",
                 "input": ".",
                 "output": "/"
+              },
+              {
+                "glob": "**/*",
+                "input": "dotnet/artifacts/publish/wwwroot/_framework",
+                "output": "/dotnet/_framework"
               }
             ],
             "styles": [

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Toolbox.Wasm.Core/Toolbox.Wasm.Core.csproj" />
+  <Project Path="Toolbox.Wasm.Tests/Toolbox.Wasm.Tests.csproj" />
+  <Project Path="Toolbox.Wasm/Toolbox.Wasm.csproj" />
+</Solution>

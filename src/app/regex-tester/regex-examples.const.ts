@@ -74,11 +74,6 @@ export interface RegexOptionMeta {
   key: keyof RegexOptionsModel;
   label: string;
   hint: string;
-  /**
-   * True for the four members with no ECMAScript flag equivalent - they reach
-   * the generated C# but the browser preview cannot honour them.
-   */
-  codegenOnly: boolean;
 }
 
 export const REGEX_OPTION_META: readonly RegexOptionMeta[] = [
@@ -86,43 +81,41 @@ export const REGEX_OPTION_META: readonly RegexOptionMeta[] = [
     key: 'ignoreCase',
     label: 'IgnoreCase',
     hint: 'Matches letters regardless of upper or lower case.',
-    codegenOnly: false,
   },
   {
     key: 'multiline',
     label: 'Multiline',
     hint: '^ and $ match at every line break, not only at the ends of the input.',
-    codegenOnly: false,
   },
   {
     key: 'singleline',
     label: 'Singleline',
     hint: 'Lets . match line breaks as well.',
-    codegenOnly: false,
   },
   {
     key: 'ignorePatternWhitespace',
     label: 'IgnorePatternWhitespace',
     hint: 'Strips unescaped whitespace and # comments from the pattern itself.',
-    codegenOnly: true,
   },
   {
     key: 'explicitCapture',
     label: 'ExplicitCapture',
     hint: 'Only named groups capture; plain ( ) become non-capturing.',
-    codegenOnly: true,
   },
   {
     key: 'cultureInvariant',
     label: 'CultureInvariant',
     hint: 'Ignores culture-specific casing rules when comparing.',
-    codegenOnly: true,
   },
   {
     key: 'rightToLeft',
     label: 'RightToLeft',
     hint: 'Searches from right to left, starting at the end of the input.',
-    codegenOnly: true,
+  },
+  {
+    key: 'nonBacktracking',
+    label: 'NonBacktracking',
+    hint: 'Linear-time matching that cannot blow up, but rejects lookaround and backreferences.',
   },
 ];
 

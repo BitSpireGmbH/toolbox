@@ -1,101 +1,86 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { DotnetRuntimeService } from './dotnet-runtime.service';
+import { RegexEngine, RegexEngineKind } from './regex-engine/regex-engine';
+import { RegexJsEngine } from './regex-engine/regex-js-engine';
+import { RegexWasmEngine } from './regex-engine/regex-wasm-engine';
+
+export type {
+  RegexEngineKind,
+  RegexEvaluation,
+  RegexGroupResult,
+  RegexMatchResult,
+  RegexOptionsModel,
+  RegexReplaceResult,
+} from './regex-engine/regex-engine';
+export { NO_REGEX_OPTIONS, EMPTY_EVALUATION } from './regex-engine/regex-engine';
+
+import type {
+  RegexEvaluation,
+  RegexOptionsModel,
+  RegexReplaceResult,
+} from './regex-engine/regex-engine';
 
 export type RegexCodeStyle = 'source-generated' | 'classic';
 
-export interface RegexOptionsModel {
-  ignoreCase: boolean;
-  multiline: boolean;
-  singleline: boolean;
-  ignorePatternWhitespace: boolean;
-  explicitCapture: boolean;
-  cultureInvariant: boolean;
-  rightToLeft: boolean;
-}
-
-export interface RegexGroupResult {
-  name: string;
-  value: string;
-  index: number;
-}
-
-export interface RegexMatchResult {
-  value: string;
-  index: number;
-  length: number;
-  groups: RegexGroupResult[];
-}
-
-export interface RegexEvaluation {
-  matches: RegexMatchResult[];
-  error?: string;
-  engineWarning?: string;
-}
-
-export interface RegexReplaceResult {
-  result: string;
-  error?: string;
-}
-
-/** RegexOptions members with no ECMAScript flag equivalent - previewed only in the generated C#. */
-const DOTNET_ONLY_OPTIONS: { key: keyof RegexOptionsModel; label: string }[] = [
-  { key: 'ignorePatternWhitespace', label: 'IgnorePatternWhitespace' },
-  { key: 'explicitCapture', label: 'ExplicitCapture' },
-  { key: 'cultureInvariant', label: 'CultureInvariant' },
-  { key: 'rightToLeft', label: 'RightToLeft' },
-];
-
-/** Safety cap so a pattern that matches at (almost) every position doesn't stall the UI. */
-const MAX_MATCHES = 1000;
-
+/**
+ * Runs patterns through the real .NET engine and generates the matching C#.
+ *
+ * Matching is asynchronous because the engine lives in WebAssembly. The runtime is
+ * fetched once, on first use; if that fails the service degrades to the browser's
+ * own `RegExp` and says so via {@link engineKind}, rather than leaving the tool dead.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class RegexTesterService {
-  evaluate(pattern: string, testInput: string, options: RegexOptionsModel): RegexEvaluation {
-    if (!pattern) {
-      return { matches: [] };
-    }
+  private readonly runtime = inject(DotnetRuntimeService);
+  private readonly wasmEngine = inject(RegexWasmEngine);
+  private readonly jsEngine = inject(RegexJsEngine);
 
-    let regex: RegExp;
-    try {
-      regex = new RegExp(pattern, this.buildJsFlags(options));
-    } catch (error) {
-      return {
-        matches: [],
-        error: error instanceof Error ? error.message : 'Invalid regular expression',
-      };
-    }
+  /** Null until the first evaluation has decided which engine it could get. */
+  private readonly currentEngineKind = signal<RegexEngineKind | null>(null);
+  readonly engineKind = this.currentEngineKind.asReadonly();
 
-    const matches: RegexMatchResult[] = [];
-    for (const match of testInput.matchAll(regex)) {
-      matches.push(this.toMatchResult(match));
-      if (matches.length >= MAX_MATCHES) {
-        break;
-      }
-    }
+  readonly runtimeStatus = this.runtime.status;
+  readonly frameworkDescription = this.runtime.frameworkDescription;
 
-    return { matches, engineWarning: this.buildEngineWarning(options) };
+  /**
+   * Resolved once and reused. The fallback decision is sticky for the session on
+   * purpose: retrying a multi-megabyte download on every keystroke would be worse
+   * than living with the approximation for one visit.
+   */
+  private engineSelection: Promise<RegexEngine> | null = null;
+
+  async evaluate(
+    pattern: string,
+    testInput: string,
+    options: RegexOptionsModel
+  ): Promise<RegexEvaluation> {
+    const engine = await this.selectEngine();
+    return engine.evaluate(pattern, testInput, options);
   }
 
-  replacePreview(
+  async replacePreview(
     pattern: string,
     testInput: string,
     replacement: string,
     options: RegexOptionsModel
-  ): RegexReplaceResult {
-    if (!pattern) {
-      return { result: testInput };
-    }
+  ): Promise<RegexReplaceResult> {
+    const engine = await this.selectEngine();
+    return engine.replacePreview(pattern, testInput, replacement, options);
+  }
 
-    try {
-      const regex = new RegExp(pattern, this.buildJsFlags(options));
-      return { result: testInput.replace(regex, replacement) };
-    } catch (error) {
-      return {
-        result: testInput,
-        error: error instanceof Error ? error.message : 'Invalid regular expression',
-      };
-    }
+  private selectEngine(): Promise<RegexEngine> {
+    this.engineSelection ??= this.runtime
+      .load()
+      .then(() => this.wasmEngine as RegexEngine)
+      .catch(() => this.jsEngine as RegexEngine)
+      .then(engine => {
+        this.currentEngineKind.set(engine.kind);
+        return engine;
+      });
+
+    return this.engineSelection;
   }
 
   generateCode(
@@ -137,48 +122,6 @@ foreach (Match match in regex.Matches(input))
     Console.WriteLine(match.Value);`;
   }
 
-  private buildJsFlags(options: RegexOptionsModel): string {
-    let flags = 'gd';
-    if (options.ignoreCase) flags += 'i';
-    if (options.multiline) flags += 'm';
-    if (options.singleline) flags += 's';
-    return flags;
-  }
-
-  private buildEngineWarning(options: RegexOptionsModel): string | undefined {
-    const active = DOTNET_ONLY_OPTIONS.filter(o => options[o.key]).map(o => o.label);
-    if (active.length === 0) {
-      return undefined;
-    }
-    return `The live preview runs in your browser's JavaScript engine, which has no equivalent for: ${active.join(', ')}. These options have no effect on the preview above, but are still applied to the generated C# code.`;
-  }
-
-  private toMatchResult(match: RegExpMatchArray): RegexMatchResult {
-    const groups: RegexGroupResult[] = [];
-
-    if (match.groups) {
-      for (const [name, value] of Object.entries(match.groups)) {
-        if (value === undefined) continue;
-        const range = match.indices?.groups?.[name];
-        groups.push({ name, value, index: range ? range[0] : -1 });
-      }
-    }
-
-    for (let i = 1; i < match.length; i++) {
-      const value = match[i];
-      if (value === undefined) continue;
-      const range = match.indices?.[i];
-      groups.push({ name: String(i), value, index: range ? range[0] : -1 });
-    }
-
-    return {
-      value: match[0],
-      index: match.index ?? -1,
-      length: match[0].length,
-      groups,
-    };
-  }
-
   private toVerbatimLiteral(pattern: string): string {
     return `@"${pattern.replace(/"/g, '""')}"`;
   }
@@ -192,6 +135,7 @@ foreach (Match match in regex.Matches(input))
     if (options.explicitCapture) flags.push('RegexOptions.ExplicitCapture');
     if (options.cultureInvariant) flags.push('RegexOptions.CultureInvariant');
     if (options.rightToLeft) flags.push('RegexOptions.RightToLeft');
+    if (options.nonBacktracking) flags.push('RegexOptions.NonBacktracking');
     return flags.join(' | ');
   }
 

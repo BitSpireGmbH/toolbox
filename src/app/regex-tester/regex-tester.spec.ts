@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RegexTesterComponent } from './regex-tester';
+import { DotnetRuntimeService } from '../services/dotnet-runtime.service';
+import { INPUT_DEBOUNCE_MS, RegexTesterComponent } from './regex-tester';
 
 describe('RegexTesterComponent', () => {
   let fixture: ComponentFixture<RegexTesterComponent>;
@@ -25,16 +26,40 @@ describe('RegexTesterComponent', () => {
     element.dispatchEvent(new Event('input'));
   };
 
-  const click = async (button: HTMLButtonElement): Promise<void> => {
-    button.click();
+  /**
+   * Matching runs through an async engine behind a debounce, so a bare
+   * whenStable() would assert against the previous result.
+   */
+  const settle = async (): Promise<void> => {
+    await new Promise(resolve => setTimeout(resolve, INPUT_DEBOUNCE_MS + 25));
     await fixture.whenStable();
   };
 
+  const click = async (button: HTMLButtonElement): Promise<void> => {
+    button.click();
+    await settle();
+  };
+
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [RegexTesterComponent] }).compileComponents();
+    // jsdom cannot load the WebAssembly runtime, so these tests exercise the
+    // JavaScript fallback path. Stubbing the load keeps that deterministic rather
+    // than depending on a network import failing.
+    await TestBed.configureTestingModule({
+      imports: [RegexTesterComponent],
+      providers: [
+        {
+          provide: DotnetRuntimeService,
+          useValue: {
+            status: () => 'failed',
+            frameworkDescription: () => null,
+            load: () => Promise.reject(new Error('no runtime in jsdom')),
+          },
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RegexTesterComponent);
-    await fixture.whenStable();
+    await settle();
   });
 
   it('explains the default pattern as a chain of parts', () => {
@@ -54,7 +79,7 @@ describe('RegexTesterComponent', () => {
     expect(text()).toContain('valid');
 
     setValue(patternField(), '(');
-    await fixture.whenStable();
+    await settle();
 
     expect(text()).toContain('invalid');
     expect(text()).toContain('Pattern error:');
@@ -62,7 +87,7 @@ describe('RegexTesterComponent', () => {
 
   it('keeps rendering a chain while the pattern is half-typed', async () => {
     setValue(patternField(), '(?<year>\\d{');
-    await fixture.whenStable();
+    await settle();
 
     expect(host().querySelector('app-pattern-chain')).not.toBeNull();
   });
@@ -101,7 +126,7 @@ describe('RegexTesterComponent', () => {
   it('folds all but the first two tips behind a "+N more" line', async () => {
     setValue(patternField(), '(a).');
     setValue(host().querySelector('textarea') as HTMLTextAreaElement, 'zzz');
-    await fixture.whenStable();
+    await settle();
 
     const more = buttonWith('more');
     expect(more.textContent).toContain('+');
@@ -117,28 +142,47 @@ describe('RegexTesterComponent', () => {
     if (!ignoreCase) throw new Error('No option checkboxes rendered');
     ignoreCase.checked = true;
     ignoreCase.dispatchEvent(new Event('change'));
-    await fixture.whenStable();
+    await settle();
 
     expect(buttonWith('RegexOptions').textContent).toContain('1');
     expect(host().querySelector('app-code-block')?.textContent).toContain('RegexOptions.IgnoreCase');
   });
 
-  it('moves the .NET-only engine warning into the tips list', async () => {
+  it('badges the browser engine as a fallback when the .NET runtime is unavailable', () => {
+    expect(text()).toContain('JS fallback');
+  });
+
+  it('warns in the tips list that the fallback cannot honour every option', async () => {
     await click(buttonWith('RegexOptions'));
 
-    // RegexOptions render in REGEX_OPTION_META order; RightToLeft is the last.
+    // RegexOptions render in REGEX_OPTION_META order; NonBacktracking is last and
+    // RightToLeft the one before it.
     const checkboxes = host().querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
-    const rightToLeft = checkboxes[checkboxes.length - 1];
-    expect(checkboxes).toHaveLength(7);
+    expect(checkboxes).toHaveLength(8);
+    const rightToLeft = checkboxes[checkboxes.length - 2];
 
     rightToLeft.checked = true;
     rightToLeft.dispatchEvent(new Event('change'));
-    await fixture.whenStable();
+    await settle();
 
     const tips = host().querySelector('app-pattern-chain')?.parentElement?.parentElement;
     expect(tips?.textContent).toContain('no equivalent for: RightToLeft');
     expect(host().querySelector('app-code-block')?.textContent).toContain(
       'RegexOptions.RightToLeft'
+    );
+  });
+
+  it('generates NonBacktracking, which no browser engine can run', async () => {
+    await click(buttonWith('RegexOptions'));
+
+    const checkboxes = host().querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+    const nonBacktracking = checkboxes[checkboxes.length - 1];
+    nonBacktracking.checked = true;
+    nonBacktracking.dispatchEvent(new Event('change'));
+    await settle();
+
+    expect(host().querySelector('app-code-block')?.textContent).toContain(
+      'RegexOptions.NonBacktracking'
     );
   });
 
@@ -151,7 +195,7 @@ describe('RegexTesterComponent', () => {
     expect(replacementField).not.toBeNull();
 
     setValue(replacementField as HTMLInputElement, '$<year>/$<month>');
-    await fixture.whenStable();
+    await settle();
     expect(text()).toContain('Replaced preview');
 
     await click(buttonWith('Remove', 'button'));

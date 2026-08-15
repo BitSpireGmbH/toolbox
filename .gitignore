@@ -6,6 +6,12 @@
 /out-tsc
 /bazel-out
 
+# .NET
+[Bb]in/
+[Oo]bj/
+# Published browser-wasm runtime, rebuilt by `npm run build:wasm`.
+/dotnet/artifacts
+
 # Node
 /node_modules
 npm-debug.log

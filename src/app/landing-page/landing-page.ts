@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DOTNET_BUILD_INFO } from '../../environments/dotnet-build-info';
 import { TOOL_CATEGORIES, Tool, ToolCategory, toolsByCategory } from '../shared/tools.registry';
 import { ToolIconComponent } from '../shared/tool-icon/tool-icon.component';
 
@@ -24,13 +25,21 @@ interface ToolGroup {
           <h1 class="text-5xl md:text-6xl font-bold bg-linear-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent mb-4">
             Developer Toolbox
           </h1>
-          <a
-            href="https://bitspire.ch"
-            target="_blank"
-            class="inline-flex items-center gap-1.5 mb-4 px-3 py-1 rounded-full bg-white/70 border border-gray-200 text-xs font-medium text-gray-600 hover:text-brand-primary hover:border-brand-primary transition-colors shadow-sm">
-            <span aria-hidden="true">⚡</span>
-            <span>Made by BitSpire - open source</span>
-          </a>
+          <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
+            <a
+              href="https://bitspire.ch"
+              target="_blank"
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/70 border border-gray-200 text-xs font-medium text-gray-600 hover:text-brand-primary hover:border-brand-primary transition-colors shadow-sm">
+              <span aria-hidden="true">⚡</span>
+              <span>Made by BitSpire - open source</span>
+            </a>
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/70 border border-violet-200 text-xs font-medium text-violet-700 shadow-sm"
+              [title]="dotnetTitle">
+              <span aria-hidden="true">🧩</span>
+              <span>Runs real .NET {{ dotnetRelease }} · SDK {{ dotnet.sdkVersion }}</span>
+            </span>
+          </div>
           <p class="text-xl text-gray-600 font-medium max-w-2xl mx-auto mb-6">
             Your go-to collection of tools for everyday web development
           </p>
@@ -161,6 +170,19 @@ export class LandingPageComponent {
   }));
 
   protected readonly keyboardShortcut = signal(this.getKeyboardShortcut());
+
+  /**
+   * Build-time values, so the landing page costs nothing extra. The multi-megabyte
+   * runtime is deliberately not loaded here - the tools that need it fetch it on
+   * demand, and they report the live version once it is actually up.
+   */
+  protected readonly dotnet = DOTNET_BUILD_INFO;
+  /** `net10.0` is the moniker; people call it ".NET 10". */
+  protected readonly dotnetRelease = DOTNET_BUILD_INFO.targetFramework.replace(/^net|\.0$/g, '');
+  protected readonly dotnetTitle =
+    `Tools like the Regex Tester run the real .NET ${DOTNET_BUILD_INFO.targetFramework} runtime ` +
+    'in your browser via WebAssembly, so results match the C# they generate. ' +
+    'The runtime is only downloaded when you open one of those tools.';
 
   constructor() {
     this.keyboardShortcut.set(this.getKeyboardShortcut());

@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Required: the JSImport/JSExport source generator emits pointer code. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!--
+      Globalization is deliberately left ON. Dropping ICU would save ~1.5MB, but the
+      Regex Tester exposes RegexOptions.CultureInvariant as a user-facing toggle, and
+      that toggle is meaningless if the whole runtime is globalization-invariant.
+      Revisit only with a measurement showing IgnoreCase still behaves for non-ASCII.
+    -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <InvariantTimezone>true</InvariantTimezone>
+
+    <PublishTrimmed>true</PublishTrimmed>
+    <WasmEnableWebcil>true</WasmEnableWebcil>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Toolbox.Wasm.Core\Toolbox.Wasm.Core.csproj" />
+  </ItemGroup>
+
+</Project>

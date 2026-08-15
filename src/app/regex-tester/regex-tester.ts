@@ -1,9 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  debounced,
+  inject,
+  linkedSignal,
+  resource,
+  signal,
+} from '@angular/core';
 import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 import { RegexExplainService, RegexPart, RegexRange } from '../services/regex-explain.service';
 import {
+  EMPTY_EVALUATION,
+  NO_REGEX_OPTIONS,
   RegexCodeStyle,
+  RegexEvaluation,
   RegexOptionsModel,
+  RegexReplaceResult,
   RegexTesterService,
 } from '../services/regex-tester.service';
 import { MatchDetailsPanelComponent } from './match-details-panel';
@@ -15,15 +28,12 @@ import {
 } from './regex-examples.const';
 import { TestTextPanelComponent } from './test-text-panel';
 
-const NO_OPTIONS: RegexOptionsModel = {
-  ignoreCase: false,
-  multiline: false,
-  singleline: false,
-  ignorePatternWhitespace: false,
-  explicitCapture: false,
-  cultureInvariant: false,
-  rightToLeft: false,
-};
+/**
+ * Matching now crosses into WebAssembly, and the .NET call runs synchronously on
+ * the main thread once it gets there. Coalescing keystrokes keeps a slow pattern
+ * from queueing one blocking call per character.
+ */
+export const INPUT_DEBOUNCE_MS = 120;
 
 /**
  * A fixed-height application frame rather than a scrolling page: the generated
@@ -50,7 +60,30 @@ const NO_OPTIONS: RegexOptionsModel = {
       <!-- Header -->
       <div class="flex shrink-0 flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 class="mb-1 text-2xl font-bold text-gray-900">Regex Tester</h1>
+          <div class="mb-1 flex items-center gap-2">
+            <h1 class="text-2xl font-bold text-gray-900">Regex Tester</h1>
+            @switch (engineKind()) {
+              @case ('dotnet') {
+                <span
+                  class="rounded-md bg-violet-100 px-1.5 py-0.5 text-[11px] font-semibold text-violet-700"
+                  title="Matching runs on the real System.Text.RegularExpressions, compiled to WebAssembly.">
+                  {{ frameworkDescription() ?? '.NET' }} engine
+                </span>
+              }
+              @case ('javascript') {
+                <span
+                  class="rounded-md bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800"
+                  title="The .NET runtime could not be loaded, so results are approximated by the browser's own regex engine.">
+                  JS fallback
+                </span>
+              }
+              @default {
+                <span class="rounded-md bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-500">
+                  starting .NET&hellip;
+                </span>
+              }
+            }
+          </div>
           <p class="text-sm text-gray-600">
             Test .NET regular expressions with live matches and ready-to-use C# code
           </p>
@@ -118,12 +151,7 @@ const NO_OPTIONS: RegexOptionsModel = {
                   (change)="setOption(option.key, $any($event.target).checked)"
                   class="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-2 focus:ring-brand-primary" />
                 <span>
-                  <span class="block text-xs font-semibold text-gray-800">
-                    {{ option.label }}
-                    @if (option.codegenOnly) {
-                      <span class="font-normal text-gray-400">(codegen only)</span>
-                    }
-                  </span>
+                  <span class="block text-xs font-semibold text-gray-800">{{ option.label }}</span>
                   <span class="block text-[11px] leading-snug text-gray-500">{{ option.hint }}</span>
                 </span>
               </label>
@@ -249,7 +277,17 @@ const NO_OPTIONS: RegexOptionsModel = {
             (textChange)="testInput.set($event)" />
 
           <p class="flex shrink-0 flex-wrap justify-between gap-2 text-xs text-gray-400">
-            <span>Preview runs on the browser engine · generated code targets .NET 7+</span>
+            <span>
+              @switch (engineKind()) {
+                @case ('dotnet') {
+                  Preview runs on the same System.Text.RegularExpressions as the generated code
+                }
+                @case ('javascript') {
+                  Preview runs on the browser engine - an approximation · generated code targets .NET 7+
+                }
+                @default { Starting the .NET runtime&hellip; }
+              }
+            </span>
             @if (selectedPart()) {
               <span>Esc clears the selected part</span>
             }
@@ -374,7 +412,7 @@ export class RegexTesterComponent {
   protected readonly replacement = signal<string>('');
   protected readonly showReplacement = signal<boolean>(false);
 
-  protected readonly options = signal<RegexOptionsModel>(NO_OPTIONS);
+  protected readonly options = signal<RegexOptionsModel>(NO_REGEX_OPTIONS);
   /** Which of the two strip panels is open, if either. */
   protected readonly strip = signal<'examples' | 'options' | null>(null);
 
@@ -392,18 +430,65 @@ export class RegexTesterComponent {
   protected readonly parseResult = computed(() => this.explain.parse(this.pattern()));
   protected readonly parts = computed(() => this.parseResult().parts);
 
-  protected readonly evaluation = computed(() =>
-    this.regexService.evaluate(this.pattern(), this.testInput(), this.options())
-  );
+  /**
+   * Coalesced so a burst of typing produces one match run rather than one per
+   * character. Options and the replacement field are not debounced: those change a
+   * click at a time.
+   */
+  private readonly debouncedPattern = debounced(() => this.pattern(), INPUT_DEBOUNCE_MS);
+  private readonly debouncedTestInput = debounced(() => this.testInput(), INPUT_DEBOUNCE_MS);
 
-  protected readonly replacedPreview = computed(() =>
-    this.regexService.replacePreview(
-      this.pattern(),
-      this.testInput(),
-      this.replacement(),
-      this.options()
-    )
-  );
+  private readonly evaluationResource = resource({
+    params: () => ({
+      pattern: this.debouncedPattern.value(),
+      testInput: this.debouncedTestInput.value(),
+      options: this.options(),
+    }),
+    loader: ({ params }) =>
+      this.regexService.evaluate(params.pattern, params.testInput, params.options),
+  });
+
+  /**
+   * Holds the previous result while the next one is in flight. Reading the resource
+   * directly would blank out on every keystroke, and the highlight overlay has to
+   * stay pinned to the text it was measured against or the match tints visibly
+   * detach from the characters underneath them.
+   */
+  protected readonly evaluation = linkedSignal<RegexEvaluation | undefined, RegexEvaluation>({
+    source: () => this.evaluationResource.value(),
+    computation: (next, previous) => next ?? previous?.value ?? EMPTY_EVALUATION,
+  });
+
+  private readonly replacementResource = resource({
+    params: () => ({
+      pattern: this.debouncedPattern.value(),
+      testInput: this.debouncedTestInput.value(),
+      replacement: this.replacement(),
+      options: this.options(),
+    }),
+    loader: ({ params }) =>
+      this.regexService.replacePreview(
+        params.pattern,
+        params.testInput,
+        params.replacement,
+        params.options
+      ),
+  });
+
+  protected readonly replacedPreview = linkedSignal<
+    RegexReplaceResult | undefined,
+    RegexReplaceResult
+  >({
+    source: () => this.replacementResource.value(),
+    computation: (next, previous) =>
+      next ?? previous?.value ?? { result: this.testInput() },
+  });
+
+  /** Which engine actually answered - `null` until the first result lands. */
+  protected readonly engineKind = this.regexService.engineKind;
+  protected readonly runtimeStatus = this.regexService.runtimeStatus;
+  /** Reported by the runtime itself, e.g. `.NET 10.0.3`. */
+  protected readonly frameworkDescription = this.regexService.frameworkDescription;
 
   protected readonly outputCode = computed(() =>
     this.regexService.generateCode(
@@ -441,11 +526,21 @@ export class RegexTesterComponent {
   );
 
   /** What the hovered part matched - or, with nothing hovered, the selected one. */
-  protected readonly hoveredPartRanges = computed<RegexRange[]>(() => {
-    const part = this.hoveredPart() ?? this.selectedPart();
-    if (!part) return [];
-    return this.explain.mapPart(this.pattern(), part, this.testInput(), this.options());
+  private readonly partRangesResource = resource({
+    params: () => ({
+      pattern: this.pattern(),
+      part: this.hoveredPart() ?? this.selectedPart(),
+      testInput: this.testInput(),
+      options: this.options(),
+    }),
+    loader: ({ params }) =>
+      params.part
+        ? this.explain.mapPart(params.pattern, params.part, params.testInput, params.options)
+        : Promise.resolve<RegexRange[]>([]),
+    defaultValue: [] as RegexRange[],
   });
+
+  protected readonly hoveredPartRanges = this.partRangesResource.value;
 
   protected readonly patternHighlight = computed(() => {
     const pattern = this.pattern();

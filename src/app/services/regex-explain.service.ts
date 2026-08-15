@@ -587,12 +587,12 @@ export class RegexExplainService {
    * Anything that could make the answer wrong bails out to an empty result:
    * showing nothing beats pointing at the wrong characters.
    */
-  mapPart(
+  async mapPart(
     pattern: string,
     part: RegexPart,
     testInput: string,
     options: RegexOptionsModel
-  ): RegexRange[] {
+  ): Promise<RegexRange[]> {
     if (!pattern || !testInput) return [];
     if (part.kind === 'anchor' || part.kind === 'alternation' || part.kind === 'unknown') return [];
     // Zero-width assertions consume nothing, so there is nothing to point at.
@@ -605,7 +605,7 @@ export class RegexExplainService {
     const probe =
       pattern.slice(0, part.start) + `(?<${PROBE_GROUP}>${part.source})` + pattern.slice(part.end);
 
-    const { matches, error } = this.regexService.evaluate(probe, testInput, options);
+    const { matches, error } = await this.regexService.evaluate(probe, testInput, options);
     if (error) return [];
 
     const ranges: RegexRange[] = [];
@@ -683,6 +683,13 @@ export class RegexExplainService {
     if (evaluation.engineWarning) {
       // Reused verbatim: it already names exactly which options are set.
       tips.push({ kind: 'warning', text: evaluation.engineWarning });
+    }
+
+    if (evaluation.truncated) {
+      tips.push({
+        kind: 'warning',
+        text: `Only the first ${evaluation.matches.length} matches are shown. The pattern matches at too many positions to list them all.`,
+      });
     }
 
     const flat = this.flatten(parts);

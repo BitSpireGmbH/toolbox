@@ -15,6 +15,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Required to build the browser-wasm project; not bundled with the SDK.
+      - name: Install WebAssembly build tools
+        run: dotnet workload install wasm-tools
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('dotnet/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -41,6 +58,13 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # The .NET regex semantics live here: fast, browser-free, and the only place
+      # System.Text.RegularExpressions behaviour is actually asserted.
+      - name: Test .NET
+        run: npm run test:wasm
+
+      # `npm run build` publishes the WebAssembly runtime first, then bundles it in
+      # as a copied asset.
       - name: Build
         run: npm run build -- --configuration production
 

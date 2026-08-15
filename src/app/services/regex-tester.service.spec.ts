@@ -1,100 +1,97 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { RegexTesterService, RegexOptionsModel } from './regex-tester.service';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { DotnetRuntimeService, ToolboxWasmExports } from './dotnet-runtime.service';
+import { NO_REGEX_OPTIONS, RegexTesterService } from './regex-tester.service';
+
+const noOptions = NO_REGEX_OPTIONS;
+
+/**
+ * Stands in for the WebAssembly runtime, which jsdom cannot load. Returns the JSON
+ * shape the real `[JSExport]` methods produce - the C# side of that contract is
+ * pinned separately by `RegexJsonFacadeTests`.
+ */
+const fakeExports = (
+  evaluate: () => unknown,
+  replace: () => unknown = () => ({ result: '' })
+): ToolboxWasmExports =>
+  ({
+    Toolbox: {
+      Wasm: {
+        RegexInterop: {
+          Evaluate: () => JSON.stringify(evaluate()),
+          Replace: () => JSON.stringify(replace()),
+        },
+        RuntimeInterop: {
+          GetFrameworkDescription: () => '.NET 10.0.0',
+        },
+      },
+    },
+  }) as ToolboxWasmExports;
+
+const configure = (runtime: Partial<DotnetRuntimeService>): RegexTesterService => {
+  TestBed.configureTestingModule({
+    providers: [{ provide: DotnetRuntimeService, useValue: runtime }],
+  });
+  return TestBed.inject(RegexTesterService);
+};
 
 describe('RegexTesterService', () => {
-  let service: RegexTesterService;
-
-  const noOptions: RegexOptionsModel = {
-    ignoreCase: false,
-    multiline: false,
-    singleline: false,
-    ignorePatternWhitespace: false,
-    explicitCapture: false,
-    cultureInvariant: false,
-    rightToLeft: false,
-  };
-
   beforeEach(() => {
-    service = new RegexTesterService();
+    TestBed.resetTestingModule();
   });
 
-  describe('evaluate', () => {
-    it('returns no matches for an empty pattern', () => {
-      const result = service.evaluate('', 'anything', noOptions);
-      expect(result.matches).toEqual([]);
-      expect(result.error).toBeUndefined();
+  describe('engine selection', () => {
+    it('uses the .NET engine when the runtime loads', async () => {
+      const service = configure({
+        load: () => Promise.resolve(fakeExports(() => ({ matches: [{ value: 'from-dotnet', index: 0, length: 3, groups: [] }] }))),
+      });
+
+      const result = await service.evaluate('abc', 'abc', noOptions);
+
+      expect(service.engineKind()).toBe('dotnet');
+      expect(result.matches[0].value).toBe('from-dotnet');
     });
 
-    it('finds matches and named groups for a date pattern', () => {
-      const result = service.evaluate(
-        String.raw`(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})`,
-        'Shipped on 2024-03-15 and again on 2024-04-02.',
-        noOptions
-      );
+    it('falls back to the browser engine when the runtime fails to load', async () => {
+      const service = configure({
+        load: () => Promise.reject(new Error('offline')),
+      });
 
-      expect(result.error).toBeUndefined();
-      expect(result.matches).toHaveLength(2);
+      const result = await service.evaluate(String.raw`\d+`, 'room 12', noOptions);
 
-      const [first] = result.matches;
-      expect(first.value).toBe('2024-03-15');
-      expect(first.index).toBe(11);
-      expect(first.length).toBe(10);
-
-      const year = first.groups.find(g => g.name === 'year');
-      const month = first.groups.find(g => g.name === 'month');
-      const day = first.groups.find(g => g.name === 'day');
-      expect(year?.value).toBe('2024');
-      expect(month?.value).toBe('03');
-      expect(day?.value).toBe('15');
+      expect(service.engineKind()).toBe('javascript');
+      expect(result.matches[0].value).toBe('12');
+      // The fallback must never pretend to be authoritative.
+      expect(result.engineWarning).toBeTruthy();
     });
 
-    it('returns numbered groups when the pattern has no named groups', () => {
-      const result = service.evaluate(String.raw`(\d+)-(\d+)`, '42-7', noOptions);
-      expect(result.matches).toHaveLength(1);
-      expect(result.matches[0].groups.map(g => g.name)).toEqual(['1', '2']);
-      expect(result.matches[0].groups.map(g => g.value)).toEqual(['42', '7']);
+    it('does not retry the download once it has fallen back', async () => {
+      // Retrying a multi-megabyte fetch on every keystroke would be worse than
+      // living with the approximation, so the fallback is sticky for the session.
+      const load = vi.fn(() => Promise.reject(new Error('offline')));
+      const service = configure({ load });
+
+      await service.evaluate('a', 'a', noOptions);
+      await service.evaluate('b', 'b', noOptions);
+      await service.replacePreview('c', 'c', 'x', noOptions);
+
+      expect(service.engineKind()).toBe('javascript');
+      expect(load).toHaveBeenCalledTimes(1);
     });
 
-    it('reports an error for an invalid pattern instead of throwing', () => {
-      const result = service.evaluate('(unclosed', 'text', noOptions);
-      expect(result.matches).toEqual([]);
-      expect(result.error).toBeTruthy();
-    });
-
-    it('is case sensitive by default and matches when IgnoreCase is enabled', () => {
-      const withoutIgnoreCase = service.evaluate('abc', 'ABC', noOptions);
-      expect(withoutIgnoreCase.matches).toHaveLength(0);
-
-      const withIgnoreCase = service.evaluate('abc', 'ABC', { ...noOptions, ignoreCase: true });
-      expect(withIgnoreCase.matches).toHaveLength(1);
-    });
-
-    it('sets an engine warning when a .NET-only option is enabled', () => {
-      const result = service.evaluate('abc', 'abc', { ...noOptions, rightToLeft: true });
-      expect(result.engineWarning).toContain('RightToLeft');
-    });
-
-    it('does not set an engine warning when only JS-representable options are enabled', () => {
-      const result = service.evaluate('abc', 'abc', { ...noOptions, ignoreCase: true, multiline: true });
-      expect(result.engineWarning).toBeUndefined();
-    });
-  });
-
-  describe('replacePreview', () => {
-    it('replaces matches using the given replacement', () => {
-      const result = service.replacePreview(String.raw`\d+`, 'room 12 and 34', 'N', noOptions);
-      expect(result.result).toBe('room N and N');
-      expect(result.error).toBeUndefined();
-    });
-
-    it('returns the original text unchanged for an invalid pattern', () => {
-      const result = service.replacePreview('(unclosed', 'text', 'X', noOptions);
-      expect(result.result).toBe('text');
-      expect(result.error).toBeTruthy();
+    it('reports no engine until the first evaluation resolves', () => {
+      const service = configure({ load: () => Promise.resolve(fakeExports(() => ({ matches: [] }))) });
+      expect(service.engineKind()).toBeNull();
     });
   });
 
   describe('generateCode', () => {
+    let service: RegexTesterService;
+
+    beforeEach(() => {
+      service = configure({ load: () => Promise.reject(new Error('not needed')) });
+    });
+
     it('generates a source-generated partial class and partial method by default', () => {
       const code = service.generateCode(String.raw`\d+`, noOptions, 'source-generated', 'RegexPatterns', 'MyRegex');
       expect(code).toContain('public partial class RegexPatterns');
@@ -118,6 +115,11 @@ describe('RegexTesterService', () => {
     it('combines multiple enabled options with the bitwise-or operator', () => {
       const code = service.generateCode('abc', { ...noOptions, ignoreCase: true, multiline: true }, 'classic', 'C', 'M');
       expect(code).toContain('RegexOptions.IgnoreCase | RegexOptions.Multiline');
+    });
+
+    it('emits NonBacktracking, which the browser engine has no equivalent for', () => {
+      const code = service.generateCode('abc', { ...noOptions, nonBacktracking: true }, 'classic', 'C', 'M');
+      expect(code).toContain('RegexOptions.NonBacktracking');
     });
 
     it('escapes double quotes in the pattern for the verbatim string literal', () => {

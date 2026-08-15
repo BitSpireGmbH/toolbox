@@ -1,17 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { RegexExplainService, RegexPart } from './regex-explain.service';
-import { RegexEvaluation, RegexOptionsModel } from './regex-tester.service';
+import { DotnetRuntimeService } from './dotnet-runtime.service';
+import { NO_REGEX_OPTIONS, RegexEvaluation } from './regex-tester.service';
 
-const noOptions: RegexOptionsModel = {
-  ignoreCase: false,
-  multiline: false,
-  singleline: false,
-  ignorePatternWhitespace: false,
-  explicitCapture: false,
-  cultureInvariant: false,
-  rightToLeft: false,
-};
+const noOptions = NO_REGEX_OPTIONS;
 
 const ISO_DATE = String.raw`(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})`;
 const SAMPLE = 'Order #1024 shipped on 2024-03-15.\nFollow-up scheduled for 2024-04-02.';
@@ -23,7 +16,20 @@ describe('RegexExplainService', () => {
 
   beforeEach(() => {
     // inject() in the field initialiser needs a real injector, so no `new`.
-    TestBed.configureTestingModule({});
+    // The rejecting stub keeps mapPart on the JavaScript engine: jsdom has no
+    // WebAssembly runtime, and these assertions describe browser-engine behaviour.
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: DotnetRuntimeService,
+          useValue: {
+            status: () => 'failed',
+            frameworkDescription: () => null,
+            load: () => Promise.reject(new Error('no runtime in jsdom')),
+          },
+        },
+      ],
+    });
     service = TestBed.inject(RegexExplainService);
   });
 
@@ -219,73 +225,73 @@ describe('RegexExplainService', () => {
   });
 
   describe('mapPart', () => {
-    it('maps a part to the exact characters it matched', () => {
+    it('maps a part to the exact characters it matched', async () => {
       const { parts } = service.parse(ISO_DATE);
       const year = parts[0].children?.[0] as RegexPart;
 
-      const ranges = service.mapPart(ISO_DATE, year, SAMPLE, noOptions);
+      const ranges = await service.mapPart(ISO_DATE, year, SAMPLE, noOptions);
 
       expect(ranges).toHaveLength(2);
       expect(SAMPLE.substr(ranges[0].index, ranges[0].length)).toBe('2024');
       expect(SAMPLE.substr(ranges[1].index, ranges[1].length)).toBe('2024');
     });
 
-    it('maps a literal separator to each of its occurrences', () => {
+    it('maps a literal separator to each of its occurrences', async () => {
       const { parts } = service.parse(ISO_DATE);
 
-      const ranges = service.mapPart(ISO_DATE, parts[1], SAMPLE, noOptions);
+      const ranges = await service.mapPart(ISO_DATE, parts[1], SAMPLE, noOptions);
 
       expect(ranges).toHaveLength(2);
       expect(SAMPLE.substr(ranges[0].index, ranges[0].length)).toBe('-');
     });
 
-    it('maps a whole group', () => {
+    it('maps a whole group', async () => {
       const { parts } = service.parse(ISO_DATE);
 
-      const ranges = service.mapPart(ISO_DATE, parts[0], SAMPLE, noOptions);
+      const ranges = await service.mapPart(ISO_DATE, parts[0], SAMPLE, noOptions);
 
       expect(SAMPLE.substr(ranges[0].index, ranges[0].length)).toBe('2024');
     });
 
-    it('bails out when the pattern has a numeric backreference', () => {
+    it('bails out when the pattern has a numeric backreference', async () => {
       const pattern = String.raw`(\w)\1`;
       const { parts } = service.parse(pattern);
 
-      expect(service.mapPart(pattern, parts[0], 'aabb', noOptions)).toEqual([]);
+      expect(await service.mapPart(pattern, parts[0], 'aabb', noOptions)).toEqual([]);
     });
 
-    it('bails out for a part inside a lookaround', () => {
+    it('bails out for a part inside a lookaround', async () => {
       const pattern = String.raw`(?=\d)\d`;
       const { parts } = service.parse(pattern);
       const inside = parts[0].children?.[0] as RegexPart;
 
-      expect(service.mapPart(pattern, inside, '42', noOptions)).toEqual([]);
+      expect(await service.mapPart(pattern, inside, '42', noOptions)).toEqual([]);
     });
 
-    it('bails out for anchors, which consume nothing', () => {
+    it('bails out for anchors, which consume nothing', async () => {
       const { parts } = service.parse('^a');
 
-      expect(service.mapPart('^a', parts[0], 'abc', noOptions)).toEqual([]);
+      expect(await service.mapPart('^a', parts[0], 'abc', noOptions)).toEqual([]);
     });
 
-    it('bails out when the pattern already uses the probe name', () => {
+    it('bails out when the pattern already uses the probe name', async () => {
       const pattern = '(?<tbxProbe>a)';
       const { parts } = service.parse(pattern);
 
-      expect(service.mapPart(pattern, parts[0], 'aaa', noOptions)).toEqual([]);
+      expect(await service.mapPart(pattern, parts[0], 'aaa', noOptions)).toEqual([]);
     });
 
-    it('returns nothing rather than throwing when there is no test text', () => {
+    it('returns nothing rather than throwing when there is no test text', async () => {
       const { parts } = service.parse(ISO_DATE);
 
-      expect(service.mapPart(ISO_DATE, parts[0], '', noOptions)).toEqual([]);
+      expect(await service.mapPart(ISO_DATE, parts[0], '', noOptions)).toEqual([]);
     });
 
-    it('honours the options the browser engine can apply', () => {
+    it('honours the options the browser engine can apply', async () => {
       const { parts } = service.parse('A');
 
-      expect(service.mapPart('A', parts[0], 'a', noOptions)).toEqual([]);
-      expect(service.mapPart('A', parts[0], 'a', { ...noOptions, ignoreCase: true })).toHaveLength(1);
+      expect(await service.mapPart('A', parts[0], 'a', noOptions)).toEqual([]);
+      expect(await service.mapPart('A', parts[0], 'a', { ...noOptions, ignoreCase: true })).toHaveLength(1);
     });
   });
 

@@ -3,11 +3,13 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "start": "npm run build:wasm && ng serve",
+    "build": "npm run build:wasm && ng build",
+    "watch": "npm run build:wasm && ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "build:wasm": "dotnet publish dotnet/Toolbox.Wasm -c Release -o dotnet/artifacts/publish && node scripts/finalize-wasm-build.mjs",
+    "test:wasm": "dotnet test dotnet/Toolbox.Wasm.Tests/Toolbox.Wasm.Tests.csproj"
   },
   "prettier": {
     "printWidth": 100,
