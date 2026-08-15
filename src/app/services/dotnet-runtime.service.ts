@@ -9,8 +9,11 @@ export type DotnetRuntimeStatus = 'idle' | 'loading' | 'ready' | 'failed';
 
 /**
  * The methods `[JSExport]` publishes, reached by namespace and class name. Mirrors
- * `dotnet/Toolbox.Wasm/RegexInterop.cs` - every value is a JSON string, because
- * JSImport/JSExport cannot marshal complex objects.
+ * `dotnet/Toolbox.Wasm/RegexInterop.cs` and `LinqInterop.cs` - every value is a JSON
+ * string, because JSImport/JSExport cannot marshal complex objects.
+ *
+ * Hand-maintained, so it has to be updated in lockstep with the C# side: a method
+ * declared here but missing there fails at the call, not at build time.
  */
 export interface ToolboxWasmExports {
   readonly Toolbox: {
@@ -23,6 +26,10 @@ export interface ToolboxWasmExports {
           replacement: string,
           optionsJson: string
         ): string;
+      };
+      readonly LinqInterop: {
+        Run(specJson: string): string;
+        GetCatalog(): string;
       };
       readonly RuntimeInterop: {
         GetFrameworkDescription(): string;

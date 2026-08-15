@@ -20,7 +20,8 @@ export type ToolIconName =
   | 'package'
   | 'regex'
   | 'env'
-  | 'signpost';
+  | 'signpost'
+  | 'flow';
 
 @Component({
   selector: 'app-tool-icon',
@@ -113,6 +114,14 @@ export type ToolIconName =
           <line x1="12" y1="3" x2="12" y2="21" stroke-linecap="round"></line>
           <path d="M12 6h6l2.5 2.5L18 11h-6" stroke-linecap="round" stroke-linejoin="round"></path>
           <path d="M12 14H6l-2.5 2.5L6 19h6" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      }
+      @case ('flow') {
+        <svg [attr.class]="svgClass()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="3" y1="12" x2="17" y2="12" stroke-linecap="round"></line>
+          <circle cx="6.5" cy="12" r="1.6" fill="currentColor" stroke="none"></circle>
+          <circle cx="11.5" cy="12" r="1.6" fill="currentColor" stroke="none"></circle>
+          <path d="M16.5 8.5 20 12l-3.5 3.5" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
       }
     }

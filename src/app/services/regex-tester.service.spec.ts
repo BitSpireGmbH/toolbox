@@ -9,6 +9,9 @@ const noOptions = NO_REGEX_OPTIONS;
  * Stands in for the WebAssembly runtime, which jsdom cannot load. Returns the JSON
  * shape the real `[JSExport]` methods produce - the C# side of that contract is
  * pinned separately by `RegexJsonFacadeTests`.
+ *
+ * Only the regex surface is stubbed; the cast is through `unknown` because the export
+ * interface also carries the other tools' interop, none of which this service touches.
  */
 const fakeExports = (
   evaluate: () => unknown,
@@ -26,7 +29,7 @@ const fakeExports = (
         },
       },
     },
-  }) as ToolboxWasmExports;
+  }) as unknown as ToolboxWasmExports;
 
 const configure = (runtime: Partial<DotnetRuntimeService>): RegexTesterService => {
   TestBed.configureTestingModule({

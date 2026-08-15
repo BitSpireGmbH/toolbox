@@ -322,6 +322,28 @@ export const TOOLS: Tool[] = [
     },
     loadComponent: () => import('../span-visualizer/span-visualizer').then(m => m.SpanVisualizerComponent),
   },
+  {
+    path: 'linq-visualizer',
+    title: 'LINQ Visualizer',
+    tagline: 'Deferred Execution, Explained',
+    description: 'See when LINQ actually runs. Build a query and watch each number move through it, step by step.',
+    seo: {
+      title: 'LINQ Deferred Execution Explained | .NET Developer Toolbox',
+      description: 'Understand how LINQ really works. Build a query and watch every number travel through it, with each step explained in plain English - powered by the real .NET System.Linq in your browser.',
+    },
+    cta: 'Open Visualizer',
+    category: 'Architecture & Analysis',
+    icon: 'flow',
+    accent: {
+      badge: 'from-lime-500 to-green-600 group-hover:shadow-lime-500/25',
+      overlay: 'from-lime-500/0 via-lime-500/0 to-lime-500/5',
+      border: 'hover:border-lime-500',
+      ring: 'focus:ring-lime-500',
+      titleHover: 'group-hover:text-lime-600',
+      ctaText: 'text-lime-600',
+    },
+    loadComponent: () => import('../linq-visualizer/linq-visualizer').then(m => m.LinqVisualizerComponent),
+  },
 
   // ---- Utilities ----
   {

@@ -27,6 +27,7 @@ Toolbox is a full [Progressive Web App](https://web.dev/explore/progressive-web-
 - **Typed DI Helper** - Generate strongly-typed dependency injection configurations for .NET HttpClient and SignalR with support for resilience and protocols
 - **cURL → HttpClient** - Convert any curl command into idiomatic C# HttpClient code (inline, IHttpClientFactory, or typed client) with optional body record generation
 - **Regex Tester** - Test .NET regular expressions with live match highlighting and named-group inspection, generating source-generated (`[GeneratedRegex]`, default) or classic `new Regex(...)` C# code
+- **LINQ Visualizer** - Understand deferred execution by watching it. Build a query from a small palette and see each number travel through it: requests running backwards down the chain, one number passing through every step before the next is fetched, filtered values dropping out, and a plain-English sentence explaining each step as it happens. Shows why nothing runs until you ask, how `First()` stops after three of a thousand items, why one `OrderBy` destroys that saving, and what reusing a query variable costs. Runs on the real `System.Linq`, so the behaviour is .NET's rather than an approximation
 
 ## Support & Contributing
 
