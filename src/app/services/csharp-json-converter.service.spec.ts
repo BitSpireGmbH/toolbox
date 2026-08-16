@@ -579,6 +579,126 @@ describe('CsharpJsonConverterService', () => {
     });
   });
 
+  describe('naming policy', () => {
+    const BASE = {
+      classType: 'class' as const,
+      enumerationType: 'List<T>' as const,
+      serializer: 'System.Text.Json' as const,
+    };
+
+    it('trusts the runtime map over its own approximation', () => {
+      // The whole point of involving .NET: real camelCase turns IPAddress into
+      // ipAddress, so the payload key matches and no attribute is needed. The local
+      // approximation says iPAddress and would wrongly emit one.
+      const json = JSON.stringify({ ipAddress: '10.0.0.1' });
+      const naming = new Map([['IpAddress', 'ipAddress']]);
+
+      const result = service.jsonToCsharp(json, { ...BASE, useWebDefaults: true }, undefined, naming);
+
+      expect(result).not.toContain('[JsonPropertyName');
+    });
+
+    it('emits the attribute when the real policy disagrees with the payload', () => {
+      const json = JSON.stringify({ IPAddress: '10.0.0.1' });
+      const naming = new Map([['IPAddress', 'ipAddress']]);
+
+      const result = service.jsonToCsharp(json, { ...BASE, useWebDefaults: true }, undefined, naming);
+
+      expect(result).toContain('[JsonPropertyName("IPAddress")]');
+    });
+
+    it('applies snake_case names from the runtime', () => {
+      const json = JSON.stringify({ first_name: 'John' });
+      const naming = new Map([['FirstName', 'first_name']]);
+
+      const result = service.jsonToCsharp(
+        json,
+        { ...BASE, namingPolicy: 'SnakeCaseLower' },
+        undefined,
+        naming
+      );
+
+      expect(result).not.toContain('[JsonPropertyName');
+      expect(result).toContain('public string FirstName { get; set; }');
+    });
+
+    it('writes the chosen policy into the generated serializer context', () => {
+      const json = JSON.stringify({ first_name: 'John' });
+
+      const result = service.jsonToCsharp(json, {
+        ...BASE,
+        namingPolicy: 'SnakeCaseLower',
+        generateSerializerContext: true,
+      });
+
+      expect(result).toContain('PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower');
+    });
+
+    it('maps the verbatim policy onto JsonKnownNamingPolicy.Unspecified', () => {
+      const json = JSON.stringify({ Name: 'John' });
+
+      const result = service.jsonToCsharp(json, {
+        ...BASE,
+        namingPolicy: 'None',
+        generateSerializerContext: true,
+      });
+
+      expect(result).toContain('PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified');
+    });
+
+    describe('effectiveNamingPolicy', () => {
+      it('is camelCase under JsonSerializerOptions.Web', () => {
+        expect(service.effectiveNamingPolicy({ ...BASE, useWebDefaults: true })).toBe('CamelCase');
+      });
+
+      it('is verbatim for Newtonsoft, which this tool does not resolve', () => {
+        expect(
+          service.effectiveNamingPolicy({
+            ...BASE,
+            serializer: 'Newtonsoft.Json',
+            namingPolicy: 'CamelCase',
+          })
+        ).toBe('None');
+      });
+    });
+
+    describe('unresolvableNames', () => {
+      it('asks for nothing when no policy is in force', () => {
+        expect(service.unresolvableNames(['IPAddress', 'Name'], 'None')).toEqual([]);
+      });
+
+      it('asks only about names the local camelCase rule gets wrong', () => {
+        // Single leading capital: "Name" -> "name" either way, so .NET adds nothing.
+        expect(service.unresolvableNames(['Name', 'FirstName', 'IPAddress', 'ID'], 'CamelCase'))
+          .toEqual(['IPAddress', 'ID']);
+      });
+
+      it('asks about every name for policies it cannot approximate at all', () => {
+        expect(service.unresolvableNames(['Name', 'ID'], 'SnakeCaseLower')).toEqual(['Name', 'ID']);
+      });
+    });
+
+    describe('propertyNamesFor', () => {
+      it('collects keys from nested objects and arrays', () => {
+        const json = JSON.stringify({ ipAddress: '1', child: { deepKey: [{ leaf: 1 }] } });
+
+        const names = service.propertyNamesFor(json);
+
+        expect(names).toContain('IpAddress');
+        expect(names).toContain('DeepKey');
+        expect(names).toContain('Leaf');
+      });
+
+      it('includes the name wrapRootArray invents', () => {
+        expect(service.propertyNamesFor('[]')).toContain('Items');
+      });
+
+      it('returns nothing for unparseable JSON rather than throwing', () => {
+        expect(service.propertyNamesFor('not json')).toEqual([]);
+      });
+    });
+  });
+
   describe('error handling', () => {
     it('should throw error for invalid C# code', () => {
       expect(() => {

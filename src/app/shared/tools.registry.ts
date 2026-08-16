@@ -456,6 +456,29 @@ export const TOOLS: Tool[] = [
     },
     loadComponent: () => import('../regex-tester/regex-tester').then(m => m.RegexTesterComponent),
   },
+  {
+    path: 'struct-layout',
+    title: 'Struct Layout',
+    tagline: 'Field Offsets & Padding',
+    description: 'Paste a C# struct and see the real field offsets, the padding between them, and a field order that wastes fewer bytes.',
+    seo: {
+      title: 'C# Struct Layout and Padding Calculator | .NET Developer Toolbox',
+      description: 'Paste a C# struct and see the real field offsets, alignment and padding for x64, ARM64, x86 or wasm32 - including the reordering CoreCLR applies as soon as the struct holds a reference.',
+    },
+    cta: 'Calculate Layout',
+    section: 'Tools',
+    category: 'Utilities',
+    icon: 'segments',
+    accent: {
+      badge: 'from-sky-500 to-blue-600 group-hover:shadow-sky-500/25',
+      overlay: 'from-sky-500/0 via-sky-500/0 to-sky-500/5',
+      border: 'hover:border-sky-500',
+      ring: 'focus:ring-sky-500',
+      titleHover: 'group-hover:text-sky-600',
+      ctaText: 'text-sky-600',
+    },
+    loadComponent: () => import('../struct-layout/struct-layout').then(m => m.StructLayoutComponent),
+  },
 ];
 
 export function toolsByCategory(category: ToolCategory): Tool[] {

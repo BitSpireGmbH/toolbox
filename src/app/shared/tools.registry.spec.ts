@@ -32,6 +32,23 @@ describe('tools registry', () => {
     expect(new Set(paths).size).toBe(paths.length);
   });
 
+  /**
+   * Two tools sharing an icon are indistinguishable in the sidebar rail, which is icon-only
+   * at its collapsed width - so the icon is the only thing telling them apart there.
+   */
+  it('gives every tool its own icon', () => {
+    const byIcon = new Map<string, string[]>();
+    for (const tool of TOOLS) {
+      byIcon.set(tool.icon, [...(byIcon.get(tool.icon) ?? []), tool.title]);
+    }
+
+    const shared = [...byIcon.entries()].filter(([, titles]) => titles.length > 1);
+    expect(
+      shared,
+      shared.map(([icon, titles]) => `"${icon}" is used by ${titles.join(' and ')}`).join('; ')
+    ).toEqual([]);
+  });
+
   it('reaches every tool from the section structure', () => {
     const reachable = TOOL_SECTIONS.flatMap(section =>
       section.categories.flatMap(category => TOOLS.filter(tool => tool.category === category))

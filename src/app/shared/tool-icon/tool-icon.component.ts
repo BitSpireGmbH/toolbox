@@ -21,7 +21,8 @@ export type ToolIconName =
   | 'regex'
   | 'env'
   | 'signpost'
-  | 'flow';
+  | 'flow'
+  | 'segments';
 
 @Component({
   selector: 'app-tool-icon',
@@ -122,6 +123,17 @@ export type ToolIconName =
           <circle cx="6.5" cy="12" r="1.6" fill="currentColor" stroke="none"></circle>
           <circle cx="11.5" cy="12" r="1.6" fill="currentColor" stroke="none"></circle>
           <path d="M16.5 8.5 20 12l-3.5 3.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      }
+      @case ('segments') {
+        <!--
+          A byte range divided into fields of unequal width. Deliberately only two
+          dividers: this renders at 20px, where anything finer turns to mush.
+        -->
+        <svg [attr.class]="svgClass()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="2" y="7" width="20" height="10" rx="2"></rect>
+          <line x1="9" y1="7" x2="9" y2="17"></line>
+          <line x1="14" y1="7" x2="14" y2="17"></line>
         </svg>
       }
     }

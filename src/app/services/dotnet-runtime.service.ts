@@ -37,6 +37,14 @@ export interface ToolboxWasmExports {
       readonly DiagnosticsInterop: {
         MeasureSlice(requestJson: string): string;
       };
+      readonly SerializationInterop: {
+        ApplyNaming(requestJson: string): string;
+        GetNamingPolicies(): string;
+        RoundTrip(payload: string, optionsJson: string): string;
+      };
+      readonly LayoutInterop: {
+        Calculate(requestJson: string): string;
+      };
       readonly RuntimeInterop: {
         GetFrameworkDescription(): string;
       };

@@ -1,12 +1,24 @@
-import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CsharpJsonConverterService, JsonToCsharpOptions } from '../services/csharp-json-converter.service';
+import { JsonNamingService, JsonNamingPolicyId } from '../services/json-naming.service';
 import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 import { CodeEditorComponent } from '../shared/code-editor/code-editor.component';
+import { JsonRoundTripPanelComponent } from './json-round-trip-panel';
+
+/** Mirrors `NamingPolicyResolver.Catalog`; labels only, the runtime owns the behaviour. */
+const NAMING_POLICIES: readonly { id: JsonNamingPolicyId; label: string }[] = [
+  { id: 'None', label: 'None (verbatim)' },
+  { id: 'CamelCase', label: 'camelCase' },
+  { id: 'SnakeCaseLower', label: 'snake_case' },
+  { id: 'SnakeCaseUpper', label: 'SNAKE_CASE' },
+  { id: 'KebabCaseLower', label: 'kebab-case' },
+  { id: 'KebabCaseUpper', label: 'KEBAB-CASE' },
+];
 
 @Component({
   selector: 'app-csharp-json',
-  imports: [FormsModule, CodeBlockComponent, CodeEditorComponent],
+  imports: [FormsModule, CodeBlockComponent, CodeEditorComponent, JsonRoundTripPanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -17,15 +29,28 @@ import { CodeEditorComponent } from '../shared/code-editor/code-editor.component
           <p class="text-sm text-gray-600">Convert JSON to C# classes in real-time</p>
         </div>
         
-        <button
-          (click)="showOptions.set(!showOptions())"
-          [class]="showOptions() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
-          class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-          </svg>
-          Options
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            (click)="showRoundTrip.set(!showRoundTrip())"
+            [class]="showRoundTrip() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+            title="Read and rewrite the payload with the real System.Text.Json. Loads the .NET runtime."
+            class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+            </svg>
+            Round-trip
+          </button>
+
+          <button
+            (click)="showOptions.set(!showOptions())"
+            [class]="showOptions() ? 'bg-brand-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+            class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm transition-all flex items-center gap-2 shadow-sm">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+            </svg>
+            Options
+          </button>
+        </div>
       </div>
 
       <!-- Options Panel -->
@@ -141,7 +166,7 @@ import { CodeEditorComponent } from '../shared/code-editor/code-editor.component
                   </label>
 
                   <label class="flex items-center gap-2 cursor-pointer px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <input 
+                    <input
                       type="checkbox"
                       [checked]="generateSerializerContext()"
                       (change)="generateSerializerContext.set($any($event.target).checked)"
@@ -151,6 +176,30 @@ import { CodeEditorComponent } from '../shared/code-editor/code-editor.component
                 }
               </div>
             </div>
+
+            <!-- Fourth Row: Naming Policy -->
+            @if (serializer() === 'System.Text.Json') {
+              <div>
+                <label for="json-naming-policy" class="block text-xs font-semibold text-gray-700 mb-2">Naming Policy</label>
+                <select
+                  id="json-naming-policy"
+                  [value]="effectivePolicy()"
+                  [disabled]="useWebDefaults()"
+                  (change)="namingPolicy.set($any($event.target).value)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-500">
+                  @for (policy of namingPolicies; track policy.id) {
+                    <option [value]="policy.id">{{ policy.label }}</option>
+                  }
+                </select>
+                <p class="mt-1.5 text-[10px] leading-snug text-gray-500">
+                  @if (useWebDefaults()) {
+                    Locked to camelCase by <span class="font-mono">JsonSerializerOptions.Web</span>.
+                  } @else {
+                    Decides when <span class="font-mono">[JsonPropertyName]</span> is actually needed.
+                  }
+                </p>
+              </div>
+            }
           </div>
         </div>
       }
@@ -181,6 +230,20 @@ import { CodeEditorComponent } from '../shared/code-editor/code-editor.component
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-1.5 rounded-full" [class]="outputCode() ? 'bg-green-500' : 'bg-gray-500'"></div>
               <h3 class="font-semibold text-sm text-gray-200">C# Output</h3>
+              @switch (namingSource()) {
+                @case ('runtime') {
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-500/15 text-green-400"
+                        title="Property names were resolved by the real System.Text.Json naming policy running in .NET">
+                    names verified by .NET
+                  </span>
+                }
+                @case ('unverified') {
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/15 text-amber-400"
+                        title="The .NET runtime could not be loaded, so names starting with several capitals (IPAddress, ID) fall back to an approximation. [JsonPropertyName] is emitted rather than omitted where that is uncertain.">
+                    names unverified
+                  </span>
+                }
+              }
             </div>
             <button 
               (click)="copyToClipboard()"
@@ -203,12 +266,25 @@ import { CodeEditorComponent } from '../shared/code-editor/code-editor.component
             heightClass="h-[500px] md:h-[600px]" />
         </div>
       </div>
+
+      <!--
+        Behind a toggle, and lazily so: this is the only part of the tool that needs the
+        .NET runtime unconditionally, and the converter has always worked without it.
+      -->
+      @if (showRoundTrip()) {
+        <div class="mt-5">
+          <app-json-round-trip-panel [json]="inputCode()" />
+        </div>
+      }
     </div>
   `,
   styles: []
 })
 export class CsharpJsonComponent {
   private readonly converterService = inject(CsharpJsonConverterService);
+  private readonly namingService = inject(JsonNamingService);
+
+  protected readonly namingPolicies = NAMING_POLICIES;
 
   protected readonly classType = signal<string>('class');
   protected readonly enumerationType = signal<string>('List<T>');
@@ -216,9 +292,18 @@ export class CsharpJsonComponent {
   protected readonly convertSnakeCase = signal<boolean>(false);
   protected readonly generateSerializerContext = signal<boolean>(false);
   protected readonly showOptions = signal<boolean>(true);
+  protected readonly showRoundTrip = signal<boolean>(false);
   protected readonly wrapRootArray = signal<boolean>(false);
   protected readonly useWebDefaults = signal<boolean>(true);
   protected readonly rootClassName = signal<string>('');
+  protected readonly namingPolicy = signal<JsonNamingPolicyId>('None');
+
+  /**
+   * Whether the last conversion's property names came from the real .NET policy, the
+   * local approximation, or - the common case - a policy where the two cannot disagree
+   * and no claim is worth making.
+   */
+  protected readonly namingSource = signal<'none' | 'runtime' | 'unverified'>('none');
 
   /** Bound rather than inline so the sample keeps real quotes instead of &quot;. */
   protected readonly jsonPlaceholder = `Paste your JSON here...
@@ -247,39 +332,81 @@ export class CsharpJsonComponent {
   protected readonly outputCode = signal<string>('');
   protected readonly errorMessage = signal<string>('');
 
+  /**
+   * Discards the result of a conversion that a later keystroke has already superseded.
+   * Needed because resolving names can await the .NET runtime, and the first call - the
+   * one that downloads it - finishes long after the calls that follow it.
+   */
+  private conversionSequence = 0;
+
   constructor() {
-    // Auto-convert on input change
+    // Auto-convert on input or option change
     effect(() => {
       const input = this.inputCode();
+      const options = this.buildOptions();
+
       if (input.trim()) {
-        this.convert();
+        void this.convert(input, options);
       } else {
         this.outputCode.set('');
         this.errorMessage.set('');
+        this.namingSource.set('none');
       }
     });
   }
 
-  protected convert(): void {
+  /** The policy actually in force; `JsonSerializerOptions.Web` pins it to camelCase. */
+  protected readonly effectivePolicy = computed<JsonNamingPolicyId>(() =>
+    this.useWebDefaults() ? 'CamelCase' : this.namingPolicy()
+  );
+
+  private buildOptions(): JsonToCsharpOptions {
+    return {
+      classType: this.classType() as JsonToCsharpOptions['classType'],
+      enumerationType: this.enumerationType() as JsonToCsharpOptions['enumerationType'],
+      serializer: this.serializer() as JsonToCsharpOptions['serializer'],
+      namespace: undefined,
+      convertSnakeCase: this.convertSnakeCase(),
+      generateSerializerContext: this.generateSerializerContext(),
+      wrapRootArray: this.wrapRootArray(),
+      useWebDefaults: this.useWebDefaults(),
+      rootClassName: this.rootClassName() || undefined,
+      namingPolicy: this.effectivePolicy()
+    };
+  }
+
+  protected async convert(input: string, options: JsonToCsharpOptions): Promise<void> {
+    const sequence = ++this.conversionSequence;
+
     this.errorMessage.set('');
     this.outputCode.set('');
 
+    // Only names the local approximation cannot answer are worth a runtime download, so
+    // the everyday payload still converts without fetching several megabytes of .NET.
+    const policy = this.converterService.effectiveNamingPolicy(options);
+    const ambiguous = this.converterService.unresolvableNames(
+      this.converterService.propertyNamesFor(input),
+      policy
+    );
+
+    let naming = undefined;
+    let source: 'none' | 'runtime' | 'unverified' = 'none';
+
+    if (ambiguous.length > 0) {
+      const resolved = await this.namingService.resolve(ambiguous, policy);
+      if (sequence !== this.conversionSequence) {
+        return;
+      }
+      naming = resolved ?? undefined;
+      source = resolved ? 'runtime' : 'unverified';
+    }
+
     try {
-      const options: JsonToCsharpOptions = {
-        classType: this.classType() as JsonToCsharpOptions['classType'],
-        enumerationType: this.enumerationType() as JsonToCsharpOptions['enumerationType'],
-        serializer: this.serializer() as JsonToCsharpOptions['serializer'],
-        namespace: undefined,
-        convertSnakeCase: this.convertSnakeCase(),
-        generateSerializerContext: this.generateSerializerContext(),
-        wrapRootArray: this.wrapRootArray(),
-        useWebDefaults: this.useWebDefaults(),
-        rootClassName: this.rootClassName() || undefined
-      };
-      const result = this.converterService.jsonToCsharp(this.inputCode(), options);
-      this.outputCode.set(result);
+      this.outputCode.set(this.converterService.jsonToCsharp(input, options, undefined, naming));
+      this.namingSource.set(source);
     } catch (error) {
       this.errorMessage.set(error instanceof Error ? error.message : 'An error occurred during conversion');
+      this.namingSource.set('none');
     }
   }
 

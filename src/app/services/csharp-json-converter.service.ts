@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import type { JsonNamingPolicyId, NamingMap } from './json-naming.service';
 
 export interface CsharpToJsonOptions {
   indentation?: number;
@@ -14,6 +15,13 @@ export interface JsonToCsharpOptions {
   wrapRootArray?: boolean;
   useWebDefaults?: boolean;
   rootClassName?: string;
+  /**
+   * Which `System.Text.Json` naming policy the consuming app configures. Defaults to
+   * `CamelCase` under {@link useWebDefaults} - that is exactly what
+   * `JsonSerializerOptions.Web` sets - and to `None` otherwise, which is what the tool
+   * assumed before the policy became selectable.
+   */
+  namingPolicy?: JsonNamingPolicyId;
 }
 
 interface ParsedProperty {
@@ -49,28 +57,110 @@ export class CsharpJsonConverterService {
   }
 
   /**
-   * Convert JSON to C# class definition
+   * The C# property names this JSON would generate, in the form a naming policy is
+   * applied to. Handed to {@link JsonNamingService} so the whole payload is resolved in
+   * one interop call rather than one per property.
+   *
+   * Deliberately collects every key anywhere in the document rather than mirroring which
+   * of them {@link generateCsharpClass} actually emits. Over-asking costs nothing on a
+   * batched call, and it keeps this immune to the generator's shape rules changing.
    */
-  jsonToCsharp(json: string, options: JsonToCsharpOptions, className?: string): string {
+  propertyNamesFor(json: string): string[] {
+    const names = new Set<string>();
+
+    const walk = (value: unknown): void => {
+      if (Array.isArray(value)) {
+        value.forEach(walk);
+        return;
+      }
+      if (typeof value !== 'object' || value === null) {
+        return;
+      }
+      for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+        names.add(this.toPascalCase(key));
+        walk(child);
+      }
+    };
+
+    try {
+      walk(JSON.parse(json));
+    } catch {
+      // An unparseable payload has no properties to resolve yet; the conversion itself
+      // reports the syntax error.
+      return [];
+    }
+
+    // `wrapRootArray` invents this one rather than reading it from the payload.
+    names.add('Items');
+    return [...names];
+  }
+
+  /**
+   * Which naming policy the generated model will be read under. `JsonSerializerOptions.Web`
+   * is camelCase by definition; Newtonsoft is out of scope for policy resolution, so it
+   * keeps the verbatim behaviour the tool has always had.
+   */
+  effectiveNamingPolicy(options: JsonToCsharpOptions): JsonNamingPolicyId {
+    if (options.serializer !== 'System.Text.Json') {
+      return 'None';
+    }
+    return options.namingPolicy ?? (options.useWebDefaults ? 'CamelCase' : 'None');
+  }
+
+  /**
+   * Of `names`, the ones {@link serializedName}'s fallback cannot work out on its own -
+   * in other words, the only ones worth downloading the .NET runtime for.
+   *
+   * This tool has never needed the runtime, and most payloads still do not: under
+   * camelCase the naive rule and the real policy agree on every name except those
+   * starting with a run of two or more capitals, which is precisely where `IPAddress`
+   * becomes `iPAddress` instead of `ipAddress`. So the runtime is fetched when it changes
+   * the output and skipped when it would only confirm it.
+   *
+   * Kept next to {@link serializedName} on purpose: the two encode the same rule from
+   * opposite sides and have to move together.
+   */
+  unresolvableNames(names: readonly string[], policy: JsonNamingPolicyId): string[] {
+    if (policy === 'None') {
+      return [];
+    }
+
+    if (policy !== 'CamelCase') {
+      // snake_case and kebab-case have no local approximation at all.
+      return [...names];
+    }
+
+    return names.filter(name => /^\p{Lu}\p{Lu}/u.test(name));
+  }
+
+  /**
+   * Convert JSON to C# class definition
+   *
+   * @param naming C# property name → serialized name, from the real .NET naming policy.
+   *   Optional: without it the generator falls back to its own approximation, which is
+   *   wrong for names starting with a run of capitals (`IPAddress`). Callers that can
+   *   reach the runtime should pass it and say so in the UI.
+   */
+  jsonToCsharp(json: string, options: JsonToCsharpOptions, className?: string, naming?: NamingMap): string {
     try {
       const jsonObject = JSON.parse(json);
-      
+
       // Determine the class name to use
       const rootClassName = options.rootClassName || className || (Array.isArray(jsonObject) ? 'RootArray' : 'RootObject');
-      
+
       // Handle arrays at root level
       if (Array.isArray(jsonObject)) {
         if (options.wrapRootArray) {
           // Wrap array in a root object with single property
           const wrappedObject = { items: jsonObject };
-          return this.generateCsharpClass(wrappedObject, rootClassName, options);
+          return this.generateCsharpClass(wrappedObject, rootClassName, options, 0, undefined, naming);
         } else {
           // Generate just the array type alias or collection
-          return this.generateArrayRootClass(jsonObject, rootClassName, options);
+          return this.generateArrayRootClass(jsonObject, rootClassName, options, naming);
         }
       }
-      
-      let result = this.generateCsharpClass(jsonObject, rootClassName, options);
+
+      let result = this.generateCsharpClass(jsonObject, rootClassName, options, 0, undefined, naming);
 
       // Add JsonSerializerContext if requested
       if (options.generateSerializerContext && options.serializer === 'System.Text.Json') {
@@ -86,7 +176,7 @@ export class CsharpJsonConverterService {
   /**
    * Generate C# representation for root-level array
    */
-  private generateArrayRootClass(array: unknown[], className: string, options: JsonToCsharpOptions): string {
+  private generateArrayRootClass(array: unknown[], className: string, options: JsonToCsharpOptions, naming?: NamingMap): string {
     const lines: string[] = [];
     
     // Add namespace if provided
@@ -117,7 +207,7 @@ export class CsharpJsonConverterService {
     const itemClassName = `${className}Item`;
     
     // Generate the item class
-    const itemClass = this.generateCsharpClass(mergedObject, itemClassName, options, 0, array);
+    const itemClass = this.generateCsharpClass(mergedObject, itemClassName, options, 0, array, naming);
     
     lines.push(itemClass);
     lines.push('');
@@ -274,7 +364,7 @@ export class CsharpJsonConverterService {
   /**
    * Generate C# class from JSON object
    */
-  private generateCsharpClass(obj: unknown, className: string, options: JsonToCsharpOptions, indent = 0, contextArray?: unknown[]): string {
+  private generateCsharpClass(obj: unknown, className: string, options: JsonToCsharpOptions, indent = 0, contextArray?: unknown[], naming?: NamingMap): string {
     if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
       throw new Error('Object JSON must be an object for class generation');
     }
@@ -319,7 +409,7 @@ export class CsharpJsonConverterService {
       const propertyType = this.inferCsharpType(value, propertyName, options, info.isNullable);
 
       // Determine if we need JsonPropertyName attribute
-      const needsAttribute = this.shouldAddPropertyNameAttribute(key, propertyName, options);
+      const needsAttribute = this.shouldAddPropertyNameAttribute(key, propertyName, options, naming);
       
       if (needsAttribute) {
         const attributeName = options.serializer === 'System.Text.Json' ? 'JsonPropertyName' : 'JsonProperty';
@@ -412,21 +502,45 @@ export class CsharpJsonConverterService {
   }
 
   /**
-   * Determine if JsonPropertyName attribute should be added
+   * Determine if JsonPropertyName attribute should be added.
+   *
+   * The attribute is needed exactly when the configured naming policy would *not* produce
+   * the key that is actually in the payload - there is no second condition. With no
+   * policy the serialized name is the property name, which reduces to the old
+   * `originalKey !== propertyName` rule.
    */
-  private shouldAddPropertyNameAttribute(originalKey: string, propertyName: string, options: JsonToCsharpOptions): boolean {
-    // If using WebDefaults with System.Text.Json, check if we can skip the attribute
-    if (options.useWebDefaults && options.serializer === 'System.Text.Json') {
-      // WebDefaults uses camelCase naming policy
-      // Skip attribute if the original key matches camelCase of property name
-      const expectedCamelCase = this.toCamelCase(propertyName);
-      if (originalKey === expectedCamelCase) {
-        return false;
-      }
+  private shouldAddPropertyNameAttribute(
+    originalKey: string,
+    propertyName: string,
+    options: JsonToCsharpOptions,
+    naming?: NamingMap
+  ): boolean {
+    return this.serializedName(propertyName, options, naming) !== originalKey;
+  }
+
+  /**
+   * What the serializer will call `propertyName` on the wire.
+   *
+   * Prefers the real `JsonNamingPolicy` result when the runtime supplied one. The
+   * fallback is only reached when the .NET runtime could not be loaded, and it is
+   * knowingly approximate: `toCamelCase` disagrees with .NET on every name beginning with
+   * a run of capitals (`IPAddress` → `iPAddress` rather than `ipAddress`). The tool says
+   * so in that state rather than presenting the guess as verified.
+   *
+   * The snake/kebab policies have no approximation at all and fall through to the
+   * property name, which makes every key look like a mismatch. That is the safe
+   * direction: a redundant `[JsonPropertyName]` still serializes correctly, whereas a
+   * missing one silently does not.
+   */
+  private serializedName(propertyName: string, options: JsonToCsharpOptions, naming?: NamingMap): string {
+    const resolved = naming?.get(propertyName);
+    if (resolved !== undefined) {
+      return resolved;
     }
 
-    // Add attribute if name differs or snake_case conversion
-    return originalKey !== propertyName || (options.convertSnakeCase === true && this.isSnakeCase(originalKey));
+    return this.effectiveNamingPolicy(options) === 'CamelCase'
+      ? this.toCamelCase(propertyName)
+      : propertyName;
   }
 
   /**
@@ -560,12 +674,17 @@ export class CsharpJsonConverterService {
   /**
    * Generate JsonSerializerContext for System.Text.Json source generators
    */
-  private generateJsonSerializerContext(className: string, _options: JsonToCsharpOptions): string {
+  private generateJsonSerializerContext(className: string, options: JsonToCsharpOptions): string {
     const lines: string[] = [];
     const contextName = `${className}JsonContext`;
 
+    // The context has to agree with the policy the attributes were decided against, or
+    // the generated model round-trips under different rules than the tool showed.
+    // `JsonKnownNamingPolicy` names the policies one-for-one, including `Unspecified`.
+    const policy = this.effectiveNamingPolicy(options);
+
     lines.push('[JsonSourceGenerationOptions(');
-    lines.push('    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,');
+    lines.push(`    PropertyNamingPolicy = JsonKnownNamingPolicy.${policy === 'None' ? 'Unspecified' : policy},`);
     lines.push('    GenerationMode = JsonSourceGenerationMode.Metadata)]');
     lines.push(`[JsonSerializable(typeof(${className}))]`);
     lines.push(`public partial class ${contextName} : JsonSerializerContext`);
