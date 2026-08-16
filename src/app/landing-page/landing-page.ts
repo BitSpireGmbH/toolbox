@@ -1,13 +1,25 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DOTNET_BUILD_INFO } from '../../environments/dotnet-build-info';
-import { TOOL_CATEGORIES, Tool, ToolCategory, toolsByCategory } from '../shared/tools.registry';
+import { TOOL_SECTIONS, Tool, ToolCategory, ToolSection, toolsByCategory } from '../shared/tools.registry';
 import { ToolIconComponent } from '../shared/tool-icon/tool-icon.component';
 
 interface ToolGroup {
   category: ToolCategory;
   tools: Tool[];
 }
+
+interface ToolSectionView {
+  name: ToolSection;
+  lede: string;
+  groups: ToolGroup[];
+}
+
+/** One line per section, so the Do/Learn split explains itself without a legend. */
+const SECTION_LEDES: Record<ToolSection, string> = {
+  Tools: 'Paste something in, get something usable back.',
+  Learn: 'Watch how .NET actually behaves, one step at a time.',
+};
 
 @Component({
   selector: 'app-landing-page',
@@ -58,9 +70,16 @@ interface ToolGroup {
         <main class="space-y-12">
           <h2 class="sr-only">Available Tools</h2>
 
-          @for (group of groups; track group.category) {
+          @for (toolSection of sections; track toolSection.name) {
             <section>
-              <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              <header class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">{{ toolSection.name }}</h2>
+                <p class="text-gray-500 mt-1">{{ toolSection.lede }}</p>
+              </header>
+
+              @for (group of toolSection.groups; track group.category) {
+                <section class="mb-10">
+                  <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 @switch (group.category) {
                   @case ('Converters') {
                     <svg class="w-6 h-6 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -72,7 +91,7 @@ interface ToolGroup {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   }
-                  @case ('Architecture & Analysis') {
+                  @case ('Explainers') {
                     <svg class="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
@@ -85,7 +104,7 @@ interface ToolGroup {
                   }
                 }
                 {{ group.category }}
-              </h2>
+              </h3>
               <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @for (tool of group.tools; track tool.path) {
                   <a
@@ -109,9 +128,9 @@ interface ToolGroup {
                           <app-tool-icon [name]="tool.icon" svgClass="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 [class]="'text-base font-bold text-gray-900 transition-colors duration-300 ' + tool.accent.titleHover">
+                          <h4 [class]="'text-base font-bold text-gray-900 transition-colors duration-300 ' + tool.accent.titleHover">
                             {{ tool.title }}
-                          </h3>
+                          </h4>
                           <span class="text-xs text-gray-500 font-medium">{{ tool.tagline }}</span>
                         </div>
                       </div>
@@ -131,7 +150,9 @@ interface ToolGroup {
                     </div>
                   </a>
                 }
-              </div>
+                  </div>
+                </section>
+              }
             </section>
           }
         </main>
@@ -164,9 +185,17 @@ interface ToolGroup {
   styles: []
 })
 export class LandingPageComponent {
-  protected readonly groups: ToolGroup[] = TOOL_CATEGORIES.map(category => ({
-    category,
-    tools: toolsByCategory(category),
+  /**
+   * Mirrors the sidebar exactly - same source, same order - so the two never
+   * tell a different story about where a tool lives.
+   */
+  protected readonly sections: ToolSectionView[] = TOOL_SECTIONS.map(section => ({
+    name: section.name,
+    lede: SECTION_LEDES[section.name],
+    groups: section.categories.map(category => ({
+      category,
+      tools: toolsByCategory(category),
+    })),
   }));
 
   protected readonly keyboardShortcut = signal(this.getKeyboardShortcut());

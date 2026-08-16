@@ -3,12 +3,38 @@ import type { ToolIconName } from './tool-icon/tool-icon.component';
 import type { SeoMetadata } from './seo.models';
 
 /**
- * The four groupings shown in the sidebar, the landing page, and the search
- * palette. Kept as a single list so every surface uses identical labels.
+ * The top-level split, by what the visitor came here to do rather than by
+ * subject matter: 'Tools' take an input and hand back an output, 'Learn'
+ * explains how something in .NET actually behaves. Difficulty deliberately
+ * isn't the axis - it's subjective, it ages badly, and nobody wants to be
+ * told the thing they just opened is for beginners.
  */
-export type ToolCategory = 'Converters' | 'ASP.NET Core' | 'Architecture & Analysis' | 'Utilities';
+export type ToolSection = 'Tools' | 'Learn';
 
-export const TOOL_CATEGORIES: ToolCategory[] = ['Converters', 'ASP.NET Core', 'Architecture & Analysis', 'Utilities'];
+/**
+ * The sub-groupings inside a section, shown in the sidebar, the landing page,
+ * and the search palette. Kept as a single list so every surface uses
+ * identical labels.
+ */
+export type ToolCategory = 'Converters' | 'ASP.NET Core' | 'Utilities' | 'Explainers';
+
+export interface ToolSectionDef {
+  readonly name: ToolSection;
+  /** Sub-groups, in render order. A single-category section renders no sub-headers. */
+  readonly categories: readonly ToolCategory[];
+}
+
+/**
+ * Section and category order for every surface. Declaring the categories
+ * *inside* their section is what stops the two lists drifting apart - there
+ * is no second flat array to keep in sync.
+ */
+export const TOOL_SECTIONS: readonly ToolSectionDef[] = [
+  { name: 'Tools', categories: ['Converters', 'ASP.NET Core', 'Utilities'] },
+  { name: 'Learn', categories: ['Explainers'] },
+];
+
+export const TOOL_CATEGORIES: ToolCategory[] = TOOL_SECTIONS.flatMap(section => [...section.categories]);
 
 /**
  * Fully literal Tailwind class strings (never assembled from a bare color
@@ -46,6 +72,8 @@ export interface Tool {
   seo: SeoMetadata;
   /** Landing-page card call-to-action label, e.g. 'Start Converting'. */
   cta: string;
+  /** Top-level grouping. Must be the section that declares `category`. */
+  section: ToolSection;
   category: ToolCategory;
   icon: ToolIconName;
   accent: ToolAccent;
@@ -53,7 +81,7 @@ export interface Tool {
 }
 
 export const TOOLS: Tool[] = [
-  // ---- Converters ----
+  // ---- Tools / Converters ----
   {
     path: 'csharp-json',
     title: 'JSON → C#',
@@ -64,6 +92,7 @@ export const TOOLS: Tool[] = [
       description: 'Convert JSON to C# classes, records, or structs with serializer options. Your data stays private in your browser.',
     },
     cta: 'Start Converting',
+    section: 'Tools',
     category: 'Converters',
     icon: 'braces',
     accent: {
@@ -86,6 +115,7 @@ export const TOOLS: Tool[] = [
       description: 'Convert C# classes to TypeScript interfaces and TypeScript back to C# for full-stack development in your browser.',
     },
     cta: 'Start Converting',
+    section: 'Tools',
     category: 'Converters',
     icon: 'swap',
     accent: {
@@ -108,6 +138,7 @@ export const TOOLS: Tool[] = [
       description: 'Generate strongly typed C# Options classes from JSON configuration, including validation and registration code.',
     },
     cta: 'Start Generating',
+    section: 'Tools',
     category: 'Converters',
     icon: 'layers',
     accent: {
@@ -130,6 +161,7 @@ export const TOOLS: Tool[] = [
       description: 'Convert appsettings.json to environment variables (Foo:Bar → Foo__Bar) and back, with Bash, PowerShell, cmd/setx, and Docker output. Runs entirely in your browser.',
     },
     cta: 'Start Converting',
+    section: 'Tools',
     category: 'Converters',
     icon: 'env',
     accent: {
@@ -152,6 +184,7 @@ export const TOOLS: Tool[] = [
       description: 'Turn cURL commands into idiomatic C# HttpClient code using inline, factory, or typed-client patterns.',
     },
     cta: 'Start Converting',
+    section: 'Tools',
     category: 'Converters',
     icon: 'terminal',
     accent: {
@@ -165,7 +198,7 @@ export const TOOLS: Tool[] = [
     loadComponent: () => import('../curl-to-httpclient/curl-to-httpclient').then(m => m.CurlToHttpClientComponent),
   },
 
-  // ---- ASP.NET Core ----
+  // ---- Tools / ASP.NET Core ----
   {
     path: 'middleware-designer',
     title: 'Middleware Designer',
@@ -176,6 +209,7 @@ export const TOOLS: Tool[] = [
       description: 'Design ASP.NET Core middleware pipelines visually, simulate requests, and export ready-to-use C# code.',
     },
     cta: 'Start Designing',
+    section: 'Tools',
     category: 'ASP.NET Core',
     icon: 'pipeline',
     accent: {
@@ -198,6 +232,7 @@ export const TOOLS: Tool[] = [
       description: 'Generate strongly typed .NET dependency-injection configuration for HttpClient and SignalR hubs.',
     },
     cta: 'Start Generating',
+    section: 'Tools',
     category: 'ASP.NET Core',
     icon: 'link',
     accent: {
@@ -210,6 +245,8 @@ export const TOOLS: Tool[] = [
     },
     loadComponent: () => import('../typed-di-helper/typed-di-helper').then(m => m.TypedDiHelperComponent),
   },
+
+  // ---- Learn / Explainers ----
   {
     path: 'response-guide',
     title: 'Response Guide',
@@ -220,7 +257,8 @@ export const TOOLS: Tool[] = [
       description: 'Searchable ASP.NET Core response reference: controller and Minimal API TypedResults snippets for 200, 201, 400, 429 with Retry-After, 502, 503, 504, plus nginx 499 and Cloudflare 520-526 explained.',
     },
     cta: 'Start Browsing',
-    category: 'ASP.NET Core',
+    section: 'Learn',
+    category: 'Explainers',
     icon: 'signpost',
     accent: {
       badge: 'from-sky-500 to-blue-700 group-hover:shadow-sky-500/25',
@@ -232,30 +270,6 @@ export const TOOLS: Tool[] = [
     },
     loadComponent: () => import('../response-guide/response-guide').then(m => m.ResponseGuideComponent),
   },
-
-  // ---- Architecture & Analysis ----
-  {
-    path: 'srp-analyzer',
-    title: 'SRP Analyzer',
-    tagline: 'Code Quality Tool',
-    description: 'Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies.',
-    seo: {
-      title: 'C# Single Responsibility Principle Analyzer | .NET Developer Toolbox',
-      description: 'Analyze C# classes for Single Responsibility Principle violations with color-coded dependency insights.',
-    },
-    cta: 'Start Analyzing',
-    category: 'Architecture & Analysis',
-    icon: 'shears',
-    accent: {
-      badge: 'from-rose-500 to-pink-600 group-hover:shadow-rose-500/25',
-      overlay: 'from-rose-500/0 via-rose-500/0 to-rose-500/5',
-      border: 'hover:border-rose-500',
-      ring: 'focus:ring-rose-500',
-      titleHover: 'group-hover:text-rose-600',
-      ctaText: 'text-rose-600',
-    },
-    loadComponent: () => import('../srp-analyzer/srp-analyzer').then(m => m.SrpAnalyzerComponent),
-  },
   {
     path: 'csharp-mindmap',
     title: 'C# Mindmap',
@@ -266,7 +280,8 @@ export const TOOLS: Tool[] = [
       description: 'Explore the evolution of C# language versions and features through an interactive mind map.',
     },
     cta: 'Start Exploring',
-    category: 'Architecture & Analysis',
+    section: 'Learn',
+    category: 'Explainers',
     icon: 'csharp-box',
     accent: {
       badge: 'from-purple-500 to-indigo-600 group-hover:shadow-purple-500/25',
@@ -288,7 +303,8 @@ export const TOOLS: Tool[] = [
       description: "Visualize C# List<T> memory layout, capacity growth, and dynamic resizing behavior.",
     },
     cta: 'Open Visualizer',
-    category: 'Architecture & Analysis',
+    section: 'Learn',
+    category: 'Explainers',
     icon: 'list',
     accent: {
       badge: 'from-sky-500 to-cyan-600 group-hover:shadow-sky-500/25',
@@ -310,7 +326,8 @@ export const TOOLS: Tool[] = [
       description: 'Visualize how C# Span<T> creates zero-allocation memory slices and compare it with Substring().',
     },
     cta: 'Open Visualizer',
-    category: 'Architecture & Analysis',
+    section: 'Learn',
+    category: 'Explainers',
     icon: 'grid',
     accent: {
       badge: 'from-violet-500 to-purple-600 group-hover:shadow-violet-500/25',
@@ -332,7 +349,8 @@ export const TOOLS: Tool[] = [
       description: 'Understand how LINQ really works. Build a query and watch every number travel through it, with each step explained in plain English - powered by the real .NET System.Linq in your browser.',
     },
     cta: 'Open Visualizer',
-    category: 'Architecture & Analysis',
+    section: 'Learn',
+    category: 'Explainers',
     icon: 'flow',
     accent: {
       badge: 'from-lime-500 to-green-600 group-hover:shadow-lime-500/25',
@@ -345,7 +363,30 @@ export const TOOLS: Tool[] = [
     loadComponent: () => import('../linq-visualizer/linq-visualizer').then(m => m.LinqVisualizerComponent),
   },
 
-  // ---- Utilities ----
+  // ---- Tools / Utilities ----
+  {
+    path: 'srp-analyzer',
+    title: 'SRP Analyzer',
+    tagline: 'Code Quality Tool',
+    description: 'Analyze C# classes for Single Responsibility Principle violations with color-coded dependencies.',
+    seo: {
+      title: 'C# Single Responsibility Principle Analyzer | .NET Developer Toolbox',
+      description: 'Analyze C# classes for Single Responsibility Principle violations with color-coded dependency insights.',
+    },
+    cta: 'Start Analyzing',
+    section: 'Tools',
+    category: 'Utilities',
+    icon: 'shears',
+    accent: {
+      badge: 'from-rose-500 to-pink-600 group-hover:shadow-rose-500/25',
+      overlay: 'from-rose-500/0 via-rose-500/0 to-rose-500/5',
+      border: 'hover:border-rose-500',
+      ring: 'focus:ring-rose-500',
+      titleHover: 'group-hover:text-rose-600',
+      ctaText: 'text-rose-600',
+    },
+    loadComponent: () => import('../srp-analyzer/srp-analyzer').then(m => m.SrpAnalyzerComponent),
+  },
   {
     path: 'jwt-decoder',
     title: 'JWT Decoder',
@@ -356,6 +397,7 @@ export const TOOLS: Tool[] = [
       description: 'Decode JSON Web Tokens in your browser, inspect claims, and check token validity without sending data to a server.',
     },
     cta: 'Start Decoding',
+    section: 'Tools',
     category: 'Utilities',
     icon: 'lock',
     accent: {
@@ -378,6 +420,7 @@ export const TOOLS: Tool[] = [
       description: 'Convert .NET projects to Central Package Management and generate a Directory.Packages.props file.',
     },
     cta: 'Start Centralizing',
+    section: 'Tools',
     category: 'Utilities',
     icon: 'package',
     accent: {
@@ -400,6 +443,7 @@ export const TOOLS: Tool[] = [
       description: 'Test .NET regular expressions with live match highlighting, a plain-English breakdown of every part of the pattern, and generated source-generated or classic C# regex code.',
     },
     cta: 'Start Testing',
+    section: 'Tools',
     category: 'Utilities',
     icon: 'regex',
     accent: {
@@ -416,4 +460,8 @@ export const TOOLS: Tool[] = [
 
 export function toolsByCategory(category: ToolCategory): Tool[] {
   return TOOLS.filter(t => t.category === category);
+}
+
+export function toolsBySection(section: ToolSection): Tool[] {
+  return TOOLS.filter(t => t.section === section);
 }

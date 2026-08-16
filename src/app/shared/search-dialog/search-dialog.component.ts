@@ -72,7 +72,7 @@ import { ToolIconComponent } from '../tool-icon/tool-icon.component';
                     <div class="min-w-0">
                       <p class="font-medium text-gray-900">{{ item.title }}</p>
                       <p class="text-sm text-gray-600">{{ item.description }}</p>
-                      <p class="text-xs text-gray-400 mt-1">{{ item.category }}</p>
+                      <p class="text-xs text-gray-400 mt-1">{{ item.section }} · {{ item.category }}</p>
                     </div>
                   </div>
                 </li>
