@@ -1,11 +1,19 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ListBenchmarkComponent } from './list-benchmark';
 
 type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discarding';
 
+/**
+ * The step-through animation, or the measured comparison. The benchmark is a separate tab
+ * rather than a panel on the same one because it pulls in the .NET runtime: keeping it behind
+ * a deliberate click is what stops a visit to the visualizer costing several megabytes.
+ */
+type ActiveTab = 'visualizer' | 'benchmark';
+
 @Component({
   selector: 'app-list-visualizer',
-  imports: [FormsModule],
+  imports: [FormsModule, ListBenchmarkComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
@@ -13,21 +21,65 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 mb-1">List&lt;T&gt; Visualizer</h1>
-          <p class="text-sm text-gray-600">Visualize memory addresses and dynamic resizing in C# List&lt;T&gt;</p>
+          <p class="text-sm text-gray-600">Visualize memory addresses and dynamic resizing in C# List&lt;T&gt;, then measure the cost on the real .NET runtime</p>
         </div>
 
         <div class="flex gap-2">
-           <button
-            (click)="reset()"
-            [disabled]="state() !== 'steady'"
-            class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            Reset
-          </button>
+           @if (activeTab() === 'visualizer') {
+             <button
+              (click)="reset()"
+              [disabled]="state() !== 'steady'"
+              class="px-4 py-2 rounded-lg border border-gray-300 font-medium text-sm hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              Reset
+            </button>
+           }
         </div>
       </div>
+
+      <!-- Tabs -->
+      <div class="border-b border-gray-200 mb-6">
+        <nav class="flex gap-1" role="tablist" aria-label="List visualizer sections">
+          <button
+            role="tab"
+            [attr.aria-selected]="activeTab() === 'visualizer'"
+            [attr.tabindex]="activeTab() === 'visualizer' ? 0 : -1"
+            (click)="activeTab.set('visualizer')"
+            class="px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1"
+            [class.bg-white]="activeTab() === 'visualizer'"
+            [class.border]="activeTab() === 'visualizer'"
+            [class.border-b-white]="activeTab() === 'visualizer'"
+            [class.border-gray-200]="activeTab() === 'visualizer'"
+            [class.-mb-px]="activeTab() === 'visualizer'"
+            [class.text-blue-700]="activeTab() === 'visualizer'"
+            [class.text-gray-500]="activeTab() !== 'visualizer'"
+            [class.hover:text-gray-700]="activeTab() !== 'visualizer'">
+            1. Visualizer
+          </button>
+          <button
+            role="tab"
+            [attr.aria-selected]="activeTab() === 'benchmark'"
+            [attr.tabindex]="activeTab() === 'benchmark' ? 0 : -1"
+            (click)="activeTab.set('benchmark')"
+            class="px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1"
+            [class.bg-white]="activeTab() === 'benchmark'"
+            [class.border]="activeTab() === 'benchmark'"
+            [class.border-b-white]="activeTab() === 'benchmark'"
+            [class.border-gray-200]="activeTab() === 'benchmark'"
+            [class.-mb-px]="activeTab() === 'benchmark'"
+            [class.text-blue-700]="activeTab() === 'benchmark'"
+            [class.text-gray-500]="activeTab() !== 'benchmark'"
+            [class.hover:text-gray-700]="activeTab() !== 'benchmark'">
+            2. Benchmark
+          </button>
+        </nav>
+      </div>
+
+      @if (activeTab() === 'benchmark') {
+        <app-list-benchmark [seedCapacity]="initialCapacity()" />
+      } @else {
 
       <!-- Information Box -->
       <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg mb-6 shadow-sm overflow-hidden">
@@ -326,6 +378,8 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
              </div>
          </div>
       </div>
+
+      }
     </div>
   `,
   styles: [`
@@ -339,6 +393,8 @@ type VisualizerState = 'steady' | 'allocating' | 'copying' | 'adding' | 'discard
   `]
 })
 export class ListVisualizerComponent {
+  protected readonly activeTab = signal<ActiveTab>('visualizer');
+
   protected readonly inputValue = signal<string>('');
   protected readonly initialCapacity = signal<number>(0);
   protected readonly count = signal<number>(0);

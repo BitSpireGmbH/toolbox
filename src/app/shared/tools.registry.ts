@@ -297,10 +297,12 @@ export const TOOLS: Tool[] = [
     path: 'list-visualizer',
     title: 'List<T> Visualizer',
     tagline: 'Memory & Resizing',
-    description: "Visualize memory addresses and dynamic resizing behavior of C#'s List<T>.",
+    description:
+      "Visualize the dynamic resizing of C#'s List<T>, then benchmark it on the real .NET runtime.",
     seo: {
-      title: 'C# List<T> Visualizer | .NET Developer Toolbox',
-      description: "Visualize C# List<T> memory layout, capacity growth, and dynamic resizing behavior.",
+      title: 'C# List<T> Visualizer and Benchmark | .NET Developer Toolbox',
+      description:
+        'Visualize C# List<T> capacity growth and resizing, then measure what preallocating saves in allocations and resizes, benchmarked live by .NET running in your browser.',
     },
     cta: 'Open Visualizer',
     section: 'Learn',
