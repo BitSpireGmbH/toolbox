@@ -1,4 +1,4 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ListBenchmarkComponent } from './list-benchmark';
 
@@ -137,11 +137,17 @@ type ActiveTab = 'visualizer' | 'benchmark';
                 [ngModel]="initialCapacity()"
                 (ngModelChange)="onInitialCapacityChange($event)"
                 [disabled]="count() > 0 || state() !== 'steady'"
+                [attr.aria-invalid]="initialCapacityExceedsMax()"
+                [attr.aria-describedby]="initialCapacityExceedsMax() ? 'initialCapacityError' : undefined"
                 min="0"
                 max="1000"
                 placeholder="0"
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-500" />
-             @if (initialCapacity() > 0) {
+             @if (initialCapacityExceedsMax()) {
+               <p id="initialCapacityError" class="text-[10px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200 mt-1">
+                 Maximum allowed: {{ MAX_INITIAL_CAPACITY }}. Current value will be clamped.
+               </p>
+             } @else if (initialCapacity() > 0) {
                <p class="text-[10px] font-mono text-blue-600 mt-1 bg-blue-50 px-2 py-1 rounded border border-blue-200">
                  new List&lt;T&gt;({{ initialCapacity() }})
                </p>
@@ -393,6 +399,8 @@ type ActiveTab = 'visualizer' | 'benchmark';
   `]
 })
 export class ListVisualizerComponent {
+  protected readonly MAX_INITIAL_CAPACITY = 1000;
+
   protected readonly activeTab = signal<ActiveTab>('visualizer');
 
   protected readonly inputValue = signal<string>('');
@@ -413,6 +421,8 @@ export class ListVisualizerComponent {
   protected readonly BYTES_PER_ELEMENT = 8; // Size of each element in memory (simulating 64-bit pointers)
   
   protected readonly logs = signal<{time: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}[]>([]);
+
+  protected readonly initialCapacityExceedsMax = computed(() => this.initialCapacity() > this.MAX_INITIAL_CAPACITY);
 
   constructor() {
      this.addLog('List<T> initialized with no internal array (Capacity = 0).', 'info');

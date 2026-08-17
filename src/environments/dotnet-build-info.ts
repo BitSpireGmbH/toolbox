@@ -4,6 +4,6 @@
  * Do not edit by hand.
  */
 export const DOTNET_BUILD_INFO = {
-  sdkVersion: '10.0.302',
+  sdkVersion: '10.0.400',
   targetFramework: 'net10.0',
 } as const;

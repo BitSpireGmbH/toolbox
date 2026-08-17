@@ -59,13 +59,20 @@ import { ListBenchmarkResult, ListBenchmarkService } from '../services/list-benc
               [ngModel]="adds()"
               (ngModelChange)="adds.set($event)"
               [disabled]="running()"
+              [attr.aria-invalid]="addsExceedsMax()"
+              [attr.aria-describedby]="addsExceedsMax() ? 'benchAddsError' : undefined"
               min="1"
               [max]="MAX_ADDS"
               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-500" />
-            <!-- min-h-6 matches the sibling column's hint chip, so both helper lines share a baseline. -->
-            <p class="text-[10px] text-gray-500 mt-1 min-h-6 flex items-center">
-              How many items each list receives.
-            </p>
+            @if (addsExceedsMax()) {
+              <p id="benchAddsError" class="text-[10px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200 mt-1">
+                Maximum allowed: {{ MAX_ADDS.toLocaleString() }}
+              </p>
+            } @else {
+              <p class="text-[10px] text-gray-500 mt-1 min-h-6 flex items-center">
+                How many items each list receives.
+              </p>
+            }
           </div>
 
           <div class="min-w-37.5 flex flex-col">
@@ -78,12 +85,20 @@ import { ListBenchmarkResult, ListBenchmarkService } from '../services/list-benc
               [ngModel]="capacity()"
               (ngModelChange)="capacity.set($event)"
               [disabled]="running()"
+              [attr.aria-invalid]="capacityExceedsMax()"
+              [attr.aria-describedby]="capacityExceedsMax() ? 'benchCapacityError' : undefined"
               min="0"
               [max]="MAX_ADDS"
               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-500" />
-            <p class="text-[10px] font-mono text-blue-600 mt-1 bg-blue-50 px-2 py-1 rounded border border-blue-200">
-              new List&lt;int&gt;({{ capacity() > 0 ? capacity() : '' }})
-            </p>
+            @if (capacityExceedsMax()) {
+              <p id="benchCapacityError" class="text-[10px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200 mt-1">
+                Maximum allowed: {{ MAX_ADDS.toLocaleString() }}
+              </p>
+            } @else {
+              <p class="text-[10px] font-mono text-blue-600 mt-1 bg-blue-50 px-2 py-1 rounded border border-blue-200">
+                new List&lt;int&gt;({{ capacity() > 0 ? capacity() : '' }})
+              </p>
+            }
           </div>
 
           <div class="flex flex-col">
@@ -282,6 +297,8 @@ export class ListBenchmarkComponent {
   protected readonly running = signal(false);
 
   protected readonly unavailable = computed(() => this.benchmark.runtimeStatus() === 'failed');
+  protected readonly addsExceedsMax = computed(() => this.adds() > this.MAX_ADDS);
+  protected readonly capacityExceedsMax = computed(() => this.capacity() > this.MAX_ADDS);
 
   constructor() {
     // The parent renders this component only while the Benchmark tab is open, so merely
