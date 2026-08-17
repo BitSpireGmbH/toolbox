@@ -43,7 +43,12 @@ import { ListBenchmarkResult, ListBenchmarkService } from '../services/list-benc
 
       <!-- Controls -->
       <div class="bg-white rounded-xl shadow-md border border-gray-200 p-5">
-        <div class="flex flex-wrap items-end gap-4">
+        <!--
+          Top-aligned, not bottom-aligned: the two columns end in helper lines of different
+          height (plain text vs the padded hint chip), so aligning bottoms would push the
+          capacity label and input a chip's worth above the adds ones.
+        -->
+        <div class="flex flex-wrap items-start gap-4">
           <div class="min-w-37.5 flex flex-col">
             <label for="benchAdds" class="block text-xs font-semibold text-gray-700 mb-2">
               Add() calls
@@ -57,7 +62,10 @@ import { ListBenchmarkResult, ListBenchmarkService } from '../services/list-benc
               min="1"
               [max]="MAX_ADDS"
               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-500" />
-            <p class="text-[10px] text-gray-500 mt-1">How many items each list receives.</p>
+            <!-- min-h-6 matches the sibling column's hint chip, so both helper lines share a baseline. -->
+            <p class="text-[10px] text-gray-500 mt-1 min-h-6 flex items-center">
+              How many items each list receives.
+            </p>
           </div>
 
           <div class="min-w-37.5 flex flex-col">
@@ -78,17 +86,26 @@ import { ListBenchmarkResult, ListBenchmarkService } from '../services/list-benc
             </p>
           </div>
 
-          <button
-            type="button"
-            (click)="runBenchmark()"
-            [disabled]="running() || unavailable()"
-            class="bg-brand-primary hover:bg-brand-secondary text-white px-5 py-2 rounded-lg font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            @if (running()) {
-              Running in .NET…
-            } @else {
-              Run benchmark
-            }
-          </button>
+          <div class="flex flex-col">
+            <!--
+              An empty stand-in for the labels the two fields carry, so the button lands level
+              with the input boxes rather than with their helper text. Same classes as a real
+              label, so it tracks any change to those; aria-hidden keeps it out of the
+              accessibility tree, where the button already names itself.
+            -->
+            <span class="block text-xs font-semibold mb-2 invisible" aria-hidden="true">&nbsp;</span>
+            <button
+              type="button"
+              (click)="runBenchmark()"
+              [disabled]="running() || unavailable()"
+              class="bg-brand-primary hover:bg-brand-secondary text-white px-5 py-2 rounded-lg font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              @if (running()) {
+                Running in .NET…
+              } @else {
+                Run benchmark
+              }
+            </button>
+          </div>
         </div>
 
         @if (capacity() > 0 && capacity() < adds()) {
@@ -112,8 +129,13 @@ import { ListBenchmarkResult, ListBenchmarkService } from '../services/list-benc
       } @else if (result(); as r) {
         <div class="grid lg:grid-cols-2 gap-6">
           @for (run of r.runs; track run.id) {
+            <!--
+              A column flex box so the code panel can take the slack: the grid stretches both
+              cards to the taller one's height, and the preallocated run is shorter whenever it
+              resizes zero times, which would otherwise leave bare card under its code block.
+            -->
             <div
-              class="bg-white rounded-xl shadow-md border overflow-hidden"
+              class="bg-white rounded-xl shadow-md border overflow-hidden flex flex-col"
               [class.border-gray-200]="run.resizeCount > 0"
               [class.border-emerald-300]="run.resizeCount === 0">
               <div
@@ -201,7 +223,11 @@ import { ListBenchmarkResult, ListBenchmarkService } from '../services/list-benc
                 }
               </div>
 
-              <app-code-block [code]="run.code" language="csharp" />
+              <app-code-block
+                class="flex flex-1 flex-col"
+                heightClass="flex-1"
+                [code]="run.code"
+                language="csharp" />
             </div>
           }
         </div>
