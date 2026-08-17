@@ -163,7 +163,11 @@ public class LayoutRuntimeParityTests
     private struct WithReference
     {
         public int Id;
-        public string Name;
+
+        // Every probe below is only ever used as `default(...)`, so its reference fields really
+        // are null and get taken by ref. The `?` says exactly that; it has no effect on layout,
+        // which is why the mirrored source strings in the catalog above stay `public string`.
+        public string? Name;
         public byte Flag;
         public long Ticks;
     }
@@ -171,16 +175,16 @@ public class LayoutRuntimeParityTests
     private struct TwoRefs
     {
         public byte Head;
-        public string A;
+        public string? A;
         public int Mid;
-        public string B;
+        public string? B;
     }
 
     private struct Mixed
     {
         public byte A;
         public long B;
-        public string R;
+        public string? R;
         public short C;
         public int D;
     }
@@ -189,27 +193,27 @@ public class LayoutRuntimeParityTests
     {
         public byte A;
         public decimal M;
-        public string R;
+        public string? R;
     }
 
     private struct RefAndGuid
     {
         public byte A;
         public Guid G;
-        public string R;
+        public string? R;
     }
 
     private struct RefAndNullable
     {
         public byte A;
         public int? N;
-        public string R;
+        public string? R;
     }
 
     private struct HasRef
     {
         public int Id;
-        public string Name;
+        public string? Name;
     }
 
     private struct NestedRef

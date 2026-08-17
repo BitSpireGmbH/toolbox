@@ -1,0 +1,25 @@
+<Project>
+
+  <PropertyGroup Label="Language">
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Analyzers">
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <NuGetAuditLevel>critical</NuGetAuditLevel>
+  </PropertyGroup>
+
+  <!--
+    Release is the configuration that ships: `npm run build:wasm` publishes with -c Release, so
+    this is the gate that keeps warnings out of the app. Debug stays warning-only so a
+    half-finished local edit still builds.
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

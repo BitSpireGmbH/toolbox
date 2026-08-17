@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('dotnet/**/*.csproj') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('dotnet/**/*.csproj', 'dotnet/Directory.Packages.props') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
@@ -61,7 +61,7 @@ jobs:
       # The .NET regex semantics live here: fast, browser-free, and the only place
       # System.Text.RegularExpressions behaviour is actually asserted.
       - name: Test .NET
-        run: npm run test:wasm
+        run: npm run test:wasm -- -c Release
 
       # `npm run build` publishes the WebAssembly runtime first, then bundles it in
       # as a copied asset.
