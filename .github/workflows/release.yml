@@ -1,0 +1,162 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump to apply'
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major, prepatch, preminor, premajor, prerelease]
+      dist_tag:
+        description: 'npm dist-tag'
+        required: false
+        default: latest
+        type: string
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  # Never let two releases run at once.
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish to npm and deploy
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Needed so the bump commit can be pushed back.
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Required to build the browser-wasm project; not bundled with the SDK.
+      - name: Install WebAssembly build tools
+        run: dotnet workload install wasm-tools
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('dotnet/**/*.csproj', 'dotnet/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+
+      # Everything that can say no runs before the bump, so a failing build never
+      # leaves an unpublished version bump sitting on main.
+      - name: Lint
+        run: npm run lint
+
+      - name: Test .NET
+        run: npm run test:wasm -- -c Release
+
+      - name: Test
+        run: npm test
+
+      - name: Bump the version, commit and tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # npm version writes package.json and package-lock.json, runs the "version"
+          # lifecycle script (which regenerates and stages src/environments/app-version.ts),
+          # commits the lot, and creates the matching v-tag.
+          NEW="$(npm version "${{ inputs.bump }}" -m 'Release v%s')"
+          echo "Bumped to $NEW"
+          git push origin HEAD:"${GITHUB_REF_NAME}"
+          git push origin "$NEW"
+          echo "RELEASE_VERSION=${NEW#v}" >> "$GITHUB_ENV"
+
+      # Publishing a version that disagrees with its tag is not something npm
+      # lets you take back, so fail here instead.
+      - name: Check the tag matches package.json
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          PKG="$(node -p "require('./package.json').version")"
+          WANTED="${GITHUB_REF_NAME#v}"
+          if [ "$PKG" != "$WANTED" ]; then
+            echo "::error::package.json is $PKG but the tag says $WANTED. Use the Release workflow, or run 'npm version' and push the tag it creates."
+            exit 1
+          fi
+          echo "RELEASE_VERSION=$PKG" >> "$GITHUB_ENV"
+
+      - name: Fail early if that version is already published
+        run: |
+          set -euo pipefail
+          NAME="$(node -p "require('./package.json').name")"
+          if npm view "$NAME@$RELEASE_VERSION" version > /dev/null 2>&1; then
+            echo "::error::$NAME@$RELEASE_VERSION is already published. npm never allows a version to be replaced."
+            exit 1
+          fi
+
+      # Built after the bump, so the app carries the version it is published under.
+      - name: Build
+        run: npm run build -- --configuration production
+
+      - name: Test CLI
+        run: npm run test:cli
+
+      # The build output is gitignored and only ships because "files" allowlists it.
+      # Prove it is really in the tarball before the publish makes it permanent.
+      - name: Verify npm package
+        run: npm run verify:package
+
+      - name: Publish
+        # --provenance attaches a signed, verifiable record of which workflow run
+        # and which commit produced this tarball. It needs id-token: write, a
+        # public repo, and a `repository` field in package.json that matches.
+        # --access public is required the first time a name is published and is
+        # harmless afterwards.
+        run: npm publish --provenance --access public --tag "${{ inputs.dist_tag || 'latest' }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # The hosted site gets the exact build that was just published, so the two
+      # channels cannot drift. deploy.yml stays as the manual redeploy path.
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C4BCCD6F32884502A82C471396DD32FB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B7A7AC6E73134FAC8A99674E317A2EC9 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DCC79192346349369199FC0B8E04D96B }}
+
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'bitspire-toolkit'
+          slot-name: 'Production'
+          package: dist/toolbox/browser
+
+      - name: Summarise
+        run: |
+          {
+            echo "### Published \`dotnet-toolbox@$RELEASE_VERSION\`"
+            echo
+            echo '```bash'
+            echo "npm install -g dotnet-toolbox@$RELEASE_VERSION"
+            echo '```'
+            echo
+            echo "Deployed the same build to <https://toolbox.bitspire.ch>."
+          } >> "$GITHUB_STEP_SUMMARY"

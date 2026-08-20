@@ -9,6 +9,9 @@
 # .NET
 [Bb]in/
 [Oo]bj/
+# ...except /bin at the repo root, which is the npm CLI entry point rather than
+# .NET build output. The rule above matches a "bin" directory at any depth.
+!/bin/
 # Published browser-wasm runtime, rebuilt by `npm run build:wasm`.
 /dotnet/artifacts
 

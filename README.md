@@ -2,12 +2,44 @@
 
 A client-side developer toolkit with utilities for code conversion and middleware design for .NET developers.
 
+Use it at **[toolbox.bitspire.ch](https://toolbox.bitspire.ch)**, or install it from npm and run it on your own machine.
+
+## Install
+
+```bash
+npm install -g dotnet-toolbox
+dotnet-toolbox
+```
+
+That serves the app on <http://localhost:7654> and opens your browser.
+
+The package carries the whole application, including the .NET WebAssembly runtime, so
+the command is a static file server over your own disk. Nothing is downloaded when you
+run it and nothing you paste into a tool leaves the machine. It needs Node 20.19 or newer,
+and no .NET SDK - the runtime it serves is already compiled.
+
+| Flag | Default | |
+| --- | --- | --- |
+| `--port <number>` | `7654` | Port to listen on |
+| `--host <address>` | `127.0.0.1` | Address to bind. Pass `0.0.0.0` to reach it from another device |
+| `--no-open` | | Print the URL instead of opening a browser |
+| `-v`, `--version` | | Print the version |
+| `-h`, `--help` | | Print usage |
+
+The port is part of the origin, and browsers key the offline cache and any installed copy
+of the app to an origin - so `--port 8080` gets its own cache and its own install, separate
+from the default. Keep `7654` unless something else already has it. If that something else
+turns out to be another `dotnet-toolbox`, the command says so and just opens the tab.
+
+Upgrade with `npm install -g dotnet-toolbox@latest`. A tab left open on the old version
+notices the new files and offers the usual "reload to update" banner.
+
 ## PWA & Offline Support
 
 Toolbox is a full [Progressive Web App](https://web.dev/explore/progressive-web-apps) - install it and use every tool with **no internet connection required**.
 
-- **Installable** - use your browser's "Install app" / "Add to Home Screen" option to run Toolbox in its own window, on desktop or mobile.
-- **Works fully offline** - all tools run entirely client-side, so once the app has loaded once, it keeps working with no network at all (flight mode, tunnels, flaky wifi, you name it).
+- **Installable** - use your browser's "Install app" / "Add to Home Screen" option to run Toolbox in its own window, on desktop or mobile. This works both on the hosted site and on the local `dotnet-toolbox` server, since browsers treat `localhost` as a secure origin.
+- **Works fully offline** - all tools run entirely client-side, so once the app has loaded once, it keeps working with no network at all (flight mode, tunnels, flaky wifi, you name it). The npm package goes one step further: the app never has to load from anywhere in the first place.
 - **Background update checks** - a service worker periodically checks for new deployed versions. When one is ready, a small "reload to update" banner appears - your current session is never interrupted or reloaded without asking.
 
 ## Features
@@ -80,9 +112,30 @@ npm run build
 ```
 
 Run tests - `npm test` covers the Angular app, `npm run test:wasm` covers the .NET
-side (the latter needs no browser and is where .NET regex semantics are asserted):
+side (the latter needs no browser and is where .NET regex semantics are asserted), and
+`npm run test:cli` serves a build through the shipped CLI and checks what comes back:
 
 ```bash
 npm test
 npm run test:wasm
+npm run test:cli
 ```
+
+### Releasing
+
+`package.json` holds the version. `scripts/write-version.mjs` mirrors it into the
+generated, committed `src/environments/app-version.ts`, which is what the sidebar
+renders - so the version in the app, the version on npm and the git tag are the same
+number by construction. `npm run build` regenerates that file, and CI fails if a bump
+lands without it.
+
+Releases go through the **Release** workflow. Either run it and pick a bump - it bumps,
+commits, tags, pushes, publishes and deploys - or push a `v1.2.3` tag yourself, which
+publishes whatever `package.json` already says after checking the two agree. Both paths
+publish to npm with provenance and deploy the same build to the hosted site, so the two
+channels cannot drift.
+
+What ends up in the tarball is the `files` allowlist in `package.json`: the CLI plus
+`dist/toolbox/browser`, minus the `.br`/`.gz` variants and `web.config`, which only the
+IIS-hosted deployment can use. `npm run verify:package` asserts the app is really in
+there - the build output is gitignored, so it ships only because `files` says so.
