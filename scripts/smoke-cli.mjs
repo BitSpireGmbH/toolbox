@@ -1,5 +1,7 @@
-import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { createToolboxServer } from '../bin/dotnet-toolbox.mjs';
 
 const FRAMEWORK_DIR = join('dist', 'toolbox', 'browser', 'dotnet', '_framework');
@@ -84,6 +86,34 @@ try {
 } finally {
   server.close();
 }
+
+// Deliberately executed as a program rather than through "node", because that is
+// what an installed global bin does: npm symlinks it and the kernel reads the
+// shebang. Running it as `node bin/...` proves nothing about that path.
+const expected = JSON.parse(readFileSync('package.json', 'utf8')).version;
+let reported;
+try {
+  reported = execFileSync('./bin/dotnet-toolbox.mjs', ['--version'], { encoding: 'utf8' }).trim();
+} catch (error) {
+  reported = `could not run it: ${error.message.split('\n')[0]}`;
+}
+check('runs as an executable in its own right', reported === expected, `printed "${reported}"`);
+
+// And once more through a symlink, because that is precisely what "npm install -g"
+// creates: a link in the bin directory pointing into node_modules. Resolving the
+// entry point without following it makes the CLI silently do nothing.
+const linkDir = mkdtempSync(join(tmpdir(), 'toolbox-bin-'));
+const link = join(linkDir, 'dotnet-toolbox');
+let viaLink;
+try {
+  symlinkSync(resolve('bin/dotnet-toolbox.mjs'), link);
+  viaLink = execFileSync(link, ['--version'], { encoding: 'utf8' }).trim();
+} catch (error) {
+  viaLink = `could not run it: ${error.message.split('\n')[0]}`;
+} finally {
+  rmSync(linkDir, { recursive: true, force: true });
+}
+check('runs when linked the way npm installs a global bin', viaLink === expected, `printed "${viaLink}"`);
 
 if (failures.length > 0) {
   console.error(`\n[cli] ${failures.length} check(s) failed.\n`);

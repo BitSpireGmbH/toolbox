@@ -1,5 +1,19 @@
+#!/usr/bin/env node
+/**
+ * Serves the built Toolbox PWA from disk and opens it.
+ *
+ * The published package carries the entire app, including the .NET WebAssembly
+ * runtime, so this process only ever reads local files - nothing is fetched and
+ * nothing is sent anywhere. Deliberately dependency-free: a global install should
+ * not put a dependency tree on someone's machine to hand them a static server.
+ *
+ * The shebang above is load-bearing. npm links a global bin as a bare symlink to
+ * this file on macOS and Linux, so it is the only thing telling the kernel to run
+ * it with node. Without it the shell runs the file as a shell script and executes
+ * the first word of line one - which is "import", i.e. ImageMagick.
+ */
 import { createServer, get as httpGet } from 'node:http';
-import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { extname, join, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -297,7 +311,23 @@ async function main() {
   process.on('SIGTERM', stop);
 }
 
-// Importable from the smoke test without starting a server.
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+/**
+ * True when this file was run as a program rather than imported by the smoke test.
+ *
+ * Compared through realpath because npm installs a global bin as a symlink: argv[1]
+ * is then the symlink in the bin directory while import.meta.url is the real file
+ * inside node_modules, and a plain string compare says "imported" for what is
+ * actually the only way users ever run this.
+ */
+function isRunDirectly() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (isRunDirectly()) {
   await main();
 }

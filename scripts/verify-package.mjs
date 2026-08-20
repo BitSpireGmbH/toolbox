@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const BROWSER_DIR = join('dist', 'toolbox', 'browser');
@@ -23,6 +23,28 @@ if (missingOnDisk.length > 0) {
       `\n[package] Run "npm run build" first.\n`
   );
   process.exit(1);
+}
+
+// npm links a global bin as a bare symlink on macOS and Linux, so the shebang is
+// the only thing that makes it runnable. Without it the shell interprets the file
+// and runs its first word - for this file, "import", which is ImageMagick.
+const { bin } = JSON.parse(readFileSync('package.json', 'utf8'));
+
+for (const [command, file] of Object.entries(bin)) {
+  const firstLine = readFileSync(file, 'utf8').split('\n', 1)[0];
+  if (firstLine !== '#!/usr/bin/env node') {
+    console.error(
+      `\n[package] "${file}" (bin "${command}") does not start with "#!/usr/bin/env node".` +
+        `\n[package] It begins with: ${JSON.stringify(firstLine.slice(0, 60))}` +
+        `\n[package] Installed globally, the shell would execute it instead of node.\n`
+    );
+    process.exit(1);
+  }
+
+  if (!(statSync(file).mode & 0o111)) {
+    console.error(`\n[package] "${file}" is not executable. Run: chmod +x ${file}\n`);
+    process.exit(1);
+  }
 }
 
 if (!process.argv.includes('--pack')) {
