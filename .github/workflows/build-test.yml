@@ -69,14 +69,6 @@ jobs:
       - name: Test
         run: npm run test --if-present
 
-      # What "npm install -g dotnet-toolbox" would actually hand someone: the CLI
-      # serving this build, and the tarball it would be served from.
-      - name: Test CLI
-        run: npm run test:cli
-
-      - name: Verify npm package
-        run: npm run verify:package
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:

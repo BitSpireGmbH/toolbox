@@ -9,16 +9,14 @@ on:
         default: patch
         type: choice
         options: [patch, minor, major, prepatch, preminor, premajor, prerelease]
-      dist_tag:
-        description: 'npm dist-tag'
-        required: false
-        default: latest
-        type: string
   push:
     tags: ['v*']
 
 permissions:
   contents: write
+  # Azure is authenticated through OIDC rather than a stored credential, and
+  # azure/login mints that token from this permission. It is load-bearing for the
+  # deploy - not leftover scaffolding.
   id-token: write
 
 concurrency:
@@ -28,9 +26,16 @@ concurrency:
 
 jobs:
   release:
-    name: Publish to npm and deploy
+    name: Deploy
     runs-on: ubuntu-latest
-    environment: npm
+    # Load-bearing, not decorative. Declaring an environment is what puts
+    # "environment:production" in the OIDC subject claim, and the federated
+    # credential on the user-assigned managed identity bitspire-toolkit-id-a644 is
+    # pinned to exactly "repo:BitSpireGmbH/toolbox:environment:production". It also
+    # makes that claim the same for both triggers: without an environment a tag
+    # push would present "ref:refs/tags/v1.2.3", which no credential on that
+    # identity matches. Renaming this needs a matching credential in Azure first.
+    environment: production
     steps:
       - uses: actions/checkout@v5
         with:
@@ -58,12 +63,11 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
 
       # Everything that can say no runs before the bump, so a failing build never
-      # leaves an unpublished version bump sitting on main.
+      # leaves a version bump sitting on main with nothing deployed for it.
       - name: Lint
         run: npm run lint
 
@@ -94,8 +98,8 @@ jobs:
           git push --atomic origin HEAD:"${GITHUB_REF_NAME}" "v$VERSION"
           echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
 
-      # Publishing a version that disagrees with its tag is not something npm
-      # lets you take back, so fail here instead.
+      # The tag is what the sidebar version and the deployed build are identified
+      # by, so a tag that disagrees with package.json would mislabel the release.
       - name: Check the tag matches package.json
         if: github.event_name == 'push'
         run: |
@@ -108,57 +112,11 @@ jobs:
           fi
           echo "RELEASE_VERSION=$PKG" >> "$GITHUB_ENV"
 
-      - name: Fail early if that version is already published
-        run: |
-          set -euo pipefail
-          NAME="$(node -p "require('./package.json').name")"
-          if npm view "$NAME@$RELEASE_VERSION" version > /dev/null 2>&1; then
-            echo "::error::$NAME@$RELEASE_VERSION is already published. npm never allows a version to be replaced."
-            exit 1
-          fi
-
-      # Built after the bump, so the app carries the version it is published under.
+      # Built after the bump, so the app carries the version it is deployed under.
       - name: Build
         run: npm run build -- --configuration production
 
-      - name: Test CLI
-        run: npm run test:cli
-
-      # The build output is gitignored and only ships because "files" allowlists it.
-      # Prove it is really in the tarball before the publish makes it permanent.
-      - name: Verify npm package
-        run: npm run verify:package
-
-      - name: Publish
-        # --provenance attaches a signed, verifiable record of which workflow run
-        # and which commit produced this tarball. It needs id-token: write, a
-        # public repo, and a `repository` field in package.json that matches.
-        # --access public is required the first time a name is published and is
-        # harmless afterwards.
-        run: npm publish --provenance --access public --tag "${{ inputs.dist_tag || 'latest' }}"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # Recorded straight after the publish rather than at the end of the job: the
-      # publish is the irreversible half, so a failure in the deploy below must not
-      # cost us the record of what went out.
-      - name: Summarise the publish
-        run: |
-          {
-            echo "### Published \`dotnet-toolbox@$RELEASE_VERSION\`"
-            echo
-            echo '```bash'
-            echo "npm install -g dotnet-toolbox@$RELEASE_VERSION"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      # The hosted site gets the exact build that was just published, so the two
-      # channels cannot drift. deploy.yml stays as the manual redeploy path.
-      #
-      # This job runs in the "npm" environment, which makes the OIDC subject claim
-      # "repo:<owner>/<repo>:environment:npm" rather than a branch or tag ref. That
-      # needs its own federated credential on the Azure app registration - one that
-      # then covers both the workflow_dispatch and the tag-push route.
+      # deploy.yml stays as the manual redeploy path for a commit that is already built.
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -174,4 +132,9 @@ jobs:
           package: dist/toolbox/browser
 
       - name: Summarise the deploy
-        run: echo "Deployed the same build to <https://toolbox.bitspire.ch>." >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          {
+            echo "### Deployed \`v$RELEASE_VERSION\`"
+            echo
+            echo "<https://toolbox.bitspire.ch>"
+          } >> "$GITHUB_STEP_SUMMARY"

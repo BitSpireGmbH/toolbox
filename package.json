@@ -1,7 +1,8 @@
 {
   "name": "dotnet-toolbox",
   "version": "1.1.1",
-  "description": "A developer toolkit for .NET, installable as a local PWA. Ships the real .NET WebAssembly runtime, so every tool runs on your machine and works offline.",
+  "private": true,
+  "description": "A developer toolkit for .NET. Installable as a PWA that runs the real .NET WebAssembly runtime in your browser, so every tool works offline.",
   "keywords": [
     "dotnet",
     "csharp",
@@ -24,20 +25,8 @@
   },
   "license": "MIT",
   "author": "BitSpire GmbH",
-  "bin": {
-    "dotnet-toolbox": "bin/dotnet-toolbox.mjs"
-  },
-  "files": [
-    "bin/",
-    "dist/toolbox/browser/",
-    "!dist/toolbox/browser/**/*.br",
-    "!dist/toolbox/browser/**/*.gz",
-    "!dist/toolbox/browser/web.config",
-    "README.md",
-    "LICENSE"
-  ],
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "ng": "ng",
@@ -48,10 +37,7 @@
     "lint": "ng lint",
     "build:wasm": "node scripts/clean-wasm-build.mjs && dotnet publish dotnet/Toolbox.Wasm -c Release -o dotnet/artifacts/publish && node scripts/finalize-wasm-build.mjs",
     "test:wasm": "dotnet test dotnet/Toolbox.Wasm.Tests/Toolbox.Wasm.Tests.csproj",
-    "test:cli": "node scripts/smoke-cli.mjs",
-    "verify:package": "node scripts/verify-package.mjs --pack",
-    "version": "node scripts/write-version.mjs && git add src/environments/app-version.ts",
-    "prepack": "node scripts/verify-package.mjs"
+    "version": "node scripts/write-version.mjs && git add src/environments/app-version.ts"
   },
   "prettier": {
     "printWidth": 100,
