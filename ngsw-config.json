@@ -27,7 +27,7 @@
     },
     {
       "name": "dotnet-runtime",
-      "installMode": "lazy",
+      "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [

@@ -2,7 +2,6 @@ import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/cor
 import { RouterOutlet } from '@angular/router';
 import { NavmenuComponent } from './navmenu/navmenu.component';
 import { PwaUpdateService } from './services/pwa-update.service';
-import { RuntimePrefetchService } from './services/runtime-prefetch.service';
 import { CommandPaletteService } from './shared/search-dialog/command-palette.service';
 import { SeoService } from './services/seo.service';
 
@@ -18,8 +17,6 @@ import { SeoService } from './services/seo.service';
 })
 export class App {
   protected readonly pwaUpdate = inject(PwaUpdateService);
-  /** Injected for its constructor: warms the .NET runtime cache once installed. */
-  private readonly runtimePrefetch = inject(RuntimePrefetchService);
   private readonly commandPalette = inject(CommandPaletteService);
   private readonly seo = inject(SeoService);
 
