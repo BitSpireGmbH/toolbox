@@ -82,11 +82,17 @@ jobs:
           # npm version writes package.json and package-lock.json, runs the "version"
           # lifecycle script (which regenerates and stages src/environments/app-version.ts),
           # commits the lot, and creates the matching v-tag.
-          NEW="$(npm version "${{ inputs.bump }}" -m 'Release v%s')"
-          echo "Bumped to $NEW"
-          git push origin HEAD:"${GITHUB_REF_NAME}"
-          git push origin "$NEW"
-          echo "RELEASE_VERSION=${NEW#v}" >> "$GITHUB_ENV"
+          #
+          # Its stdout carries that lifecycle script's output as well as the new
+          # version, so read the result back out of package.json instead of
+          # capturing what it printed.
+          npm version "${{ inputs.bump }}" -m 'Release v%s' > /dev/null
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "Bumped to v$VERSION"
+          # --atomic so a bad tag ref cannot leave the bump commit on the branch
+          # with no tag pointing at it.
+          git push --atomic origin HEAD:"${GITHUB_REF_NAME}" "v$VERSION"
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
 
       # Publishing a version that disagrees with its tag is not something npm
       # lets you take back, so fail here instead.
