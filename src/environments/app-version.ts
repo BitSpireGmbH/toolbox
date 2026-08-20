@@ -3,4 +3,4 @@
  * Committed so a fresh clone compiles and so a release is visible in the diff.
  * Do not edit by hand - run "npm version <bump>".
  */
-export const APP_VERSION = '1.1.0';
+export const APP_VERSION = '1.1.1';
