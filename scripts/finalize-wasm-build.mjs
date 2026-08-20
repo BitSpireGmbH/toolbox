@@ -10,6 +10,11 @@
  * 2. Record which SDK produced the runtime, so the app can show it. The file it
  *    writes is committed: a fresh clone has to compile before anyone has run a .NET
  *    build, and the pinned global.json keeps the value stable between machines.
+ *
+ * 3. Hold the payload to a budget. Shipping a runtime means every assembly added
+ *    later is paid for by every visitor who opens a .NET-backed tool, and there is
+ *    no lazy assembly loading outside the Blazor SDK to soften it. Measuring on
+ *    every build is what keeps "can we add X?" a number instead of an argument.
  */
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync, existsSync, writeFileSync } from 'node:fs';
@@ -20,6 +25,18 @@ const CSPROJ = join('dotnet', 'Toolbox.Wasm', 'Toolbox.Wasm.csproj');
 const BUILD_PROPS = join('dotnet', 'Directory.Build.props');
 const BUILD_INFO = join('src', 'environments', 'dotnet-build-info.ts');
 const REQUIRED_ENTRY = 'dotnet.js';
+
+/**
+ * Ceiling for what a visitor downloads the first time they open a .NET-backed tool.
+ * Deliberately a literal rather than a recorded baseline file: a baseline would churn
+ * on every build (every asset is content-hashed) and bury the one number anyone cares
+ * about in noise. Raising this should show up in a diff as a one-line decision.
+ *
+ * Headroom over the current payload is intentionally small. Adding Microsoft.Extensions
+ * .DependencyInjection fits; adding the ASP.NET Core middleware pipeline does not, and
+ * should have to argue for itself here first.
+ */
+const BUDGET_BYTES = 1_950_000;
 
 // --- 1. verify -------------------------------------------------------------
 
@@ -75,14 +92,73 @@ if (previous !== contents) {
   console.log(`[wasm] build info updated: SDK ${sdkVersion}, ${targetFramework}`);
 }
 
-// Reported because payload size is the main ongoing risk of shipping a runtime.
-const bytes = files.reduce((total, file) => {
-  const stats = statSync(join(FRAMEWORK_DIR, file));
-  return stats.isFile() && !file.endsWith('.br') && !file.endsWith('.gz')
-    ? total + stats.size
-    : total;
-}, 0);
+// --- 3. hold the payload to a budget ---------------------------------------
 
-console.log(
-  `[wasm] ${files.length} files in _framework, ${(bytes / 1024 / 1024).toFixed(1)} MB uncompressed.`
-);
+/**
+ * Publish fingerprints most assets as `name.<10-char-base36>.ext`. Stripping the hash
+ * keeps the reported names readable and stable between builds. Assembly names are
+ * PascalCase and fingerprints are lowercase, so this cannot eat a real name segment.
+ */
+const stableName = (file) => file.replace(/\.[a-z0-9]{10}\.(wasm|dat|js)$/, '.$1');
+
+/**
+ * What a visitor's browser actually pulls down. `dotnet publish` emits a `.br` next to
+ * every compressible asset, so that is the honest number wherever one exists - and
+ * where one does not, the raw size is the honest number, which is what makes a
+ * serving-side compression gap show up here rather than only in DevTools.
+ */
+const wireSize = (file) => {
+  const brotli = join(FRAMEWORK_DIR, `${file}.br`);
+  return statSync(existsSync(brotli) ? brotli : join(FRAMEWORK_DIR, file)).size;
+};
+
+const assets = files
+  .filter((file) => !file.endsWith('.br') && !file.endsWith('.gz'))
+  .filter((file) => statSync(join(FRAMEWORK_DIR, file)).isFile())
+  .map((file) => ({
+    name: stableName(file),
+    wire: wireSize(file),
+    raw: statSync(join(FRAMEWORK_DIR, file)).size,
+    /** `globalizationMode: sharded` means the runtime fetches exactly one of these. */
+    isIcuShard: file.startsWith('icudt'),
+  }));
+
+const totalRaw = assets.reduce((total, asset) => total + asset.raw, 0);
+const runtime = assets.filter((asset) => !asset.isIcuShard);
+const shards = assets.filter((asset) => asset.isIcuShard);
+
+/**
+ * Summing all three ICU shards would overstate the payload by ~470KB: the runtime picks
+ * one by browser culture and never asks for the others. EFIGS is the one western-locale
+ * visitors get, and it is also the smallest, so quoting it keeps the headline honest
+ * without pretending a CJK visitor pays the same.
+ */
+const efigs = shards.find((shard) => shard.name.includes('EFIGS'));
+const runtimeWire = runtime.reduce((total, asset) => total + asset.wire, 0);
+const firstLoad = runtimeWire + (efigs?.wire ?? 0);
+
+const kb = (bytes) => `${(bytes / 1024).toFixed(0)} KB`;
+const pad = (bytes) => kb(bytes).padStart(9);
+
+console.log(`[wasm] ${assets.length} assets, ${(totalRaw / 1024 / 1024).toFixed(1)} MB uncompressed`);
+console.log(`[wasm]   runtime + assemblies ${pad(runtimeWire)}  (${runtime.length} files)`);
+if (efigs) {
+  console.log(`[wasm]   ICU shard (EFIGS)    ${pad(efigs.wire)}  1 of ${shards.length}, picked by browser culture`);
+}
+console.log(`[wasm]   typical first load   ${pad(firstLoad)}  budget ${kb(BUDGET_BYTES)}`);
+
+if (firstLoad > BUDGET_BYTES) {
+  console.error(
+    `\n[wasm] Payload budget exceeded: a typical first load is ${kb(firstLoad)}, ` +
+      `budget is ${kb(BUDGET_BYTES)} (over by ${kb(firstLoad - BUDGET_BYTES)}).`
+  );
+  console.error('[wasm] Largest assets:');
+  for (const asset of [...assets].sort((a, b) => b.wire - a.wire).slice(0, 8)) {
+    console.error(`[wasm]   ${pad(asset.wire)}  ${asset.name}`);
+  }
+  console.error(
+    `[wasm] Either trim what was just added, or raise BUDGET_BYTES in this script ` +
+      `deliberately - the point of the number is that raising it is a decision someone reviews.\n`
+  );
+  process.exit(1);
+}

@@ -8,10 +8,32 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!--
-      Globalization is deliberately left ON. Dropping ICU would save ~1.5MB, but the
-      Regex Tester exposes RegexOptions.CultureInvariant as a user-facing toggle, and
-      that toggle is meaningless if the whole runtime is globalization-invariant.
-      Revisit only with a measurement showing IgnoreCase still behaves for non-ASCII.
+      Globalization is left ON, but the reasoning has been measured and narrowed.
+      See dotnet/Toolbox.Wasm.Tests/GlobalizationDependencyTests.cs, which runs the
+      suite both ways (DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1) to keep this honest.
+
+      What the measurement found:
+        - The old note asked for proof that IgnoreCase still behaves for non-ASCII
+          without ICU. It does. Simple Unicode case mapping has lived in CoreLib
+          since .NET 5, so accented Latin, Cyrillic and Greek all still match. 242
+          of 244 tests pass with ICU off, and the two that do not are the probes
+          written to detect exactly this.
+        - What ICU actually buys is narrower than "the CultureInvariant toggle":
+          without it a named culture cannot be constructed at all - GetCultureInfo
+          ("tr-TR") throws. In the browser CurrentCulture follows the visitor's
+          locale, so ICU is what makes IgnoreCase correct for a Turkish visitor and
+          what leaves the toggle with something to switch off. Drop ICU and the
+          toggle silently becomes a no-op, which is a UI honesty problem rather
+          than a correctness one.
+        - The cost is also smaller than the old "~1.5MB": globalizationMode is
+          "sharded", so a visitor downloads exactly one shard. EFIGS is 141KB
+          brotli / 551KB raw. The ~1.5MB figure counted all three shards
+          uncompressed, which no visitor ever pays.
+
+      So the live trade is 141KB against culture-correct matching for non-English
+      locales. If that stops being worth it, set this to true AND remove the
+      CultureInvariant toggle from the Regex Tester UI rather than shipping a
+      switch that does nothing.
     -->
     <InvariantGlobalization>false</InvariantGlobalization>
     <InvariantTimezone>true</InvariantTimezone>
