@@ -139,8 +139,26 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      # Recorded straight after the publish rather than at the end of the job: the
+      # publish is the irreversible half, so a failure in the deploy below must not
+      # cost us the record of what went out.
+      - name: Summarise the publish
+        run: |
+          {
+            echo "### Published \`dotnet-toolbox@$RELEASE_VERSION\`"
+            echo
+            echo '```bash'
+            echo "npm install -g dotnet-toolbox@$RELEASE_VERSION"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # The hosted site gets the exact build that was just published, so the two
       # channels cannot drift. deploy.yml stays as the manual redeploy path.
+      #
+      # This job runs in the "npm" environment, which makes the OIDC subject claim
+      # "repo:<owner>/<repo>:environment:npm" rather than a branch or tag ref. That
+      # needs its own federated credential on the Azure app registration - one that
+      # then covers both the workflow_dispatch and the tag-push route.
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -155,14 +173,5 @@ jobs:
           slot-name: 'Production'
           package: dist/toolbox/browser
 
-      - name: Summarise
-        run: |
-          {
-            echo "### Published \`dotnet-toolbox@$RELEASE_VERSION\`"
-            echo
-            echo '```bash'
-            echo "npm install -g dotnet-toolbox@$RELEASE_VERSION"
-            echo '```'
-            echo
-            echo "Deployed the same build to <https://toolbox.bitspire.ch>."
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Summarise the deploy
+        run: echo "Deployed the same build to <https://toolbox.bitspire.ch>." >> "$GITHUB_STEP_SUMMARY"
