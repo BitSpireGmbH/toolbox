@@ -88,21 +88,3 @@ side (the latter needs no browser and is where .NET regex semantics are asserted
 npm test
 npm run test:wasm
 ```
-
-### Releasing
-
-`package.json` holds the version. `scripts/write-version.mjs` mirrors it into the
-generated, committed `src/environments/app-version.ts`, which is what the sidebar
-renders - so the version in the app and the git tag are the same number by
-construction. `npm run build` regenerates that file, and CI fails if a bump lands
-without it.
-
-Releases go through the **Release** workflow. Either run it and pick a bump - it bumps,
-commits, tags, pushes and deploys - or push a `v1.2.3` tag yourself, which deploys
-whatever `package.json` already says after checking the two agree. Lint and both test
-suites run before the bump, so a failing build never leaves a version bump stranded on
-main.
-
-`deploy.yml` is the manual redeploy path: it takes the artifact an earlier
-`build-test.yml` run already produced for a commit and pushes it to Azure again,
-without touching the version.
