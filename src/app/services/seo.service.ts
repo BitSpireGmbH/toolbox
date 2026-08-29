@@ -35,6 +35,45 @@ export class SeoService {
 
     const canonical = this.document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     canonical?.setAttribute('href', canonicalUrl);
+
+    this.updateToolStructuredData(metadata, path, canonicalUrl);
+  }
+
+  /**
+   * Tool pages get a SoftwareApplication JSON-LD block so search and AI
+   * answer engines have a structured, quotable fact set per tool. The home
+   * page is already covered by the static WebSite/Organization graph in
+   * index.html, so it gets no per-page block here.
+   */
+  private updateToolStructuredData(metadata: SeoMetadata, path: string, canonicalUrl: string): void {
+    const scriptId = 'tool-structured-data';
+    const existing = this.document.getElementById(scriptId);
+
+    if (!path) {
+      existing?.remove();
+      return;
+    }
+
+    const structuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: metadata.title,
+      description: metadata.description,
+      url: canonicalUrl,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Any (runs in the browser)',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    };
+
+    const script = existing ?? this.document.createElement('script');
+    script.setAttribute('type', 'application/ld+json');
+    script.setAttribute('id', scriptId);
+    script.textContent = JSON.stringify(structuredData);
+
+    if (!existing) {
+      this.document.head.appendChild(script);
+    }
   }
 
   private updateForRoute(url: string): void {

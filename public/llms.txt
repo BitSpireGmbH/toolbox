@@ -1,0 +1,44 @@
+# .NET Developer Toolbox
+
+> Free, privacy-first browser tools for .NET developers, built by BitSpire GmbH, a Swiss .NET software consultancy. Everything runs client-side, including real .NET code executed via WebAssembly, so no code or data is ever sent to a server.
+
+The .NET Developer Toolbox is a collection of converters, ASP.NET Core utilities, and interactive explainers for C# and .NET. Several tools run actual .NET WebAssembly in the browser (not a JavaScript reimplementation), so output like LINQ execution order, List<T> resizing, or struct field layout reflects the real CoreCLR runtime. The toolbox is maintained as a public, open-source proof of BitSpire's .NET expertise. Website https://toolbox.bitspire.ch, made by BitSpire GmbH https://bitspire.ch, source at https://github.com/BitSpireGmbH.
+
+## Website
+
+- [Home](https://toolbox.bitspire.ch/): All tools, grouped by category
+- [Sitemap](https://toolbox.bitspire.ch/sitemap.xml): Full list of tool pages
+
+## Converters
+
+- [JSON to C#](https://toolbox.bitspire.ch/csharp-json): Convert JSON to C# classes, records, or structs with serializer options
+- [C# to TypeScript](https://toolbox.bitspire.ch/csharp-typescript): Bidirectional converter between C# classes and TypeScript interfaces
+- [Strong-Typer](https://toolbox.bitspire.ch/strong-typer): Generate strongly-typed C# Options classes from JSON, with validation and registration code
+- [appsettings to Env Vars](https://toolbox.bitspire.ch/appsettings-env): Flatten appsettings.json into environment variables and back, with Bash, PowerShell, cmd, and Docker output
+- [cURL to HttpClient](https://toolbox.bitspire.ch/curl-to-httpclient): Turn cURL commands into idiomatic C# HttpClient code (inline, factory, or typed-client)
+
+## ASP.NET Core
+
+- [Middleware Designer](https://toolbox.bitspire.ch/middleware-designer): Build ASP.NET Core middleware pipelines visually and export ready-to-use C# code
+- [Typed DI Helper](https://toolbox.bitspire.ch/typed-di-helper): Generate strongly-typed dependency-injection configuration for HttpClient and SignalR hubs
+
+## Utilities
+
+- [JWT Decoder](https://toolbox.bitspire.ch/jwt-decoder): Decode and inspect JSON Web Tokens with claim explanations and signature verification, entirely in the browser
+- [Regex Tester](https://toolbox.bitspire.ch/regex-tester): Test .NET regular expressions with real .NET regex semantics and generated C# code
+- [Struct Layout](https://toolbox.bitspire.ch/struct-layout): Calculate real C# struct field offsets, alignment and padding for x64, ARM64, x86, or wasm32
+- [SRP Analyzer](https://toolbox.bitspire.ch/srp-analyzer): Analyze C# classes for Single Responsibility Principle violations with dependency insights
+- [Package Centralizer](https://toolbox.bitspire.ch/package-centralizer): Convert a .NET solution to Central Package Management
+
+## Learn
+
+- [Response Guide](https://toolbox.bitspire.ch/response-guide): ASP.NET Core HTTP status code reference, as both MVC controller and Minimal API TypedResults snippets
+- [C# Mindmap](https://toolbox.bitspire.ch/csharp-mindmap): Interactive exploration of C# language feature evolution by version
+- [List<T> Visualizer](https://toolbox.bitspire.ch/list-visualizer): Visualize C# List<T> capacity growth and resizing, benchmarked on the real .NET runtime
+- [Span<T> Visualizer](https://toolbox.bitspire.ch/span-visualizer): Visualize how C# Span<T> creates zero-allocation memory slices, compared with Substring()
+- [LINQ Visualizer](https://toolbox.bitspire.ch/linq-visualizer): Step-by-step visualization of LINQ deferred execution, powered by the real .NET System.Linq
+
+## Made by BitSpire
+
+- [BitSpire GmbH](https://bitspire.ch): Swiss software consultancy specializing in .NET, C#, Blazor, and enterprise architecture, including large-scale enterprise delivery in partnership with the customer
+- [.NET Developer Toolbox blog post](https://bitspire.ch/blog/dotnet-developer-toolbox): Background on why BitSpire built and open-sourced these tools

@@ -158,7 +158,8 @@ export class CsharpVersionService {
         "features": [
           { "name": "Collection expression arguments", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15#collection-expression-arguments" },
           { "name": "Union Types", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15#union-types" },
-          { "name": "closed", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/closed" }
+          { "name": "closed", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/closed" },
+          { "name": "Extension indexers", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15#extension-indexers" }
         ]
       }
     }
