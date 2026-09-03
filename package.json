@@ -1,6 +1,6 @@
 {
   "name": "dotnet-toolbox",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "A developer toolkit for .NET. Installable as a PWA that runs the real .NET WebAssembly runtime in your browser, so every tool works offline.",
   "keywords": [
