@@ -49,7 +49,9 @@
             "allowedCommonJsDependencies": [
               "prismjs"
             ],
-            "crossOrigin": "anonymous"
+            "crossOrigin": "anonymous",
+            "server": "src/main.server.ts",
+            "outputMode": "static"
           },
           "configurations": {
             "production": {

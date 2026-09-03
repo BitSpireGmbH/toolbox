@@ -5,13 +5,13 @@ import { TOOLS } from './shared/tools.registry';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/home',
-    pathMatch: 'full'
+    data: { seo: HOME_SEO },
+    loadComponent: () => import('./landing-page/landing-page').then(m => m.LandingPageComponent)
   },
   {
     path: 'home',
-    data: { seo: HOME_SEO },
-    loadComponent: () => import('./landing-page/landing-page').then(m => m.LandingPageComponent)
+    redirectTo: '/',
+    pathMatch: 'full'
   },
   ...TOOLS.map(tool => ({
     path: tool.path,

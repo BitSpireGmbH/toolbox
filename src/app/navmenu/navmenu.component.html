@@ -46,9 +46,9 @@
     }
 
     <a
-      routerLink="/home"
+      routerLink="/"
       routerLinkActive="text-white bg-gray-800 border-l-2 border-brand-primary"
-      [routerLinkActiveOptions]="{exact: false}"
+      [routerLinkActiveOptions]="{exact: true}"
       class="w-full flex items-center h-10 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all relative group"
       [class.justify-center]="!sidebarOpen()"
       [class.px-3]="sidebarOpen()"
@@ -256,9 +256,9 @@
 
     <nav class="flex-1 min-h-0 overflow-y-auto py-4" aria-label="Mobile navigation">
       <a
-        routerLink="/home"
+        routerLink="/"
         routerLinkActive="bg-brand-primary/20 text-brand-primary border-l-2 border-brand-primary"
-        [routerLinkActiveOptions]="{exact: false}"
+        [routerLinkActiveOptions]="{exact: true}"
         (click)="onCloseSidebar()"
         class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

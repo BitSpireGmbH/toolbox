@@ -1,4 +1,13 @@
-import { Component, ChangeDetectionStrategy, signal, computed, effect, inject } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+  effect,
+  inject,
+  PLATFORM_ID,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 import { ResponseCatalogService } from '../services/response-catalog.service';
@@ -200,6 +209,7 @@ const QUERY_DEBOUNCE_MS = 150;
 export class ResponseGuideComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly catalog = inject(ResponseCatalogService);
 
   protected readonly modeOptions: readonly { value: ResponseMode; label: string }[] = [
@@ -259,6 +269,13 @@ export class ResponseGuideComponent {
       const vendor = this.showVendorSpecific();
 
       this.persistMode(mode);
+
+      // Prerendering has no real URL to update, and treats any navigation
+      // as a redirect - skip it there so the route still prerenders its
+      // actual content instead of a redirect stub.
+      if (!this.isBrowser) {
+        return;
+      }
 
       void this.router.navigate([], {
         relativeTo: this.route,
