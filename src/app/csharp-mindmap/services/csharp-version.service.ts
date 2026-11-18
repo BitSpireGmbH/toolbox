@@ -154,7 +154,6 @@ export class CsharpVersionService {
       },
       "15": {
         "year": 2026,
-        "isPreview": true,
         "features": [
           { "name": "Collection expression arguments", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15#collection-expression-arguments" },
           { "name": "Union Types", "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15#union-types" },
