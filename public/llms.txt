@@ -25,6 +25,7 @@ The .NET Developer Toolbox is a collection of converters, ASP.NET Core utilities
 ## Utilities
 
 - [JWT Decoder](https://toolbox.bitspire.ch/jwt-decoder): Decode and inspect JSON Web Tokens with claim explanations and signature verification, entirely in the browser
+- [Query String Inspector](https://toolbox.bitspire.ch/query-inspector): Deconstruct a URL or query string, decode and edit JSON parameters, remove parameters, and copy the rebuilt URL
 - [Regex Tester](https://toolbox.bitspire.ch/regex-tester): Test .NET regular expressions with real .NET regex semantics and generated C# code
 - [Struct Layout](https://toolbox.bitspire.ch/struct-layout): Calculate real C# struct field offsets, alignment and padding for x64, ARM64, x86, or wasm32
 - [SRP Analyzer](https://toolbox.bitspire.ch/srp-analyzer): Analyze C# classes for Single Responsibility Principle violations with dependency insights

@@ -22,7 +22,8 @@ export type ToolIconName =
   | 'env'
   | 'signpost'
   | 'flow'
-  | 'segments';
+  | 'segments'
+  | 'query';
 
 @Component({
   selector: 'app-tool-icon',
@@ -123,6 +124,14 @@ export type ToolIconName =
           <circle cx="6.5" cy="12" r="1.6" fill="currentColor" stroke="none"></circle>
           <circle cx="11.5" cy="12" r="1.6" fill="currentColor" stroke="none"></circle>
           <path d="M16.5 8.5 20 12l-3.5 3.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      }
+      @case ('query') {
+        <svg [attr.class]="svgClass()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 9a3 3 0 1 1 4 2.83c-.6.22-1 .8-1 1.42V14"></path>
+          <line x1="8" y1="18" x2="8.01" y2="18"></line>
+          <line x1="14" y1="10" x2="20" y2="10"></line>
+          <line x1="14" y1="14" x2="20" y2="14"></line>
         </svg>
       }
       @case ('segments') {
