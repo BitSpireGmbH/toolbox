@@ -1,5 +1,5 @@
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, resource, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DOCUMENT, computed, inject, linkedSignal, resource, signal } from '@angular/core';
 import { CodeBlockComponent } from '../shared/code-block/code-block.component';
 import { DotnetRuntimeService, invokeWasm } from '../services/dotnet-runtime.service';
 import { StepCodeComponent, type CodeMarker } from './step-code';
@@ -54,6 +54,20 @@ const BLOCKING_CODE = AWAITING_CODE.replace(
   'await Task.Delay(wait); // holds nothing',
   'Thread.Sleep(wait);     // holds the thread'
 );
+
+function whenVisible(document: Document): Promise<void> {
+  if (!document.hidden) {
+    return Promise.resolve();
+  }
+  return new Promise(resolve =>
+    document.addEventListener('visibilitychange', function onChange() {
+      if (!document.hidden) {
+        document.removeEventListener('visibilitychange', onChange);
+        resolve();
+      }
+    })
+  );
+}
 
 const TASK_ARROW_COLORS: Record<string, string> = { A: 'text-sky-400', B: 'text-violet-400', C: 'text-emerald-400' };
 
@@ -502,9 +516,21 @@ export class AsyncVisualizerComponent {
   protected readonly blocking = signal(false);
   protected readonly totals = signal<{ awaiting?: number; blocking?: number }>({});
 
+  protected readonly explanation = resource({
+    loader: () => invokeWasm<AsyncExplanation>(this.runtime, wasm => wasm.AsyncInterop.Explain()),
+  });
+
+  private readonly document = inject(DOCUMENT);
+
+  /**
+   * Waits for the explanation so the two do not share the browser's single thread, and for
+   * the tab to be visible: hidden tabs throttle timers to about once a second, which would
+   * turn a 40 ms delay into a 1000 ms one and make the chart describe the browser, not .NET.
+   */
   protected readonly timelineResource = resource({
-    params: () => ({ blocking: this.blocking() }),
+    params: () => (this.explanation.hasValue() ? { blocking: this.blocking() } : undefined),
     loader: async ({ params }) => {
+      await whenVisible(this.document);
       const timeline = await invokeWasm<ThreadTimeline>(this.runtime, wasm => wasm.AsyncInterop.RunTimeline(params.blocking));
       this.totals.update(totals => ({ ...totals, [params.blocking ? 'blocking' : 'awaiting']: timeline.totalMs }));
       return timeline;
@@ -518,9 +544,6 @@ export class AsyncVisualizerComponent {
   });
   protected readonly framework = this.runtime.frameworkDescription;
 
-  protected readonly explanation = resource({
-    loader: () => invokeWasm<AsyncExplanation>(this.runtime, wasm => wasm.AsyncInterop.Explain()),
-  });
 
   protected readonly unavailable = computed(
     () => this.runtime.status() === 'failed' || this.explanation.error() !== undefined
@@ -550,7 +573,7 @@ export class AsyncVisualizerComponent {
   }
 
   protected scrollTo(id: string): void {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   protected taskCount(timeline: ThreadTimeline): number {
