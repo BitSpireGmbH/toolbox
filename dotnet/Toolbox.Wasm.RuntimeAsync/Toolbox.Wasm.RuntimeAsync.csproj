@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The same probe sources as Toolbox.Wasm.Core, compiled a second time with runtime async so the
+    explainer can compare both outputs. Its own assembly because the switch is per compilation, and
+    because Mono (the browser runtime) refuses to execute these methods - Core must stay without it.
+  -->
+  <PropertyGroup>
+    <IsTrimmable>true</IsTrimmable>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <Features>runtime-async=on</Features>
+  </PropertyGroup>
+
+</Project>

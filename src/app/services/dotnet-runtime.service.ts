@@ -48,6 +48,10 @@ export interface ToolboxWasmExports {
       readonly LayoutInterop: {
         Calculate(requestJson: string): string;
       };
+      readonly AsyncInterop: {
+        Explain(): Promise<string>;
+        RunTimeline(blocking: boolean): Promise<string>;
+      };
       readonly RuntimeInterop: {
         GetFrameworkDescription(): string;
       };
@@ -84,10 +88,10 @@ export interface WasmRuntimeLoader {
  */
 export async function invokeWasm<T>(
   runtime: WasmRuntimeLoader,
-  call: (wasm: ToolboxWasmExports['Toolbox']['Wasm']) => string
+  call: (wasm: ToolboxWasmExports['Toolbox']['Wasm']) => string | Promise<string>
 ): Promise<T> {
   const exports = await runtime.load();
-  return JSON.parse(call(exports.Toolbox.Wasm)) as T;
+  return JSON.parse(await call(exports.Toolbox.Wasm)) as T;
 }
 
 interface DotnetRuntimeApi {

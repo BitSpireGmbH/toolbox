@@ -5,4 +5,10 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Toolbox.Wasm.RuntimeAsync\Shapes.cs" Link="Async\Shapes.cs" />
+    <Compile Include="..\Toolbox.Wasm.RuntimeAsync\StackProbe.cs" Link="Async\StackProbe.cs" />
+    <ProjectReference Include="..\Toolbox.Wasm.RuntimeAsync\Toolbox.Wasm.RuntimeAsync.csproj" />
+  </ItemGroup>
+
 </Project>

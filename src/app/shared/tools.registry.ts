@@ -364,6 +364,29 @@ export const TOOLS: Tool[] = [
     },
     loadComponent: () => import('../linq-visualizer/linq-visualizer').then(m => m.LinqVisualizerComponent),
   },
+  {
+    path: 'async-visualizer',
+    title: 'Async/Await Explained',
+    tagline: 'Runtime Async & Exceptions',
+    description: 'See what async compiles to in .NET 11, why async void still gets a state machine, and where exceptions really go.',
+    seo: {
+      title: 'C# Async/Await and .NET 11 Runtime Async Explained | .NET Developer Toolbox',
+      description: 'Run async/await for real in your browser: state machines vs .NET 11 runtime async, async void vs async Task, await vs .Wait(), Task.WhenAll and cancellation exceptions.',
+    },
+    cta: 'Open Explainer',
+    section: 'Learn',
+    category: 'Explainers',
+    icon: 'hourglass',
+    accent: {
+      badge: 'from-cyan-500 to-teal-600 group-hover:shadow-cyan-500/25',
+      overlay: 'from-cyan-500/0 via-cyan-500/0 to-cyan-500/5',
+      border: 'hover:border-cyan-500',
+      ring: 'focus:ring-cyan-500',
+      titleHover: 'group-hover:text-cyan-600',
+      ctaText: 'text-cyan-600',
+    },
+    loadComponent: () => import('../async-visualizer/async-visualizer').then(m => m.AsyncVisualizerComponent),
+  },
 
   // ---- Tools / Utilities ----
   {

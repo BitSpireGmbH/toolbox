@@ -23,7 +23,8 @@ export type ToolIconName =
   | 'signpost'
   | 'flow'
   | 'segments'
-  | 'query';
+  | 'query'
+  | 'hourglass';
 
 @Component({
   selector: 'app-tool-icon',
@@ -132,6 +133,11 @@ export type ToolIconName =
           <line x1="8" y1="18" x2="8.01" y2="18"></line>
           <line x1="14" y1="10" x2="20" y2="10"></line>
           <line x1="14" y1="14" x2="20" y2="14"></line>
+        </svg>
+      }
+      @case ('hourglass') {
+        <svg [attr.class]="svgClass()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9s10 4 10 9"></path>
         </svg>
       }
       @case ('segments') {

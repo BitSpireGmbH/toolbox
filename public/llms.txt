@@ -38,6 +38,7 @@ The .NET Developer Toolbox is a collection of converters, ASP.NET Core utilities
 - [List<T> Visualizer](https://toolbox.bitspire.ch/list-visualizer): Visualize C# List<T> capacity growth and resizing, benchmarked on the real .NET runtime
 - [Span<T> Visualizer](https://toolbox.bitspire.ch/span-visualizer): Visualize how C# Span<T> creates zero-allocation memory slices, compared with Substring()
 - [LINQ Visualizer](https://toolbox.bitspire.ch/linq-visualizer): Step-by-step visualization of LINQ deferred execution, powered by the real .NET System.Linq
+- [Async/Await Explained](https://toolbox.bitspire.ch/async-visualizer): State machines vs .NET 11 runtime async, async void vs async Task, and where async exceptions go - executed by the real .NET runtime
 
 ## Made by BitSpire
 
